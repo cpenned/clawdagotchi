@@ -2,42 +2,28 @@ import SwiftUI
 
 struct ClaudeShape: Shape {
     func path(in rect: CGRect) -> Path {
-        let w = rect.width
-        let h = rect.height
+        Path(
+            roundedRect: rect,
+            cornerRadius: min(rect.width, rect.height) * 0.22,
+            style: .continuous
+        )
+    }
+}
+
+struct ChevronEye: Shape {
+    let pointsRight: Bool
+
+    func path(in rect: CGRect) -> Path {
         var path = Path()
-
-        // Rounded organic blob — slight left-lean asymmetry
-        path.move(to: CGPoint(x: w * 0.50, y: 0))
-
-        // Top → right
-        path.addCurve(
-            to: CGPoint(x: w, y: h * 0.44),
-            control1: CGPoint(x: w * 0.78, y: 0),
-            control2: CGPoint(x: w, y: h * 0.16)
-        )
-
-        // Right → bottom
-        path.addCurve(
-            to: CGPoint(x: w * 0.52, y: h),
-            control1: CGPoint(x: w, y: h * 0.76),
-            control2: CGPoint(x: w * 0.80, y: h)
-        )
-
-        // Bottom → left
-        path.addCurve(
-            to: CGPoint(x: 0, y: h * 0.48),
-            control1: CGPoint(x: w * 0.22, y: h),
-            control2: CGPoint(x: 0, y: h * 0.78)
-        )
-
-        // Left → top
-        path.addCurve(
-            to: CGPoint(x: w * 0.50, y: 0),
-            control1: CGPoint(x: 0, y: h * 0.14),
-            control2: CGPoint(x: w * 0.20, y: 0)
-        )
-
-        path.closeSubpath()
+        if pointsRight {
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        } else {
+            path.move(to: CGPoint(x: rect.maxX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        }
         return path
     }
 }

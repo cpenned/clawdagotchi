@@ -72,35 +72,53 @@ struct TamagotchiView: View {
     }
 
     private var idleEyes: some View {
-        HStack(spacing: 18) {
-            SleepyEye()
-            SleepyEye()
+        HStack(spacing: 16) {
+            ChevronEye(pointsRight: true)
+                .stroke(.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                .frame(width: 10, height: 12)
+            ChevronEye(pointsRight: false)
+                .stroke(.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                .frame(width: 10, height: 12)
         }
-        .offset(y: -4)
+        .offset(y: -2)
     }
 
     private var thinkingEyes: some View {
-        HStack(spacing: 18) {
-            Circle().fill(.white).frame(width: 6, height: 6)
-            Circle().fill(.white).frame(width: 6, height: 6)
+        HStack(spacing: 16) {
+            ChevronEye(pointsRight: true)
+                .stroke(.white.opacity(0.6), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                .frame(width: 8, height: 10)
+            ChevronEye(pointsRight: false)
+                .stroke(.white.opacity(0.6), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                .frame(width: 8, height: 10)
         }
-        .offset(y: -4)
+        .offset(y: -2)
     }
 
     private var workingEyes: some View {
         HStack(spacing: 14) {
-            Circle().fill(.white).frame(width: 10, height: 10)
-            Circle().fill(.white).frame(width: 10, height: 10)
+            ChevronEye(pointsRight: true)
+                .stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                .frame(width: 12, height: 14)
+            ChevronEye(pointsRight: false)
+                .stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                .frame(width: 12, height: 14)
         }
-        .offset(y: -4)
+        .offset(y: -2)
     }
 
     private var doneEyes: some View {
-        SmileArc()
-            .stroke(.white, lineWidth: 2)
-            .frame(width: 24, height: 8)
-            .scaleEffect(y: -1)
-            .offset(y: 2)
+        HStack(spacing: 16) {
+            SmileArc()
+                .stroke(.white, lineWidth: 2)
+                .frame(width: 10, height: 5)
+                .scaleEffect(y: -1)
+            SmileArc()
+                .stroke(.white, lineWidth: 2)
+                .frame(width: 10, height: 5)
+                .scaleEffect(y: -1)
+        }
+        .offset(y: 0)
     }
 
     // MARK: - Session badge
@@ -191,14 +209,6 @@ struct TamagotchiView: View {
 }
 
 // MARK: - Sub-shapes
-
-struct SleepyEye: View {
-    var body: some View {
-        SmileArc()
-            .stroke(.white, lineWidth: 2)
-            .frame(width: 12, height: 5)
-    }
-}
 
 struct SmileArc: Shape {
     func path(in rect: CGRect) -> Path {
