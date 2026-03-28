@@ -14,7 +14,7 @@ struct ClaudeTamagotchiApp: App {
         }
         .windowStyle(.plain)
         .windowResizability(.contentSize)
-        .defaultSize(width: 220, height: 260)
+        .defaultSize(width: 220, height: 280)
     }
 }
 
