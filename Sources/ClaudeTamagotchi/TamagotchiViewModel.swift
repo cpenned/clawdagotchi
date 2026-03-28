@@ -6,6 +6,7 @@ enum PetState: Equatable, Sendable {
     case thinking
     case working
     case done
+    case permissionNeeded
 }
 
 @MainActor
@@ -18,15 +19,24 @@ final class TamagotchiViewModel {
 
     private(set) var displayState: PetState = .idle
     private(set) var activeSessionCount: Int = 0
+    private(set) var pendingPermission: PendingPermission?
+    private(set) var lastToolUsed: String = ""
+    private(set) var funReaction: FunReaction?
+
+    enum FunReaction: Equatable {
+        case poke
+        case pet
+    }
 
     private var sessions: [String: Session] = [:]
     private var server: HookServer?
     private var expiryTask: Task<Void, Never>?
 
     func start() {
-        server = HookServer { [weak self] event in
-            self?.handleEvent(event)
-        }
+        server = HookServer(
+            onEvent: { [weak self] event in self?.handleEvent(event) },
+            onPermission: { [weak self] perm in self?.handlePermission(perm) }
+        )
         server?.start()
 
         expiryTask = Task { [weak self] in
@@ -42,9 +52,51 @@ final class TamagotchiViewModel {
         expiryTask?.cancel()
     }
 
+    // MARK: - Permission actions
+
+    func approvePermission() {
+        guard pendingPermission != nil else { return }
+        server?.respondToPermission(decision: "allow")
+        pendingPermission = nil
+        updateDisplayState()
+    }
+
+    func denyPermission() {
+        guard pendingPermission != nil else { return }
+        server?.respondToPermission(decision: "deny", reason: "Denied from Tamagotchi")
+        pendingPermission = nil
+        updateDisplayState()
+    }
+
+    // MARK: - Fun interactions
+
+    func pokeCrab() {
+        guard pendingPermission == nil else { return }
+        funReaction = .poke
+        Task {
+            try? await Task.sleep(for: .seconds(0.8))
+            funReaction = nil
+        }
+    }
+
+    func petCrab() {
+        guard pendingPermission == nil else { return }
+        funReaction = .pet
+        Task {
+            try? await Task.sleep(for: .seconds(1.2))
+            funReaction = nil
+        }
+    }
+
+    // MARK: - Event handling
+
     private func handleEvent(_ event: HookEvent) {
         let sessionId = event.sessionId
         let now = Date()
+
+        if !event.tool.isEmpty {
+            lastToolUsed = event.tool
+        }
 
         switch event.event {
         case "PreToolUse":
@@ -68,6 +120,15 @@ final class TamagotchiViewModel {
         updateDisplayState()
     }
 
+    private func handlePermission(_ perm: PendingPermission) {
+        pendingPermission = perm
+        sessions[perm.sessionId] = Session(state: .permissionNeeded, lastEventTime: perm.receivedAt)
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            displayState = .permissionNeeded
+        }
+        activeSessionCount = sessions.count
+    }
+
     private func expireStaleSessions() {
         let cutoff = Date().addingTimeInterval(-60)
         let before = sessions.count
@@ -79,6 +140,13 @@ final class TamagotchiViewModel {
 
     private func updateDisplayState() {
         activeSessionCount = sessions.count
+
+        if pendingPermission != nil {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                displayState = .permissionNeeded
+            }
+            return
+        }
 
         if sessions.isEmpty {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {

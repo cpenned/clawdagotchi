@@ -7,7 +7,6 @@ struct EggShape: Shape {
         let w = rect.width
         let h = rect.height
         var path = Path()
-
         path.move(to: CGPoint(x: w * 0.50, y: 0))
         path.addCurve(to: CGPoint(x: w, y: h * 0.52),
                        control1: CGPoint(x: w * 0.80, y: 0),
@@ -26,7 +25,7 @@ struct EggShape: Shape {
     }
 }
 
-// MARK: - Eye styles (clawd-mochi inspired)
+// MARK: - Eye styles
 
 enum EyeStyle: Equatable {
     case normal
@@ -35,110 +34,106 @@ enum EyeStyle: Equatable {
     case wide
 }
 
-// MARK: - 8-bit pixel art character with dynamic eyes
+// MARK: - Canvas crab (claude-island style with dynamic eyes)
 
 struct CrabView: View {
-    let pixelSize: CGFloat
-    var bodyColor: Color = .gray
+    let size: CGFloat
+    var color: Color = .gray
     var eyeColor: Color = .black
     var eyeStyle: EyeStyle = .normal
-    var eyeOffsetX: CGFloat = 0
+    var animateLegs: Bool = false
 
-    // 14 wide x 10 tall — body only (eyes drawn separately)
-    // 0 = empty, 1 = body
-    private let grid: [[Int]] = [
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-        [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-        [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-    ]
+    @State private var legPhase: Int = 0
+    private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
 
-    // Eye positions in grid coordinates
-    private let leftEyeCol: CGFloat = 4
-    private let rightEyeCol: CGFloat = 8
-    private let eyeRow: CGFloat = 2.5
+    // Geometry constants (viewBox: 66 wide x 52 tall)
+    private let viewW: CGFloat = 66
+    private let viewH: CGFloat = 52
 
     var body: some View {
-        Canvas { context, size in
-            let cols = grid[0].count
-            let rows = grid.count
-            let totalW = CGFloat(cols) * pixelSize
-            let totalH = CGFloat(rows) * pixelSize
-            let ox = (size.width - totalW) / 2
-            let oy = (size.height - totalH) / 2
+        Canvas { context, canvasSize in
+            let scale = size / viewH
+            let xOff = (canvasSize.width - viewW * scale) / 2
+            let yOff = (canvasSize.height - viewH * scale) / 2
 
-            // Draw body
-            for row in 0..<rows {
-                for col in 0..<cols {
-                    guard grid[row][col] == 1 else { continue }
-                    let rect = CGRect(
-                        x: ox + CGFloat(col) * pixelSize,
-                        y: oy + CGFloat(row) * pixelSize,
-                        width: pixelSize, height: pixelSize
-                    )
-                    context.fill(Path(rect), with: .color(bodyColor))
-                }
+            func r(_ rect: CGRect) -> Path {
+                Path(CGRect(
+                    x: xOff + rect.origin.x * scale,
+                    y: yOff + rect.origin.y * scale,
+                    width: rect.width * scale,
+                    height: rect.height * scale
+                ))
             }
 
-            // Draw eyes based on style
-            let lx = ox + (leftEyeCol + eyeOffsetX) * pixelSize
-            let rx = ox + (rightEyeCol + eyeOffsetX) * pixelSize
-            let ey = oy + eyeRow * pixelSize
+            // Antennae
+            context.fill(r(CGRect(x: 0, y: 13, width: 6, height: 13)), with: .color(color))
+            context.fill(r(CGRect(x: 60, y: 13, width: 6, height: 13)), with: .color(color))
+
+            // Legs (4 legs with walking animation)
+            let legXs: [CGFloat] = [6, 18, 42, 54]
+            let baseH: CGFloat = 13
+            let offsets: [[CGFloat]] = [
+                [3, -3, 3, -3],
+                [0, 0, 0, 0],
+                [-3, 3, -3, 3],
+                [0, 0, 0, 0],
+            ]
+            let phase = animateLegs ? offsets[legPhase % 4] : [0, 0, 0, 0]
+            for (i, lx) in legXs.enumerated() {
+                let lh = baseH + phase[i]
+                context.fill(r(CGRect(x: lx, y: 39, width: 6, height: lh)), with: .color(color))
+            }
+
+            // Main body
+            context.fill(r(CGRect(x: 6, y: 0, width: 54, height: 39)), with: .color(color))
+
+            // Eyes
+            let leftEyeX: CGFloat = 14
+            let rightEyeX: CGFloat = 46
+            let eyeY: CGFloat = 12
 
             switch eyeStyle {
             case .normal:
-                let leftRect = CGRect(x: lx, y: ey, width: pixelSize * 2, height: pixelSize * 1.5)
-                let rightRect = CGRect(x: rx, y: ey, width: pixelSize * 2, height: pixelSize * 1.5)
-                context.fill(Path(leftRect), with: .color(eyeColor))
-                context.fill(Path(rightRect), with: .color(eyeColor))
+                context.fill(r(CGRect(x: leftEyeX, y: eyeY, width: 6, height: 7)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: rightEyeX, y: eyeY, width: 6, height: 7)), with: .color(eyeColor))
 
             case .blink:
-                let leftRect = CGRect(x: lx, y: ey + pixelSize * 0.5, width: pixelSize * 2, height: pixelSize * 0.5)
-                let rightRect = CGRect(x: rx, y: ey + pixelSize * 0.5, width: pixelSize * 2, height: pixelSize * 0.5)
-                context.fill(Path(leftRect), with: .color(eyeColor))
-                context.fill(Path(rightRect), with: .color(eyeColor))
+                context.fill(r(CGRect(x: leftEyeX, y: eyeY + 3, width: 6, height: 2)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: rightEyeX, y: eyeY + 3, width: 6, height: 2)), with: .color(eyeColor))
 
             case .squish:
-                // > < chevron eyes
-                let armH = pixelSize * 1.5
-                let reachW = pixelSize * 1.2
-                let lcx = lx + pixelSize
-                let rcx = rx + pixelSize
-                let cy = ey + pixelSize * 0.75
+                // > < chevrons
+                let armH: CGFloat = 8 * scale
+                let reachW: CGFloat = 5 * scale
+                let lcx = xOff + (leftEyeX + 3) * scale
+                let rcx = xOff + (rightEyeX + 3) * scale
+                let cy = yOff + (eyeY + 3.5) * scale
 
-                // Left eye: >
                 var leftChev = Path()
                 leftChev.move(to: CGPoint(x: lcx - reachW/2, y: cy - armH/2))
                 leftChev.addLine(to: CGPoint(x: lcx + reachW/2, y: cy))
                 leftChev.addLine(to: CGPoint(x: lcx - reachW/2, y: cy + armH/2))
                 context.stroke(leftChev, with: .color(eyeColor),
-                               style: StrokeStyle(lineWidth: pixelSize * 0.6, lineCap: .round, lineJoin: .round))
+                               style: StrokeStyle(lineWidth: 2 * scale, lineCap: .round, lineJoin: .round))
 
-                // Right eye: <
                 var rightChev = Path()
                 rightChev.move(to: CGPoint(x: rcx + reachW/2, y: cy - armH/2))
                 rightChev.addLine(to: CGPoint(x: rcx - reachW/2, y: cy))
                 rightChev.addLine(to: CGPoint(x: rcx + reachW/2, y: cy + armH/2))
                 context.stroke(rightChev, with: .color(eyeColor),
-                               style: StrokeStyle(lineWidth: pixelSize * 0.6, lineCap: .round, lineJoin: .round))
+                               style: StrokeStyle(lineWidth: 2 * scale, lineCap: .round, lineJoin: .round))
 
             case .wide:
-                let leftRect = CGRect(x: lx, y: ey - pixelSize * 0.25, width: pixelSize * 2, height: pixelSize * 2)
-                let rightRect = CGRect(x: rx, y: ey - pixelSize * 0.25, width: pixelSize * 2, height: pixelSize * 2)
-                context.fill(Path(leftRect), with: .color(eyeColor))
-                context.fill(Path(rightRect), with: .color(eyeColor))
+                context.fill(r(CGRect(x: leftEyeX - 1, y: eyeY - 1, width: 8, height: 9)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: rightEyeX - 1, y: eyeY - 1, width: 8, height: 9)), with: .color(eyeColor))
             }
         }
-        .frame(
-            width: CGFloat(grid[0].count) * pixelSize + 4,
-            height: CGFloat(grid.count) * pixelSize + 4
-        )
+        .frame(width: size * (viewW / viewH), height: size)
+        .onReceive(legTimer) { _ in
+            if animateLegs {
+                legPhase = (legPhase + 1) % 4
+            }
+        }
     }
 }
 

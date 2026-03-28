@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "Installing ClaudeTamagotchi hooks..."
+echo "Installing Clawdagotchi hooks..."
 
 python3 << PYEOF
 import json
@@ -12,7 +12,7 @@ import os
 SETTINGS = os.path.expanduser("~/.claude/settings.json")
 RELAY = "${SCRIPT_DIR}/hook_relay.py"
 MARKER = "hook_relay.py"
-EVENTS = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop"]
+EVENTS = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop", "PermissionRequest"]
 
 try:
     with open(SETTINGS, "r") as f:
@@ -36,14 +36,16 @@ for event in EVENTS:
         print(f"  {event}: already installed")
         continue
 
+    hook_def = {
+        "type": "command",
+        "command": f"python3 {RELAY} {event}"
+    }
+    if event == "PermissionRequest":
+        hook_def["timeout"] = 300000
+
     entry = {
         "matcher": "*",
-        "hooks": [
-            {
-                "type": "command",
-                "command": f"python3 {RELAY} {event}"
-            }
-        ]
+        "hooks": [hook_def]
     }
     event_list.append(entry)
     changed = True

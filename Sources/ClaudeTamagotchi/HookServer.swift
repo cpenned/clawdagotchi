@@ -5,21 +5,39 @@ struct HookEvent: Sendable {
     let event: String
     let sessionId: String
     let tool: String
+    let toolInput: String
 }
 
 private struct HookPayload: Decodable, Sendable {
     let event: String
     let session_id: String
     let tool: String?
+    let tool_input: String?
+}
+
+struct PendingPermission: Sendable {
+    let sessionId: String
+    let tool: String
+    let toolInput: String
+    let receivedAt: Date
 }
 
 final class HookServer: @unchecked Sendable {
     nonisolated(unsafe) private var listener: NWListener?
     private let queue = DispatchQueue(label: "com.claudetamagotchi.server")
     private let eventHandler: @MainActor @Sendable (HookEvent) -> Void
+    private let permissionHandler: @MainActor @Sendable (PendingPermission) -> Void
 
-    init(onEvent: @escaping @MainActor @Sendable (HookEvent) -> Void) {
+    // Held connection for permission response
+    private var pendingConnection: NWConnection?
+    private let lock = NSLock()
+
+    init(
+        onEvent: @escaping @MainActor @Sendable (HookEvent) -> Void,
+        onPermission: @escaping @MainActor @Sendable (PendingPermission) -> Void
+    ) {
         self.eventHandler = onEvent
+        self.permissionHandler = onPermission
     }
 
     func start() {
@@ -51,13 +69,54 @@ final class HookServer: @unchecked Sendable {
     func stop() {
         listener?.cancel()
         listener = nil
+        lock.lock()
+        pendingConnection?.cancel()
+        pendingConnection = nil
+        lock.unlock()
+    }
+
+    func respondToPermission(decision: String, reason: String? = nil) {
+        lock.lock()
+        guard let conn = pendingConnection else {
+            lock.unlock()
+            return
+        }
+        pendingConnection = nil
+        lock.unlock()
+
+        var responseDict: [String: Any] = [
+            "hookSpecificOutput": [
+                "hookEventName": "PermissionRequest",
+                "decision": [
+                    "behavior": decision
+                ] as [String: Any]
+            ] as [String: Any]
+        ]
+
+        if decision == "deny", let reason {
+            var output = responseDict["hookSpecificOutput"] as! [String: Any]
+            var dec = output["decision"] as! [String: Any]
+            dec["message"] = reason
+            output["decision"] = dec
+            responseDict["hookSpecificOutput"] = output
+        }
+
+        let body: String
+        if let data = try? JSONSerialization.data(withJSONObject: responseDict),
+           let str = String(data: data, encoding: .utf8) {
+            body = str
+        } else {
+            body = #"{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"\#(decision)"}}}"#
+        }
+
+        respond(conn, status: "200 OK", body: body)
     }
 
     // MARK: - Connection handling
 
     private func handleConnection(_ conn: NWConnection) {
         conn.start(queue: queue)
-        conn.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, _, error in
+        conn.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, _, _ in
             if let data {
                 self?.processHTTP(data, connection: conn)
             } else {
@@ -79,10 +138,12 @@ final class HookServer: @unchecked Sendable {
         }
 
         let parts = requestLine.split(separator: " ", maxSplits: 2)
-        guard parts.count >= 2, parts[0] == "POST", parts[1] == "/hook" else {
+        guard parts.count >= 2, parts[0] == "POST" else {
             respond(conn, status: "404 Not Found", body: #"{"error":"not found"}"#)
             return
         }
+
+        let path = String(parts[1])
 
         guard let bodyRange = raw.range(of: "\r\n\r\n") else {
             respond(conn, status: "400 Bad Request", body: #"{"error":"no body"}"#)
@@ -96,18 +157,39 @@ final class HookServer: @unchecked Sendable {
             return
         }
 
-        let event = HookEvent(
-            event: payload.event,
-            sessionId: payload.session_id,
-            tool: payload.tool ?? ""
-        )
+        switch path {
+        case "/hook":
+            let event = HookEvent(
+                event: payload.event,
+                sessionId: payload.session_id,
+                tool: payload.tool ?? "",
+                toolInput: payload.tool_input ?? ""
+            )
+            let handler = self.eventHandler
+            Task { @MainActor in handler(event) }
+            respond(conn, status: "200 OK", body: #"{"ok":true}"#)
 
-        let handler = self.eventHandler
-        Task { @MainActor in
-            handler(event)
+        case "/permission":
+            let permission = PendingPermission(
+                sessionId: payload.session_id,
+                tool: payload.tool ?? "unknown",
+                toolInput: payload.tool_input ?? "",
+                receivedAt: Date()
+            )
+
+            // Cancel any previous pending connection
+            lock.lock()
+            pendingConnection?.cancel()
+            pendingConnection = conn
+            lock.unlock()
+
+            let handler = self.permissionHandler
+            Task { @MainActor in handler(permission) }
+            // Don't respond — hold connection open until user decides
+
+        default:
+            respond(conn, status: "404 Not Found", body: #"{"error":"not found"}"#)
         }
-
-        respond(conn, status: "200 OK", body: #"{"ok":true}"#)
     }
 
     private func respond(_ conn: NWConnection, status: String, body: String) {

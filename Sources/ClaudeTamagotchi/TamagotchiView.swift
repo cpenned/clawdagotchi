@@ -3,12 +3,19 @@ import SwiftUI
 struct TamagotchiView: View {
     let state: PetState
     let sessionCount: Int
+    let pendingPermission: PendingPermission?
+    let funReaction: TamagotchiViewModel.FunReaction?
+    var onApprove: () -> Void = {}
+    var onDeny: () -> Void = {}
+    var onPoke: () -> Void = {}
+    var onPet: () -> Void = {}
 
     @State private var bobOffset: CGFloat = 0
     @State private var eyeOffset: CGFloat = 0
     @State private var currentEyeStyle: EyeStyle = .normal
     @State private var animGeneration: Int = 0
     @State private var blinkTimer: Task<Void, Never>?
+    @State private var permissionPulse: Bool = false
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -29,6 +36,11 @@ struct TamagotchiView: View {
         .onChange(of: state) { _, newState in
             resetAnimations()
             startAnimations(for: newState)
+        }
+        .onChange(of: funReaction) { _, reaction in
+            if let reaction {
+                applyFunReaction(reaction)
+            }
         }
         .onAppear {
             startAnimations(for: state)
@@ -61,13 +73,8 @@ struct TamagotchiView: View {
             EggShape()
                 .stroke(
                     LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.5),
-                            Color.white.opacity(0.0),
-                            Color.white.opacity(0.1)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                        colors: [Color.white.opacity(0.5), Color.white.opacity(0.0), Color.white.opacity(0.1)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
                     ),
                     lineWidth: 1.5
                 )
@@ -77,19 +84,17 @@ struct TamagotchiView: View {
 
     private var specularHighlight: some View {
         Ellipse()
-            .fill(
-                RadialGradient(
-                    colors: [Color.white.opacity(0.45), Color.white.opacity(0.0)],
-                    center: .center, startRadius: 0, endRadius: 40
-                )
-            )
+            .fill(RadialGradient(
+                colors: [Color.white.opacity(0.45), Color.white.opacity(0.0)],
+                center: .center, startRadius: 0, endRadius: 40
+            ))
             .frame(width: 70, height: 30)
             .offset(x: -30, y: -(eggHeight * 0.30))
             .allowsHitTesting(false)
     }
 
     private var brandLabel: some View {
-        Text("TAMAGOTCHI")
+        Text("CLAWDAGOTCHI")
             .font(.system(size: 8, weight: .heavy, design: .rounded))
             .tracking(2)
             .foregroundStyle(Color.shellPinkDark.opacity(0.7))
@@ -112,6 +117,13 @@ struct TamagotchiView: View {
                     )
                 )
                 .frame(width: screenWidth + 8, height: screenHeight + 6)
+
+            // Permission pulse border
+            if state == .permissionNeeded {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.orange.opacity(permissionPulse ? 0.6 : 0.2), lineWidth: 2)
+                    .frame(width: screenWidth + 8, height: screenHeight + 6)
+            }
 
             RoundedRectangle(cornerRadius: 6)
                 .stroke(
@@ -138,28 +150,45 @@ struct TamagotchiView: View {
 
             crabCharacter
 
-            stateLabel
-                .offset(y: screenHeight / 2 - 10)
+            screenText
+                .offset(y: screenHeight / 2 - 12)
         }
         .frame(width: screenWidth, height: screenHeight)
         .offset(y: -24)
     }
 
-    private var crabCharacter: some View {
-        CrabView(
-            pixelSize: 5,
-            bodyColor: Color(white: 0.55),
-            eyeColor: Color.screenDark,
-            eyeStyle: currentEyeStyle,
-            eyeOffsetX: eyeOffset
-        )
-        .offset(y: bobOffset - 2)
+    private var isWalking: Bool {
+        state == .working || funReaction == .pet
     }
 
-    private var stateLabel: some View {
-        Text(stateLabelText)
-            .font(.system(size: 7, weight: .medium, design: .monospaced))
-            .foregroundStyle(Color.white.opacity(0.2))
+    private var crabCharacter: some View {
+        CrabView(
+            size: 46,
+            color: Color(white: 0.55),
+            eyeColor: Color.screenDark,
+            eyeStyle: currentEyeStyle,
+            animateLegs: isWalking
+        )
+        .offset(y: bobOffset - 4)
+    }
+
+    private var screenText: some View {
+        Group {
+            if state == .permissionNeeded, let perm = pendingPermission {
+                VStack(spacing: 1) {
+                    Text(perm.tool)
+                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                        .foregroundStyle(Color.orange.opacity(0.7))
+                    Text("Allow?")
+                        .font(.system(size: 6, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.white.opacity(0.3))
+                }
+            } else {
+                Text(stateLabelText)
+                    .font(.system(size: 7, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.2))
+            }
+        }
     }
 
     private var stateLabelText: String {
@@ -168,59 +197,107 @@ struct TamagotchiView: View {
         case .thinking: "..."
         case .working: ">>>"
         case .done: "^_^"
+        case .permissionNeeded: ""
         }
     }
 
-    // MARK: - Buttons (light up per active session)
+    // MARK: - Interactive buttons
 
     private var buttons: some View {
         HStack(spacing: 14) {
-            tamaButton(lit: sessionCount >= 1)
-            tamaButton(lit: sessionCount >= 2)
-            tamaButton(lit: sessionCount >= 3)
+            if state == .permissionNeeded {
+                // Deny button (left, red)
+                interactiveButton(
+                    baseColor: Color(red: 0.7, green: 0.2, blue: 0.2),
+                    glowColor: Color.red,
+                    lit: true,
+                    action: onDeny
+                )
+                // Info button (middle)
+                interactiveButton(
+                    baseColor: Color(white: 0.25),
+                    glowColor: Color.orange,
+                    lit: true,
+                    action: {}
+                )
+                // Allow button (right, green)
+                interactiveButton(
+                    baseColor: Color(red: 0.15, green: 0.5, blue: 0.2),
+                    glowColor: Color.green,
+                    lit: true,
+                    action: onApprove
+                )
+            } else {
+                // Poke (left)
+                interactiveButton(
+                    baseColor: Color(white: 0.25),
+                    glowColor: .shellPinkLight,
+                    lit: sessionCount >= 1,
+                    action: onPoke
+                )
+                // Info (middle)
+                interactiveButton(
+                    baseColor: Color(white: 0.25),
+                    glowColor: .shellPinkLight,
+                    lit: sessionCount >= 2,
+                    action: {}
+                )
+                // Pet (right)
+                interactiveButton(
+                    baseColor: Color(white: 0.25),
+                    glowColor: .shellPinkLight,
+                    lit: sessionCount >= 3,
+                    action: onPet
+                )
+            }
         }
         .offset(y: eggHeight / 2 - 46)
     }
 
-    private func tamaButton(lit: Bool) -> some View {
-        ZStack {
-            Circle()
-                .fill(Color.black.opacity(0.3))
-                .frame(width: 16, height: 16)
-                .offset(y: 1.5)
-
-            Circle()
-                .fill(
-                    lit
-                    ? LinearGradient(
-                        colors: [Color.shellPinkLight, Color.shellPinkDark],
-                        startPoint: .top, endPoint: .bottom)
-                    : LinearGradient(
-                        colors: [Color(white: 0.35), Color(white: 0.18)],
-                        startPoint: .top, endPoint: .bottom)
-                )
-                .frame(width: 15, height: 15)
-
-            if lit {
+    private func interactiveButton(
+        baseColor: Color,
+        glowColor: Color,
+        lit: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            ZStack {
                 Circle()
-                    .fill(Color.shellPinkLight.opacity(0.5))
-                    .frame(width: 15, height: 15)
-                    .blur(radius: 4)
-            }
+                    .fill(Color.black.opacity(0.3))
+                    .frame(width: 16, height: 16)
+                    .offset(y: 1.5)
 
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white.opacity(lit ? 0.4 : 0.25), Color.clear],
-                        startPoint: .top, endPoint: .center
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [baseColor.opacity(1.0), baseColor.opacity(0.6)],
+                            startPoint: .top, endPoint: .bottom
+                        )
                     )
-                )
-                .frame(width: 13, height: 13)
+                    .frame(width: 15, height: 15)
 
-            Circle()
-                .stroke(Color.black.opacity(0.5), lineWidth: 0.5)
-                .frame(width: 15, height: 15)
+                if lit {
+                    Circle()
+                        .fill(glowColor.opacity(0.4))
+                        .frame(width: 15, height: 15)
+                        .blur(radius: 4)
+                }
+
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(lit ? 0.4 : 0.2), Color.clear],
+                            startPoint: .top, endPoint: .center
+                        )
+                    )
+                    .frame(width: 13, height: 13)
+
+                Circle()
+                    .stroke(Color.black.opacity(0.5), lineWidth: 0.5)
+                    .frame(width: 15, height: 15)
+            }
         }
+        .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.3), value: lit)
     }
 
@@ -232,6 +309,7 @@ struct TamagotchiView: View {
         bobOffset = 0
         eyeOffset = 0
         currentEyeStyle = .normal
+        permissionPulse = false
     }
 
     private func startAnimations(for petState: PetState) {
@@ -239,14 +317,12 @@ struct TamagotchiView: View {
 
         switch petState {
         case .idle:
-            // Gentle bob + periodic blink
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                 bobOffset = 3
             }
             startBlinkLoop(gen: gen, interval: 3.0)
 
         case .thinking:
-            // Eyes look side to side
             currentEyeStyle = .normal
             withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
                 eyeOffset = 0.8
@@ -254,14 +330,12 @@ struct TamagotchiView: View {
             startBlinkLoop(gen: gen, interval: 2.0)
 
         case .working:
-            // Wide eyes + faster bob
             currentEyeStyle = .wide
             withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
                 bobOffset = 2
             }
 
         case .done:
-            // Happy squish eyes + bounce
             currentEyeStyle = .squish
             withAnimation(.spring(response: 0.3, dampingFraction: 0.4).repeatCount(3, autoreverses: true)) {
                 bobOffset = -6
@@ -273,6 +347,39 @@ struct TamagotchiView: View {
                     bobOffset = 0
                 }
             }
+
+        case .permissionNeeded:
+            currentEyeStyle = .wide
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                permissionPulse = true
+            }
+            withAnimation(.easeInOut(duration: 0.4).repeatForever(autoreverses: true)) {
+                bobOffset = 1
+            }
+        }
+    }
+
+    private func applyFunReaction(_ reaction: TamagotchiViewModel.FunReaction) {
+        switch reaction {
+        case .poke:
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.3)) {
+                bobOffset = -10
+                currentEyeStyle = .wide
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    bobOffset = 0
+                    currentEyeStyle = .squish
+                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation { currentEyeStyle = .normal }
+            }
+
+        case .pet:
+            withAnimation(.easeInOut(duration: 0.2)) {
+                currentEyeStyle = .squish
+            }
         }
     }
 
@@ -281,16 +388,10 @@ struct TamagotchiView: View {
             while !Task.isCancelled && animGeneration == gen {
                 try? await Task.sleep(for: .seconds(interval))
                 guard animGeneration == gen else { return }
-
-                withAnimation(.easeInOut(duration: 0.08)) {
-                    currentEyeStyle = .blink
-                }
+                withAnimation(.easeInOut(duration: 0.08)) { currentEyeStyle = .blink }
                 try? await Task.sleep(for: .seconds(0.12))
                 guard animGeneration == gen else { return }
-
-                withAnimation(.easeInOut(duration: 0.08)) {
-                    currentEyeStyle = .normal
-                }
+                withAnimation(.easeInOut(duration: 0.08)) { currentEyeStyle = .normal }
             }
         }
     }
