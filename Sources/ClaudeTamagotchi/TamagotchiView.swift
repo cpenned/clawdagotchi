@@ -24,9 +24,6 @@ struct TamagotchiView: View {
             screenInset
             lcdScreen
             buttons
-            if sessionCount > 1 {
-                sessionBadge
-            }
         }
         .frame(width: eggWidth + padding * 2, height: eggHeight + padding * 2)
         .onChange(of: state) { _, newState in
@@ -174,18 +171,18 @@ struct TamagotchiView: View {
         }
     }
 
-    // MARK: - Buttons
+    // MARK: - Buttons (light up per active session)
 
     private var buttons: some View {
         HStack(spacing: 14) {
-            tamaButton
-            tamaButton
-            tamaButton
+            tamaButton(lit: sessionCount >= 1)
+            tamaButton(lit: sessionCount >= 2)
+            tamaButton(lit: sessionCount >= 3)
         }
         .offset(y: eggHeight / 2 - 46)
     }
 
-    private var tamaButton: some View {
+    private func tamaButton(lit: Bool) -> some View {
         ZStack {
             Circle()
                 .fill(Color.black.opacity(0.3))
@@ -194,17 +191,27 @@ struct TamagotchiView: View {
 
             Circle()
                 .fill(
-                    LinearGradient(
+                    lit
+                    ? LinearGradient(
+                        colors: [Color.shellPinkLight, Color.shellPinkDark],
+                        startPoint: .top, endPoint: .bottom)
+                    : LinearGradient(
                         colors: [Color(white: 0.35), Color(white: 0.18)],
-                        startPoint: .top, endPoint: .bottom
-                    )
+                        startPoint: .top, endPoint: .bottom)
                 )
                 .frame(width: 15, height: 15)
+
+            if lit {
+                Circle()
+                    .fill(Color.shellPinkLight.opacity(0.5))
+                    .frame(width: 15, height: 15)
+                    .blur(radius: 4)
+            }
 
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.25), Color.clear],
+                        colors: [Color.white.opacity(lit ? 0.4 : 0.25), Color.clear],
                         startPoint: .top, endPoint: .center
                     )
                 )
@@ -214,17 +221,7 @@ struct TamagotchiView: View {
                 .stroke(Color.black.opacity(0.5), lineWidth: 0.5)
                 .frame(width: 15, height: 15)
         }
-    }
-
-    // MARK: - Session badge
-
-    private var sessionBadge: some View {
-        Text("\(sessionCount)")
-            .font(.system(size: 9, weight: .bold, design: .monospaced))
-            .foregroundStyle(.white)
-            .frame(width: 16, height: 16)
-            .background(Circle().fill(Color(white: 0.3)))
-            .offset(x: eggWidth / 2 - 14, y: -(eggHeight / 2 - 28))
+        .animation(.easeInOut(duration: 0.3), value: lit)
     }
 
     // MARK: - Animations
