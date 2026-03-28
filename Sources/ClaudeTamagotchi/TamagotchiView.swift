@@ -177,7 +177,7 @@ struct TamagotchiView: View {
     }
 
     private var crabCharacter: some View {
-        CrabView(pixelSize: 5, color: Color(white: 0.55))
+        CrabView(pixelSize: 5, bodyColor: Color(white: 0.55), eyeColor: Color.screenDark)
             .opacity(state == .thinking ? pulseOpacity : 1.0)
             .offset(
                 x: state == .working ? crabWalk : 0,

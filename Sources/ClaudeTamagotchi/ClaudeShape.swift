@@ -39,22 +39,26 @@ struct EggShape: Shape {
     }
 }
 
-// MARK: - 8-bit pixel art crab
+// MARK: - 8-bit pixel art character (Claude Code mascot)
+// 0 = empty, 1 = body, 2 = eye
 
 struct CrabView: View {
     let pixelSize: CGFloat
-    var color: Color = .gray
+    var bodyColor: Color = .gray
+    var eyeColor: Color = .black
 
+    // 14 wide x 10 tall — head, eyes, body+arms, 3 legs
     private let grid: [[Int]] = [
-        [0,1,0,0,0,0,0,0,0,1,0],
-        [1,1,0,0,0,0,0,0,0,1,1],
-        [0,1,0,1,1,1,1,1,0,1,0],
-        [0,0,1,1,1,1,1,1,1,0,0],
-        [0,1,1,0,1,1,1,0,1,1,0],
-        [0,1,1,1,1,1,1,1,1,1,0],
-        [0,0,1,1,1,1,1,1,1,0,0],
-        [0,1,0,1,0,0,0,1,0,1,0],
-        [1,0,0,0,1,0,1,0,0,0,1],
+        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+        [0,0,0,1,2,2,1,1,2,2,1,0,0,0],
+        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+        [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
+        [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
     ]
 
     var body: some View {
@@ -68,15 +72,16 @@ struct CrabView: View {
 
             for row in 0..<rows {
                 for col in 0..<cols {
-                    if grid[row][col] == 1 {
-                        let rect = CGRect(
-                            x: offsetX + CGFloat(col) * pixelSize,
-                            y: offsetY + CGFloat(row) * pixelSize,
-                            width: pixelSize,
-                            height: pixelSize
-                        )
-                        context.fill(Path(rect), with: .color(color))
-                    }
+                    let val = grid[row][col]
+                    guard val != 0 else { continue }
+                    let rect = CGRect(
+                        x: offsetX + CGFloat(col) * pixelSize,
+                        y: offsetY + CGFloat(row) * pixelSize,
+                        width: pixelSize,
+                        height: pixelSize
+                    )
+                    let c: Color = val == 2 ? eyeColor : bodyColor
+                    context.fill(Path(rect), with: .color(c))
                 }
             }
         }
