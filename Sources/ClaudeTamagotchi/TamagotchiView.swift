@@ -12,6 +12,9 @@ struct TamagotchiView: View {
     @State private var sparkleRotation: Double = 0
     @State private var animGeneration: Int = 0
 
+    private let charWidth: CGFloat = 90
+    private let charHeight: CGFloat = 90
+
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
@@ -46,14 +49,14 @@ struct TamagotchiView: View {
 
     private var characterBody: some View {
         ClaudeShape()
-            .fill(Color.claudeOrange)
-            .frame(width: 80, height: 80)
+            .fill(Color.claudePink)
+            .frame(width: charWidth, height: charHeight)
             .scaleEffect(state == .working ? bounceScale : (state == .done ? donePop : 1.0))
             .opacity(state == .thinking ? pulseOpacity : 1.0)
             .offset(y: state == .idle ? bobOffset : 0)
     }
 
-    // MARK: - Eyes
+    // MARK: - Eyes (dark squares on the head, 8-bit style)
 
     private var eyesOverlay: some View {
         Group {
@@ -71,74 +74,84 @@ struct TamagotchiView: View {
         .offset(y: state == .idle ? bobOffset : 0)
     }
 
-    private var idleEyes: some View {
-        HStack(spacing: 16) {
-            ChevronEye(pointsRight: true)
-                .stroke(.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                .frame(width: 10, height: 12)
-            ChevronEye(pointsRight: false)
-                .stroke(.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                .frame(width: 10, height: 12)
+    private var pixelEyes: some View {
+        HStack(spacing: charWidth * 0.16) {
+            Rectangle()
+                .fill(Color.black.opacity(0.7))
+                .frame(width: charWidth * 0.12, height: charHeight * 0.14)
+            Rectangle()
+                .fill(Color.black.opacity(0.7))
+                .frame(width: charWidth * 0.12, height: charHeight * 0.14)
         }
-        .offset(y: -2)
+        .offset(y: -(charHeight * 0.18))
+    }
+
+    private var idleEyes: some View {
+        HStack(spacing: charWidth * 0.16) {
+            Rectangle()
+                .fill(Color.black.opacity(0.6))
+                .frame(width: charWidth * 0.12, height: charHeight * 0.06)
+            Rectangle()
+                .fill(Color.black.opacity(0.6))
+                .frame(width: charWidth * 0.12, height: charHeight * 0.06)
+        }
+        .offset(y: -(charHeight * 0.18))
     }
 
     private var thinkingEyes: some View {
-        HStack(spacing: 16) {
-            ChevronEye(pointsRight: true)
-                .stroke(.white.opacity(0.6), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                .frame(width: 8, height: 10)
-            ChevronEye(pointsRight: false)
-                .stroke(.white.opacity(0.6), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                .frame(width: 8, height: 10)
+        HStack(spacing: charWidth * 0.20) {
+            Rectangle()
+                .fill(Color.black.opacity(0.4))
+                .frame(width: charWidth * 0.08, height: charHeight * 0.08)
+            Rectangle()
+                .fill(Color.black.opacity(0.4))
+                .frame(width: charWidth * 0.08, height: charHeight * 0.08)
         }
-        .offset(y: -2)
+        .offset(y: -(charHeight * 0.18))
     }
 
     private var workingEyes: some View {
-        HStack(spacing: 14) {
-            ChevronEye(pointsRight: true)
-                .stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                .frame(width: 12, height: 14)
-            ChevronEye(pointsRight: false)
-                .stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                .frame(width: 12, height: 14)
+        HStack(spacing: charWidth * 0.14) {
+            Rectangle()
+                .fill(Color.black.opacity(0.8))
+                .frame(width: charWidth * 0.14, height: charHeight * 0.16)
+            Rectangle()
+                .fill(Color.black.opacity(0.8))
+                .frame(width: charWidth * 0.14, height: charHeight * 0.16)
         }
-        .offset(y: -2)
+        .offset(y: -(charHeight * 0.18))
     }
 
     private var doneEyes: some View {
-        HStack(spacing: 16) {
-            SmileArc()
-                .stroke(.white, lineWidth: 2)
-                .frame(width: 10, height: 5)
-                .scaleEffect(y: -1)
-            SmileArc()
-                .stroke(.white, lineWidth: 2)
-                .frame(width: 10, height: 5)
-                .scaleEffect(y: -1)
+        HStack(spacing: charWidth * 0.10) {
+            PixelSmile()
+                .stroke(Color.black.opacity(0.6), lineWidth: 2)
+                .frame(width: charWidth * 0.14, height: charHeight * 0.08)
+            PixelSmile()
+                .stroke(Color.black.opacity(0.6), lineWidth: 2)
+                .frame(width: charWidth * 0.14, height: charHeight * 0.08)
         }
-        .offset(y: 0)
+        .offset(y: -(charHeight * 0.14))
     }
 
     // MARK: - Session badge
 
     private var sessionBadge: some View {
         Text("\(sessionCount)")
-            .font(.system(size: 11, weight: .bold))
+            .font(.system(size: 11, weight: .bold, design: .monospaced))
             .foregroundStyle(.white)
             .frame(width: 20, height: 20)
-            .background(Circle().fill(.orange))
-            .offset(x: 34, y: -34)
+            .background(Rectangle().fill(Color.claudePink))
+            .offset(x: 40, y: -40)
     }
 
-    // MARK: - Sparkles (working)
+    // MARK: - Sparkles (working) — 8-bit pixel sparkles
 
     private var sparkles: some View {
         ForEach(0..<6, id: \.self) { i in
-            Text("\u{2726}")
-                .font(.system(size: 10))
-                .foregroundStyle(Color.claudeOrange.opacity(0.7))
+            Rectangle()
+                .fill(Color.claudePink.opacity(0.8))
+                .frame(width: 5, height: 5)
                 .offset(sparkleOffset(index: i))
                 .rotationEffect(.degrees(sparkleRotation + Double(i) * 60))
         }
@@ -146,7 +159,7 @@ struct TamagotchiView: View {
 
     private func sparkleOffset(index: Int) -> CGSize {
         let angle = (Double(index) / 6.0) * .pi * 2 + sparkleRotation * .pi / 180
-        return CGSize(width: cos(angle) * 50, height: sin(angle) * 50)
+        return CGSize(width: cos(angle) * 52, height: sin(angle) * 52)
     }
 
     // MARK: - Checkmark (done)
@@ -155,7 +168,7 @@ struct TamagotchiView: View {
         Image(systemName: "checkmark.circle.fill")
             .font(.system(size: 22))
             .foregroundStyle(.green)
-            .offset(y: -50)
+            .offset(y: -55)
             .transition(.opacity)
     }
 
@@ -175,15 +188,15 @@ struct TamagotchiView: View {
         switch petState {
         case .idle:
             withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                bobOffset = 8
+                bobOffset = 6
             }
         case .thinking:
             withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                pulseOpacity = 0.6
+                pulseOpacity = 0.5
             }
         case .working:
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5).repeatForever(autoreverses: true)) {
-                bounceScale = 1.12
+                bounceScale = 1.10
             }
             withAnimation(.linear(duration: 4).repeatForever(autoreverses: false)) {
                 sparkleRotation = 360
@@ -191,7 +204,7 @@ struct TamagotchiView: View {
         case .done:
             let gen = animGeneration
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-                donePop = 1.2
+                donePop = 1.15
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 guard self.animGeneration == gen else { return }
@@ -210,7 +223,7 @@ struct TamagotchiView: View {
 
 // MARK: - Sub-shapes
 
-struct SmileArc: Shape {
+struct PixelSmile: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         path.addArc(
@@ -225,15 +238,15 @@ struct SmileArc: Shape {
 }
 
 struct ThinkingDotsView: View {
-    @State private var dot1: Double = 0
-    @State private var dot2: Double = 0
-    @State private var dot3: Double = 0
+    @State private var dot1: Double = 0.3
+    @State private var dot2: Double = 0.3
+    @State private var dot3: Double = 0.3
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle().fill(Color.claudeOrange).frame(width: 8, height: 8).opacity(dot1)
-            Circle().fill(Color.claudeOrange).frame(width: 8, height: 8).opacity(dot2)
-            Circle().fill(Color.claudeOrange).frame(width: 8, height: 8).opacity(dot3)
+            Rectangle().fill(Color.claudePink).frame(width: 8, height: 8).opacity(dot1)
+            Rectangle().fill(Color.claudePink).frame(width: 8, height: 8).opacity(dot2)
+            Rectangle().fill(Color.claudePink).frame(width: 8, height: 8).opacity(dot3)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
