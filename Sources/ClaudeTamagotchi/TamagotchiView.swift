@@ -5,10 +5,10 @@ struct TamagotchiView: View {
     let sessionCount: Int
 
     @State private var bobOffset: CGFloat = 0
-    @State private var crabWalk: CGFloat = 0
-    @State private var pulseOpacity: Double = 1.0
-    @State private var bounceY: CGFloat = 0
+    @State private var eyeOffset: CGFloat = 0
+    @State private var currentEyeStyle: EyeStyle = .normal
     @State private var animGeneration: Int = 0
+    @State private var blinkTimer: Task<Void, Never>?
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -36,35 +36,31 @@ struct TamagotchiView: View {
         .onAppear {
             startAnimations(for: state)
         }
+        .onDisappear {
+            blinkTimer?.cancel()
+        }
     }
 
-    // MARK: - Egg shell (realistic plastic)
+    // MARK: - Egg shell
 
     private var egg: some View {
         ZStack {
-            // Base shadow layer
             EggShape()
                 .fill(Color.black.opacity(0.25))
                 .frame(width: eggWidth, height: eggHeight)
                 .offset(y: 5)
                 .blur(radius: 12)
 
-            // Main body with plastic gradient
             EggShape()
                 .fill(
                     LinearGradient(
-                        colors: [
-                            Color.shellPinkLight,
-                            Color.shellPink,
-                            Color.shellPinkDark
-                        ],
+                        colors: [.shellPinkLight, .shellPink, .shellPinkDark],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .frame(width: eggWidth, height: eggHeight)
 
-            // Rim highlight (edge catch light)
             EggShape()
                 .stroke(
                     LinearGradient(
@@ -82,27 +78,18 @@ struct TamagotchiView: View {
         }
     }
 
-    // MARK: - Specular highlight (glossy plastic reflection)
-
     private var specularHighlight: some View {
         Ellipse()
             .fill(
                 RadialGradient(
-                    colors: [
-                        Color.white.opacity(0.45),
-                        Color.white.opacity(0.0)
-                    ],
-                    center: .center,
-                    startRadius: 0,
-                    endRadius: 40
+                    colors: [Color.white.opacity(0.45), Color.white.opacity(0.0)],
+                    center: .center, startRadius: 0, endRadius: 40
                 )
             )
             .frame(width: 70, height: 30)
             .offset(x: -30, y: -(eggHeight * 0.30))
             .allowsHitTesting(false)
     }
-
-    // MARK: - Brand label
 
     private var brandLabel: some View {
         Text("TAMAGOTCHI")
@@ -112,40 +99,28 @@ struct TamagotchiView: View {
             .offset(y: -(eggHeight * 0.24))
     }
 
-    // MARK: - Screen inset (recessed bezel)
+    // MARK: - Screen inset
 
     private var screenInset: some View {
         ZStack {
-            // Outer dark ring (depth shadow)
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.shellPinkDark.opacity(0.8))
                 .frame(width: screenWidth + 16, height: screenHeight + 14)
 
-            // Inner bevel (lighter inside edge)
             RoundedRectangle(cornerRadius: 8)
                 .fill(
                     LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.4),
-                            Color.black.opacity(0.15)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                        colors: [Color.black.opacity(0.4), Color.black.opacity(0.15)],
+                        startPoint: .top, endPoint: .bottom
                     )
                 )
                 .frame(width: screenWidth + 8, height: screenHeight + 6)
 
-            // Inner shadow top edge
             RoundedRectangle(cornerRadius: 6)
                 .stroke(
                     LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.5),
-                            Color.clear,
-                            Color.white.opacity(0.1)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                        colors: [Color.black.opacity(0.5), Color.clear, Color.white.opacity(0.1)],
+                        startPoint: .top, endPoint: .bottom
                     ),
                     lineWidth: 1.5
                 )
@@ -154,21 +129,18 @@ struct TamagotchiView: View {
         .offset(y: -24)
     }
 
-    // MARK: - LCD screen (dark modern)
+    // MARK: - LCD screen
 
     private var lcdScreen: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 5)
                 .fill(Color.screenDark)
 
-            // Subtle pixel grid
             PixelGridOverlay()
                 .clipShape(RoundedRectangle(cornerRadius: 5))
 
-            // Crab
             crabCharacter
 
-            // State text
             stateLabel
                 .offset(y: screenHeight / 2 - 10)
         }
@@ -177,12 +149,14 @@ struct TamagotchiView: View {
     }
 
     private var crabCharacter: some View {
-        CrabView(pixelSize: 5, bodyColor: Color(white: 0.55), eyeColor: Color.screenDark)
-            .opacity(state == .thinking ? pulseOpacity : 1.0)
-            .offset(
-                x: state == .working ? crabWalk : 0,
-                y: state == .idle ? bobOffset : (state == .done ? bounceY : -2)
-            )
+        CrabView(
+            pixelSize: 5,
+            bodyColor: Color(white: 0.55),
+            eyeColor: Color.screenDark,
+            eyeStyle: currentEyeStyle,
+            eyeOffsetX: eyeOffset
+        )
+        .offset(y: bobOffset - 2)
     }
 
     private var stateLabel: some View {
@@ -200,7 +174,7 @@ struct TamagotchiView: View {
         }
     }
 
-    // MARK: - Buttons (3D realistic)
+    // MARK: - Buttons
 
     private var buttons: some View {
         HStack(spacing: 14) {
@@ -213,41 +187,29 @@ struct TamagotchiView: View {
 
     private var tamaButton: some View {
         ZStack {
-            // Button shadow
             Circle()
                 .fill(Color.black.opacity(0.3))
                 .frame(width: 16, height: 16)
                 .offset(y: 1.5)
 
-            // Button body
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [
-                            Color(white: 0.35),
-                            Color(white: 0.18)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                        colors: [Color(white: 0.35), Color(white: 0.18)],
+                        startPoint: .top, endPoint: .bottom
                     )
                 )
                 .frame(width: 15, height: 15)
 
-            // Top highlight
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.25),
-                            Color.clear
-                        ],
-                        startPoint: .top,
-                        endPoint: .center
+                        colors: [Color.white.opacity(0.25), Color.clear],
+                        startPoint: .top, endPoint: .center
                     )
                 )
                 .frame(width: 13, height: 13)
 
-            // Rim
             Circle()
                 .stroke(Color.black.opacity(0.5), lineWidth: 0.5)
                 .frame(width: 15, height: 15)
@@ -269,40 +231,75 @@ struct TamagotchiView: View {
 
     private func resetAnimations() {
         animGeneration += 1
+        blinkTimer?.cancel()
         bobOffset = 0
-        crabWalk = 0
-        pulseOpacity = 1.0
-        bounceY = 0
+        eyeOffset = 0
+        currentEyeStyle = .normal
     }
 
     private func startAnimations(for petState: PetState) {
         let gen = animGeneration
+
         switch petState {
         case .idle:
+            // Gentle bob + periodic blink
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                bobOffset = 4
+                bobOffset = 3
             }
+            startBlinkLoop(gen: gen, interval: 3.0)
+
         case .thinking:
-            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                pulseOpacity = 0.3
+            // Eyes look side to side
+            currentEyeStyle = .normal
+            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                eyeOffset = 0.8
             }
+            startBlinkLoop(gen: gen, interval: 2.0)
+
         case .working:
-            withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
-                crabWalk = 12
+            // Wide eyes + faster bob
+            currentEyeStyle = .wide
+            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                bobOffset = 2
             }
+
         case .done:
+            // Happy squish eyes + bounce
+            currentEyeStyle = .squish
             withAnimation(.spring(response: 0.3, dampingFraction: 0.4).repeatCount(3, autoreverses: true)) {
-                bounceY = -8
+                bobOffset = -6
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 guard self.animGeneration == gen else { return }
-                withAnimation { bounceY = 0 }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentEyeStyle = .normal
+                    bobOffset = 0
+                }
+            }
+        }
+    }
+
+    private func startBlinkLoop(gen: Int, interval: TimeInterval) {
+        blinkTimer = Task { @MainActor in
+            while !Task.isCancelled && animGeneration == gen {
+                try? await Task.sleep(for: .seconds(interval))
+                guard animGeneration == gen else { return }
+
+                withAnimation(.easeInOut(duration: 0.08)) {
+                    currentEyeStyle = .blink
+                }
+                try? await Task.sleep(for: .seconds(0.12))
+                guard animGeneration == gen else { return }
+
+                withAnimation(.easeInOut(duration: 0.08)) {
+                    currentEyeStyle = .normal
+                }
             }
         }
     }
 }
 
-// MARK: - Pixel grid overlay (modern dark screen texture)
+// MARK: - Pixel grid overlay
 
 struct PixelGridOverlay: View {
     var body: some View {
