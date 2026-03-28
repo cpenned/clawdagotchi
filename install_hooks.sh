@@ -50,9 +50,16 @@ for event in EVENTS:
     print(f"  {event}: installed")
 
 if changed:
-    with open(SETTINGS, "w") as f:
-        json.dump(settings, f, indent=2)
-        f.write("\n")
+    import tempfile
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(SETTINGS), suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w") as f:
+            json.dump(settings, f, indent=2)
+            f.write("\n")
+        os.replace(tmp_path, SETTINGS)
+    except:
+        os.unlink(tmp_path)
+        raise
     print("\nHooks written to", SETTINGS)
 else:
     print("\nAll hooks already installed, nothing changed.")

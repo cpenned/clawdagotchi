@@ -10,6 +10,7 @@ struct TamagotchiView: View {
     @State private var donePop: CGFloat = 1.0
     @State private var showCheckmark = false
     @State private var sparkleRotation: Double = 0
+    @State private var animGeneration: Int = 0
 
     var body: some View {
         VStack(spacing: 12) {
@@ -98,6 +99,7 @@ struct TamagotchiView: View {
         SmileArc()
             .stroke(.white, lineWidth: 2)
             .frame(width: 24, height: 8)
+            .scaleEffect(y: -1)
             .offset(y: 2)
     }
 
@@ -142,6 +144,7 @@ struct TamagotchiView: View {
     // MARK: - Animation control
 
     private func resetAnimations() {
+        animGeneration += 1
         bobOffset = 0
         pulseOpacity = 1.0
         bounceScale = 1.0
@@ -168,16 +171,19 @@ struct TamagotchiView: View {
                 sparkleRotation = 360
             }
         case .done:
+            let gen = animGeneration
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                 donePop = 1.2
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                guard self.animGeneration == gen else { return }
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     donePop = 1.0
                 }
             }
             withAnimation { showCheckmark = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                guard self.animGeneration == gen else { return }
                 withAnimation { showCheckmark = false }
             }
         }

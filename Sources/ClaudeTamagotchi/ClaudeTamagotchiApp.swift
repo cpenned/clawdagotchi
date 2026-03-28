@@ -10,6 +10,7 @@ struct ClaudeTamagotchiApp: App {
             ContentView(viewModel: viewModel)
                 .background(WindowConfigurator())
                 .onAppear { viewModel.start() }
+                .onDisappear { viewModel.stop() }
         }
         .windowStyle(.plain)
         .windowResizability(.contentSize)
