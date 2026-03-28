@@ -9,9 +9,18 @@ A floating macOS widget that shows the state of your active Claude Code sessions
 
 ## Build & Run
 
-    cd ~/Desktop/ClaudeTamagotchi
-    swift build
-    swift run
+### As .app bundle (recommended)
+
+    bash build_app.sh
+    open ClaudeTamagotchi.app
+
+This builds a release binary and wraps it in a proper `.app` bundle. The app runs as a background agent (no dock icon) — just the floating widget. To install permanently:
+
+    cp -r ClaudeTamagotchi.app /Applications/
+
+### Quick dev mode
+
+    swift build && swift run
 
 The widget appears as a small floating window. Right-click to quit.
 
