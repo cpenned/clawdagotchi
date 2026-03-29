@@ -20,6 +20,11 @@ struct SettingsView: View {
 
     private var appearanceTab: some View {
         Form {
+            Section("Pet Name") {
+                TextField("Name", text: $settings.botName)
+                    .textFieldStyle(.roundedBorder)
+            }
+
             Section("Shell Style") {
                 Picker("Style", selection: $settings.shellStyle) {
                     ForEach(ShellStyle.allCases, id: \.rawValue) { style in

@@ -285,6 +285,9 @@ struct TamagotchiView: View {
             PixelGridOverlay()
                 .clipShape(RoundedRectangle(cornerRadius: 5))
 
+            botNameLabel
+                .offset(y: -(screenHeight / 2 - 12))
+
             crabCharacter
 
             screenText
@@ -317,6 +320,12 @@ struct TamagotchiView: View {
             animateLegs: isWalking
         )
         .offset(y: bobOffset - 4)
+    }
+
+    private var botNameLabel: some View {
+        Text(AppSettings.shared.botName)
+            .font(.system(size: 7, weight: .medium, design: .monospaced))
+            .foregroundStyle(Color.white.opacity(0.2))
     }
 
     private var screenText: some View {

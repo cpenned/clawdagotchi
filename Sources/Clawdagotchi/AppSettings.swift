@@ -43,6 +43,9 @@ final class AppSettings {
     var floatPolicy: FloatPolicy {
         didSet { UserDefaults.standard.set(floatPolicy.rawValue, forKey: "floatPolicy") }
     }
+    var botName: String {
+        didSet { UserDefaults.standard.set(botName, forKey: "botName") }
+    }
 
     private init() {
         let defaults = UserDefaults.standard
@@ -55,6 +58,7 @@ final class AppSettings {
             "shellStyle": ShellStyle.salmonPink.rawValue,
             "widgetScale": 1.0,
             "floatPolicy": FloatPolicy.always.rawValue,
+            "botName": "Clawd",
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
@@ -64,6 +68,7 @@ final class AppSettings {
         self.shellStyle = ShellStyle(rawValue: defaults.string(forKey: "shellStyle") ?? "") ?? .salmonPink
         self.widgetScale = defaults.double(forKey: "widgetScale")
         self.floatPolicy = FloatPolicy(rawValue: defaults.string(forKey: "floatPolicy") ?? "") ?? .always
+        self.botName = defaults.string(forKey: "botName") ?? "Clawd"
     }
 
     func applyDockPolicy() {
