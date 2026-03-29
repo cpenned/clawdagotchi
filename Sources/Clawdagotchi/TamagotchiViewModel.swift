@@ -78,6 +78,23 @@ final class TamagotchiViewModel {
         }
 
         greetingMessage = Self.timeOfDayGreeting()
+
+        // Also check for stale permissions (handled in terminal instead of Tamagotchi)
+        Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                self?.expireStalePermissions()
+            }
+        }
+    }
+
+    private func expireStalePermissions() {
+        let cutoff = Date().addingTimeInterval(-30)
+        let before = permissionQueue.count
+        permissionQueue.removeAll { $0.receivedAt < cutoff }
+        if permissionQueue.count != before {
+            updateDisplayState()
+        }
     }
 
     func stop() {
@@ -270,6 +287,10 @@ final class TamagotchiViewModel {
         if !event.tool.isEmpty {
             lastToolUsed = event.tool
         }
+
+        // If we get an event for a session that has a pending permission,
+        // it was handled elsewhere (terminal) — clear it
+        permissionQueue.removeAll { $0.sessionId == sessionId }
 
         switch event.event {
         case "PreToolUse":
