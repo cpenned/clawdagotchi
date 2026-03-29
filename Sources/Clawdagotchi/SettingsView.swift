@@ -72,6 +72,24 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
+            Section("Screen Background") {
+                Picker("Theme", selection: $settings.backgroundTheme) {
+                    ForEach(BackgroundTheme.allCases, id: \.rawValue) { theme in
+                        Text(theme.displayName).tag(theme)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+            }
+
+            Section("Seasonal") {
+                Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
+                if let seasonal = CrabAccessory.seasonalAccessory() {
+                    Text("Current: \(seasonal)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Section("Float on Top") {
                 Picker("Keep on top", selection: $settings.floatPolicy) {
                     ForEach(FloatPolicy.allCases, id: \.rawValue) { policy in

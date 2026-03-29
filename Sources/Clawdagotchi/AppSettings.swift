@@ -55,6 +55,12 @@ final class AppSettings {
     var level: Int {
         didSet { UserDefaults.standard.set(level, forKey: "level") }
     }
+    var backgroundTheme: BackgroundTheme {
+        didSet { UserDefaults.standard.set(backgroundTheme.rawValue, forKey: "backgroundTheme") }
+    }
+    var seasonalAccessories: Bool {
+        didSet { UserDefaults.standard.set(seasonalAccessories, forKey: "seasonalAccessories") }
+    }
 
     // Streak
     var streak: Int {
@@ -109,6 +115,8 @@ final class AppSettings {
             "useCustomCrabColor": true,
             "xp": 0,
             "level": 1,
+            "backgroundTheme": BackgroundTheme.none.rawValue,
+            "seasonalAccessories": true,
             "streak": 0,
             "lastLoginDate": "",
             "totalSessions": 0,
@@ -132,6 +140,8 @@ final class AppSettings {
         self.useCustomCrabColor = defaults.bool(forKey: "useCustomCrabColor")
         self.xp = defaults.integer(forKey: "xp")
         self.level = defaults.integer(forKey: "level")
+        self.backgroundTheme = BackgroundTheme(rawValue: defaults.string(forKey: "backgroundTheme") ?? "") ?? .none
+        self.seasonalAccessories = defaults.bool(forKey: "seasonalAccessories")
         self.streak = defaults.integer(forKey: "streak")
         self.lastLoginDate = defaults.string(forKey: "lastLoginDate") ?? ""
         self.totalSessions = defaults.integer(forKey: "totalSessions")

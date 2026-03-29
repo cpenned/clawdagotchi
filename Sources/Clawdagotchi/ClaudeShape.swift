@@ -1,5 +1,22 @@
 import SwiftUI
 
+// MARK: - Background themes
+
+enum BackgroundTheme: String, CaseIterable, Sendable {
+    case none, stars, matrix, waves, circuit, bubbles
+
+    var displayName: String {
+        switch self {
+        case .none: "None"
+        case .stars: "Stars"
+        case .matrix: "Matrix"
+        case .waves: "Waves"
+        case .circuit: "Circuit"
+        case .bubbles: "Bubbles"
+        }
+    }
+}
+
 // MARK: - Tamagotchi egg shell
 
 struct EggShape: Shape {
@@ -47,19 +64,51 @@ enum CrabAccessory: Int, CaseIterable, Sendable {
     case crown = 6
     case headphones = 7
     case starAura = 8
+    case santaHat = 10
+    case pumpkin = 11
+    case bunnyEars = 12
+    case heartBow = 13
+    case partyPopper = 14
 
     static func forLevel(_ level: Int) -> CrabAccessory {
         CrabAccessory(rawValue: min(level, 8)) ?? .none
     }
 
-    static func allUnlocked(for level: Int) -> [CrabAccessory] {
+    static func seasonalAccessory() -> CrabAccessory? {
+        let cal = Calendar.current
+        let month = cal.component(.month, from: Date())
+        let day = cal.component(.day, from: Date())
+
+        switch (month, day) {
+        case (1, 1): return .partyPopper
+        case (2, 1...14): return .heartBow
+        case (4, 1...20): return .bunnyEars
+        case (10, _): return .pumpkin
+        case (12, _): return .santaHat
+        default: return nil
+        }
+    }
+
+    static func allUnlocked(for level: Int, seasonalEnabled: Bool = true) -> [CrabAccessory] {
         var items: [CrabAccessory] = []
         if level >= 2 { items.append(.bowTie) }
         if level >= 4 { items.append(.sunglasses) }
-        // Head item: highest unlocked wins
-        if level >= 6 { items.append(.crown) }
-        else if level >= 5 { items.append(.topHat) }
-        else if level >= 3 { items.append(.partyHat) }
+
+        // Head item: seasonal overrides level-based
+        if seasonalEnabled, let seasonal = seasonalAccessory() {
+            if seasonal == .partyPopper {
+                // partyPopper is body effect, not head — still show head item
+                items.append(seasonal)
+            } else {
+                items.append(seasonal)  // seasonal replaces head slot
+            }
+        } else {
+            // Normal head progression
+            if level >= 6 { items.append(.crown) }
+            else if level >= 5 { items.append(.topHat) }
+            else if level >= 3 { items.append(.partyHat) }
+        }
+
         if level >= 7 { items.append(.headphones) }
         if level >= 8 { items.append(.starAura) }
         return items
@@ -273,6 +322,65 @@ struct CrabView: View {
                     h.addLine(to: CGPoint(x: cx2 + arm, y: cy2))
                     context.stroke(h, with: .color(accessoryColor.opacity(0.7)),
                                    style: StrokeStyle(lineWidth: 1 * scale, lineCap: .round))
+                }
+
+            case .santaHat:
+                let santaRed = Color(red: 0.8, green: 0.15, blue: 0.1)
+                // Red triangle hat
+                var santaHatPath = Path()
+                santaHatPath.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-14) * scale))
+                santaHatPath.addLine(to: CGPoint(x: xOff + 21 * scale, y: yOff + 2 * scale))
+                santaHatPath.addLine(to: CGPoint(x: xOff + 45 * scale, y: yOff + 2 * scale))
+                santaHatPath.closeSubpath()
+                context.fill(santaHatPath, with: .color(santaRed))
+                // White trim at base
+                context.fill(r(CGRect(x: 19, y: 0, width: 28, height: 4)), with: .color(Color.white))
+                // White pom-pom on top
+                let pomSanta = CGRect(x: xOff + 29 * scale, y: yOff + (-18) * scale, width: 8 * scale, height: 7 * scale)
+                context.fill(Path(ellipseIn: pomSanta), with: .color(Color.white))
+
+            case .pumpkin:
+                let pumpkinOrange = Color(red: 0.9, green: 0.5, blue: 0.1)
+                // Orange rounded rectangle on head
+                let pumpkinRect = CGRect(x: xOff + 24 * scale, y: yOff + (-8) * scale, width: 18 * scale, height: 12 * scale)
+                context.fill(Path(roundedRect: pumpkinRect, cornerRadius: 4 * scale), with: .color(pumpkinOrange))
+                // Green stem on top
+                context.fill(r(CGRect(x: 31, y: -12, width: 4, height: 5)), with: .color(Color.green))
+
+            case .bunnyEars:
+                let earPink = Color(red: 1.0, green: 0.7, blue: 0.8)
+                // Left ear — white outer, pink inner
+                context.fill(r(CGRect(x: 19, y: -18, width: 8, height: 16)), with: .color(Color.white))
+                context.fill(r(CGRect(x: 21, y: -16, width: 4, height: 12)), with: .color(earPink))
+                // Right ear — white outer, pink inner
+                context.fill(r(CGRect(x: 39, y: -18, width: 8, height: 16)), with: .color(Color.white))
+                context.fill(r(CGRect(x: 41, y: -16, width: 4, height: 12)), with: .color(earPink))
+
+            case .heartBow:
+                let heartPink = Color(red: 1.0, green: 0.3, blue: 0.5)
+                let hcx = xOff + 33 * scale
+                let hcy = yOff + (-10) * scale
+                let hr = CGFloat(5) * scale
+                // Two circles + triangle for heart shape
+                let leftCircleRect = CGRect(x: hcx - hr, y: hcy - hr / 2, width: hr, height: hr)
+                let rightCircleRect = CGRect(x: hcx, y: hcy - hr / 2, width: hr, height: hr)
+                context.fill(Path(ellipseIn: leftCircleRect), with: .color(heartPink))
+                context.fill(Path(ellipseIn: rightCircleRect), with: .color(heartPink))
+                var heartTri = Path()
+                heartTri.move(to: CGPoint(x: hcx - hr, y: hcy))
+                heartTri.addLine(to: CGPoint(x: hcx + hr, y: hcy))
+                heartTri.addLine(to: CGPoint(x: hcx, y: hcy + hr * 1.2))
+                heartTri.closeSubpath()
+                context.fill(heartTri, with: .color(heartPink))
+
+            case .partyPopper:
+                let confettiColors: [Color] = [.red, .yellow, .blue, .green, Color(red: 1, green: 0.5, blue: 0), .purple]
+                let positions: [(CGFloat, CGFloat)] = [
+                    (-2, 5), (68, 8), (5, 42), (60, 38), (20, -2), (50, -3), (10, 28), (58, 22)
+                ]
+                for (i, (px, py)) in positions.enumerated() {
+                    let col = confettiColors[i % confettiColors.count]
+                    context.fill(r(CGRect(x: px, y: py, width: 4, height: 3)), with: .color(col.opacity(0.5)))
                 }
             }
             } // end for acc

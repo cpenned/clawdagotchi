@@ -374,6 +374,9 @@ struct TamagotchiView: View {
             PixelGridOverlay()
                 .clipShape(RoundedRectangle(cornerRadius: 5))
 
+            LCDBackgroundView(theme: AppSettings.shared.backgroundTheme)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+
             statusBars
                 .offset(y: -(screenHeight / 2 - 10))
 
@@ -425,7 +428,7 @@ struct TamagotchiView: View {
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking,
-            accessories: CrabAccessory.allUnlocked(for: level),
+            accessories: CrabAccessory.allUnlocked(for: level, seasonalEnabled: AppSettings.shared.seasonalAccessories),
             accessoryColor: .white
         )
         .offset(y: bobOffset + 4)
@@ -1254,6 +1257,109 @@ struct PixelStatBar: View {
                         .frame(width: 5, height: 3)
                 }
             }
+        }
+    }
+}
+
+struct LCDBackgroundView: View {
+    let theme: BackgroundTheme
+
+    var body: some View {
+        if theme != .none {
+            Canvas { context, size in
+                let w = size.width
+                let h = size.height
+                let color = Color.white
+
+                switch theme {
+                case .none: break
+                case .stars: drawStars(context, w, h, color)
+                case .matrix: drawMatrix(context, w, h, color)
+                case .waves: drawWaves(context, w, h, color)
+                case .circuit: drawCircuit(context, w, h, color)
+                case .bubbles: drawBubbles(context, w, h, color)
+                }
+            }
+        }
+    }
+
+    private func drawStars(_ context: GraphicsContext, _ w: CGFloat, _ h: CGFloat, _ color: Color) {
+        for i in 0..<20 {
+            let x = CGFloat((i * 7 + 13) % Int(w))
+            let y = CGFloat((i * 11 + 7) % Int(h))
+            let size = CGFloat((i % 2) + 1)
+            let opacity = 0.06 + Double(i % 4) * 0.01
+            context.fill(Path(CGRect(x: x, y: y, width: size, height: size)), with: .color(color.opacity(opacity)))
+        }
+    }
+
+    private func drawMatrix(_ context: GraphicsContext, _ w: CGFloat, _ h: CGFloat, _ color: Color) {
+        let colCount = 8
+        let colSpacing = w / CGFloat(colCount)
+        for col in 0..<colCount {
+            let x = CGFloat(col) * colSpacing + colSpacing * 0.3
+            let dotCount = 3 + (col % 2)
+            let startY = CGFloat((col * 13 + 5) % Int(h / 2))
+            let spacing = h / CGFloat(dotCount + 2)
+            for dot in 0..<dotCount {
+                let y = startY + CGFloat(dot) * spacing
+                let opacity = 0.06 + Double(dot) * 0.015
+                context.fill(Path(CGRect(x: x, y: y, width: 1, height: 2)), with: .color(color.opacity(opacity)))
+            }
+        }
+    }
+
+    private func drawWaves(_ context: GraphicsContext, _ w: CGFloat, _ h: CGFloat, _ color: Color) {
+        for wave in 0..<3 {
+            let baseY = h * (0.25 + Double(wave) * 0.25)
+            let amplitude = h * 0.05
+            let frequency = 2.0 * .pi / w
+            var path = Path()
+            var started = false
+            for xi in stride(from: CGFloat(0), through: w, by: 1.5) {
+                let y = baseY + amplitude * sin(frequency * xi * 1.5 + Double(wave) * 1.0)
+                if !started {
+                    path.move(to: CGPoint(x: xi, y: y))
+                    started = true
+                } else {
+                    path.addLine(to: CGPoint(x: xi, y: y))
+                }
+            }
+            context.stroke(path, with: .color(color.opacity(0.07)), style: StrokeStyle(lineWidth: 0.5))
+        }
+    }
+
+    private func drawCircuit(_ context: GraphicsContext, _ w: CGFloat, _ h: CGFloat, _ color: Color) {
+        let segments: [(CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (10, 20, 50, 20, 50, 50),
+            (60, 15, 60, 45, 90, 45),
+            (80, 70, 80, 30, 100, 30),
+            (20, 60, 20, 80, 60, 80),
+            (40, 40, 70, 40, 70, 70),
+            (10, 50, 30, 50, 30, 75),
+            (85, 20, 85, 60, 105, 60),
+            (15, 85, 55, 85, 55, 55),
+        ]
+        for (x1, y1, x2, y2, x3, y3) in segments {
+            // Scale to actual view size
+            let sx = w / 110
+            let sy = h / 90
+            var path = Path()
+            path.move(to: CGPoint(x: x1 * sx, y: y1 * sy))
+            path.addLine(to: CGPoint(x: x2 * sx, y: y2 * sy))
+            path.addLine(to: CGPoint(x: x3 * sx, y: y3 * sy))
+            context.stroke(path, with: .color(color.opacity(0.08)), style: StrokeStyle(lineWidth: 0.5))
+        }
+    }
+
+    private func drawBubbles(_ context: GraphicsContext, _ w: CGFloat, _ h: CGFloat, _ color: Color) {
+        for i in 0..<10 {
+            let x = CGFloat((i * 11 + 7) % Int(w - 10)) + 5
+            let y = CGFloat((i * 13 + 9) % Int(h - 10)) + 5
+            let radius = CGFloat(2 + (i % 4))
+            let opacity = 0.06 + Double(i % 4) * 0.01
+            let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
+            context.stroke(Path(ellipseIn: rect), with: .color(color.opacity(opacity)), style: StrokeStyle(lineWidth: 0.5))
         }
     }
 }
