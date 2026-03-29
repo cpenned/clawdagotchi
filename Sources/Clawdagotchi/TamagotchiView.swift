@@ -420,7 +420,7 @@ struct TamagotchiView: View {
 
     private var crabCharacter: some View {
         CrabView(
-            size: 38,
+            size: 43,
             color: AppSettings.shared.activeCrabColor,
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
