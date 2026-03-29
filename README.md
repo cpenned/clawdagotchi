@@ -27,12 +27,12 @@
 
 ## Install
 
-Download the latest `.dmg` from [Releases](../../releases), open it, and drag Clawdagotchi to Applications.
+Download the latest `.dmg` from [Releases](https://github.com/cpenned/clawdagotchi/releases), open it, and drag Clawdagotchi to Applications.
 
 Or build from source:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/clawdagotchi.git
+git clone https://github.com/cpenned/clawdagotchi.git
 cd clawdagotchi
 bash scripts/create-dmg.sh
 open releases/Clawdagotchi-*.dmg

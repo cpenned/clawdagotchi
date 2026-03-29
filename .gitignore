@@ -1,5 +1,5 @@
-ClaudeTamagotchi.app
-Clawdagotchi.app
-.build
-build
-releases
+.build/
+build/
+releases/
+*.app
+.DS_Store

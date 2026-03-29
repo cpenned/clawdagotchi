@@ -47,13 +47,8 @@ if EVENT == "PermissionRequest":
         # Return hookSpecificOutput to Claude Code
         print(json.dumps(result))
     except Exception:
-        # Server not running or timeout — deny by default for safety
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PermissionRequest",
-                "decision": {"behavior": "deny", "message": "Clawdagotchi unavailable"}
-            }
-        }))
+        # Server not running or timeout — let Claude Code handle normally
+        pass
 else:
     # Fire-and-forget for all other events
     try:
