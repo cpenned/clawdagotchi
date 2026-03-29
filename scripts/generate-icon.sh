@@ -73,11 +73,11 @@ ctx.saveGState()
 ctx.addPath(eggPath())
 ctx.clip()
 
-// Gradient: shellPinkLight → shellPink → shellPinkDark
+// Gradient: very light pink → light pink → medium pink
 let gradColors = [
-    CGColor(red: 0xF8/255.0, green: 0xB0/255.0, blue: 0xA0/255.0, alpha: 1.0),
-    CGColor(red: 0xF0/255.0, green: 0x90/255.0, blue: 0x80/255.0, alpha: 1.0),
-    CGColor(red: 0xC8/255.0, green: 0x6A/255.0, blue: 0x58/255.0, alpha: 1.0),
+    CGColor(red: 0xFD/255.0, green: 0xE8/255.0, blue: 0xE0/255.0, alpha: 1.0),
+    CGColor(red: 0xF8/255.0, green: 0xD0/255.0, blue: 0xC4/255.0, alpha: 1.0),
+    CGColor(red: 0xF0/255.0, green: 0xB8/255.0, blue: 0xA8/255.0, alpha: 1.0),
 ]
 let grad = CGGradient(colorsSpace: colorSpace, colors: gradColors as CFArray, locations: [0, 0.5, 1])!
 ctx.drawLinearGradient(grad,
@@ -100,7 +100,7 @@ let crabXOff = eggCX - (viewW * crabScale) / 2
 let crabYOff = eggCY - (viewH * crabScale) / 2 - canvas * 0.04
 
 func crabRect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat) {
-    ctx.setFillColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1.0)
+    ctx.setFillColor(red: 0xD9/255.0, green: 0x77/255.0, blue: 0x57/255.0, alpha: 1.0)
     ctx.fill(CGRect(x: crabXOff + x * crabScale, y: crabYOff + y * crabScale,
                     width: w * crabScale, height: h * crabScale))
 }
@@ -114,8 +114,8 @@ crabRect(6, 0, 54, 39)
 for lx: CGFloat in [6, 18, 42, 54] {
     crabRect(lx, 39, 6, 13)
 }
-// Eyes (cutout — use egg gradient color as approximation)
-ctx.setFillColor(red: 0xF0/255.0, green: 0x90/255.0, blue: 0x80/255.0, alpha: 1.0)
+// Eyes (cutout — lighter color to show through)
+ctx.setFillColor(red: 0xF8/255.0, green: 0xD0/255.0, blue: 0xC4/255.0, alpha: 1.0)
 ctx.fill(CGRect(x: crabXOff + 14 * crabScale, y: crabYOff + 12 * crabScale, width: 6 * crabScale, height: 7 * crabScale))
 ctx.fill(CGRect(x: crabXOff + 46 * crabScale, y: crabYOff + 12 * crabScale, width: 6 * crabScale, height: 7 * crabScale))
 
@@ -126,7 +126,7 @@ let btnSpacing = canvas * 0.055
 for i in -1...1 {
     let bx = eggCX + CGFloat(i) * btnSpacing
     let btnPath = CGPath(ellipseIn: CGRect(x: bx - btnR, y: btnY - btnR, width: btnR * 2, height: btnR * 2), transform: nil)
-    ctx.setFillColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
+    ctx.setFillColor(red: 0xD9/255.0, green: 0x77/255.0, blue: 0x57/255.0, alpha: 1.0)
     ctx.addPath(btnPath)
     ctx.fillPath()
 }
