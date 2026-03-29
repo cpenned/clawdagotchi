@@ -1,5 +1,19 @@
 import SwiftUI
 
+enum FloatPolicy: String, CaseIterable, Sendable {
+    case always
+    case permissionOnly
+    case never
+
+    var displayName: String {
+        switch self {
+        case .always: "Always"
+        case .permissionOnly: "Only during permission requests"
+        case .never: "Never"
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class AppSettings {
@@ -26,6 +40,9 @@ final class AppSettings {
     var widgetScale: Double {
         didSet { UserDefaults.standard.set(widgetScale, forKey: "widgetScale") }
     }
+    var floatPolicy: FloatPolicy {
+        didSet { UserDefaults.standard.set(floatPolicy.rawValue, forKey: "floatPolicy") }
+    }
 
     private init() {
         let defaults = UserDefaults.standard
@@ -37,6 +54,7 @@ final class AppSettings {
             "soundVolume": Float(0.5),
             "shellStyle": ShellStyle.salmonPink.rawValue,
             "widgetScale": 1.0,
+            "floatPolicy": FloatPolicy.always.rawValue,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
@@ -45,6 +63,7 @@ final class AppSettings {
         self.soundVolume = defaults.float(forKey: "soundVolume")
         self.shellStyle = ShellStyle(rawValue: defaults.string(forKey: "shellStyle") ?? "") ?? .salmonPink
         self.widgetScale = defaults.double(forKey: "widgetScale")
+        self.floatPolicy = FloatPolicy(rawValue: defaults.string(forKey: "floatPolicy") ?? "") ?? .always
     }
 
     func applyDockPolicy() {

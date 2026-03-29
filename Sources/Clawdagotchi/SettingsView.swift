@@ -49,6 +49,15 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
+            Section("Float on Top") {
+                Picker("Keep on top", selection: $settings.floatPolicy) {
+                    ForEach(FloatPolicy.allCases, id: \.rawValue) { policy in
+                        Text(policy.displayName).tag(policy)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+            }
+
             Section("Visibility") {
                 Toggle("Show in Dock", isOn: $settings.showDockIcon)
                 Toggle("Show menubar icon", isOn: $settings.showMenubarIcon)

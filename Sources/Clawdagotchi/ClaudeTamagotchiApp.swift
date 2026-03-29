@@ -9,7 +9,7 @@ struct ClawdagotchiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(viewModel: viewModel)
-                .background(WindowConfigurator())
+                .background(WindowConfigurator(hasPermissionPending: viewModel.pendingPermission != nil))
                 .onAppear { viewModel.start() }
                 .onDisappear { viewModel.stop() }
         }
@@ -24,11 +24,12 @@ struct ClawdagotchiApp: App {
 }
 
 struct WindowConfigurator: NSViewRepresentable {
+    let hasPermissionPending: Bool
+
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
         DispatchQueue.main.async {
             guard let window = view.window else { return }
-            window.level = .floating
             window.isMovableByWindowBackground = true
             window.backgroundColor = .clear
             window.isOpaque = false
@@ -39,9 +40,25 @@ struct WindowConfigurator: NSViewRepresentable {
             window.standardWindowButton(.miniaturizeButton)?.isHidden = true
             window.standardWindowButton(.zoomButton)?.isHidden = true
             window.collectionBehavior = [.canJoinAllSpaces, .stationary]
+            applyFloatLevel(to: window)
         }
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {}
+    func updateNSView(_ nsView: NSView, context: Context) {
+        guard let window = nsView.window else { return }
+        applyFloatLevel(to: window)
+    }
+
+    private func applyFloatLevel(to window: NSWindow) {
+        let policy = AppSettings.shared.floatPolicy
+        switch policy {
+        case .always:
+            window.level = .floating
+        case .permissionOnly:
+            window.level = hasPermissionPending ? .floating : .normal
+        case .never:
+            window.level = .normal
+        }
+    }
 }
