@@ -25,6 +25,20 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
             }
 
+            Section("Character Color") {
+                Picker("", selection: $settings.useCustomCrabColor) {
+                    HStack(spacing: 6) {
+                        Circle().fill(Color(red: 0.94, green: 0.56, blue: 0.50)).frame(width: 10, height: 10)
+                        Text("Always salmon")
+                    }.tag(false)
+                    HStack(spacing: 6) {
+                        Circle().fill(settings.shellStyle.crabColor).frame(width: 10, height: 10)
+                        Text("Match theme")
+                    }.tag(true)
+                }
+                .pickerStyle(.radioGroup)
+            }
+
             Section("Shell Style") {
                 Picker("Style", selection: $settings.shellStyle) {
                     ForEach(ShellStyle.allCases, id: \.rawValue) { style in

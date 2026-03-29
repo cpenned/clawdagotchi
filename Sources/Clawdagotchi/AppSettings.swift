@@ -46,6 +46,13 @@ final class AppSettings {
     var botName: String {
         didSet { UserDefaults.standard.set(botName, forKey: "botName") }
     }
+    var useCustomCrabColor: Bool {
+        didSet { UserDefaults.standard.set(useCustomCrabColor, forKey: "useCustomCrabColor") }
+    }
+
+    var activeCrabColor: Color {
+        useCustomCrabColor ? shellStyle.crabColor : Color(red: 0.94, green: 0.56, blue: 0.50)
+    }
 
     private init() {
         let defaults = UserDefaults.standard
@@ -59,6 +66,7 @@ final class AppSettings {
             "widgetScale": 1.0,
             "floatPolicy": FloatPolicy.always.rawValue,
             "botName": "Clawd",
+            "useCustomCrabColor": true,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
@@ -69,6 +77,7 @@ final class AppSettings {
         self.widgetScale = defaults.double(forKey: "widgetScale")
         self.floatPolicy = FloatPolicy(rawValue: defaults.string(forKey: "floatPolicy") ?? "") ?? .always
         self.botName = defaults.string(forKey: "botName") ?? "Clawd"
+        self.useCustomCrabColor = defaults.bool(forKey: "useCustomCrabColor")
     }
 
     func applyDockPolicy() {
