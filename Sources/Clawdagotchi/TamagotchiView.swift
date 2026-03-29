@@ -331,9 +331,8 @@ struct TamagotchiView: View {
 
             // Poop stays until pet
             if showPoop {
-                Text("\u{1F4A9}")
-                    .font(.system(size: 10))
-                    .offset(x: screenWidth / 2 - 18, y: screenHeight / 2 - 20)
+                PixelPoop()
+                    .offset(x: screenWidth / 2 - 18, y: screenHeight / 2 - 22)
             }
 
             screenText
@@ -462,7 +461,7 @@ struct TamagotchiView: View {
         if state == .idle {
             switch moodState {
             case .sleeping: return "zzz..."
-            case .hungry: return "hungry..."
+            case .hungry: return "i'm hungry!"
             case .angry: return "hmph!"
             case .pooping: return "oops"
             case .normal: return "~"
@@ -504,8 +503,7 @@ struct TamagotchiView: View {
     // MARK: - Angry steam animation
 
     private var angrySteam: some View {
-        Text("\u{1F4A2}")
-            .font(.system(size: 8))
+        PixelAnger()
             .opacity(angrySteamOpacity)
             .offset(x: -18, y: -20 + angrySteamOffset)
     }
@@ -1064,6 +1062,73 @@ struct InternalsView: View {
 }
 
 // MARK: - Pixel grid overlay
+
+// MARK: - 8-bit pixel poop
+
+struct PixelPoop: View {
+    private let grid: [[Int]] = [
+        [0,0,1,0,0],
+        [0,1,0,1,0],
+        [0,1,1,1,0],
+        [1,1,1,1,1],
+        [0,1,1,1,0],
+    ]
+
+    var body: some View {
+        Canvas { context, size in
+            let px: CGFloat = 2
+            let cols = grid[0].count
+            let rows = grid.count
+            let ox = (size.width - CGFloat(cols) * px) / 2
+            let oy = (size.height - CGFloat(rows) * px) / 2
+            for r in 0..<rows {
+                for c in 0..<cols {
+                    if grid[r][c] == 1 {
+                        let rect = CGRect(x: ox + CGFloat(c) * px, y: oy + CGFloat(r) * px, width: px, height: px)
+                        context.fill(Path(rect), with: .color(Color(white: 0.4)))
+                    }
+                }
+            }
+            // Steam lines above
+            var s1 = Path(); s1.move(to: CGPoint(x: ox + 2 * px, y: oy - 2)); s1.addLine(to: CGPoint(x: ox + 2 * px + 1, y: oy - 5))
+            context.stroke(s1, with: .color(Color(white: 0.35)), style: StrokeStyle(lineWidth: 0.5))
+            var s2 = Path(); s2.move(to: CGPoint(x: ox + 3 * px, y: oy - 1)); s2.addLine(to: CGPoint(x: ox + 3 * px - 1, y: oy - 4))
+            context.stroke(s2, with: .color(Color(white: 0.35)), style: StrokeStyle(lineWidth: 0.5))
+        }
+        .frame(width: 14, height: 16)
+    }
+}
+
+// MARK: - 8-bit anger symbol (cross/spark)
+
+struct PixelAnger: View {
+    var body: some View {
+        Canvas { context, size in
+            let cx = size.width / 2
+            let cy = size.height / 2
+            let color = Color(white: 0.5)
+            let px: CGFloat = 1.5
+
+            // X shape (anger cross)
+            var d1 = Path()
+            d1.move(to: CGPoint(x: cx - 3, y: cy - 3))
+            d1.addLine(to: CGPoint(x: cx + 3, y: cy + 3))
+            context.stroke(d1, with: .color(color), style: StrokeStyle(lineWidth: px))
+
+            var d2 = Path()
+            d2.move(to: CGPoint(x: cx + 3, y: cy - 3))
+            d2.addLine(to: CGPoint(x: cx - 3, y: cy + 3))
+            context.stroke(d2, with: .color(color), style: StrokeStyle(lineWidth: px))
+
+            // Small dots at the tips
+            for (dx, dy) in [(-4.0, -4.0), (4.0, -4.0), (-4.0, 4.0), (4.0, 4.0)] {
+                let dot = CGRect(x: cx + dx - 0.5, y: cy + dy - 0.5, width: 1, height: 1)
+                context.fill(Path(dot), with: .color(color))
+            }
+        }
+        .frame(width: 14, height: 14)
+    }
+}
 
 struct PixelGridOverlay: View {
     var body: some View {
