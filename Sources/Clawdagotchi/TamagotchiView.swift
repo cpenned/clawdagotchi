@@ -72,7 +72,6 @@ struct TamagotchiView: View {
             screenInset
             lcdScreen
             buttons
-            xpBar
         }
         .frame(width: eggWidth + padding * 2, height: eggHeight + padding * 2)
         .onChange(of: state) { _, newState in
@@ -109,18 +108,6 @@ struct TamagotchiView: View {
     }
 
     // MARK: - XP bar
-
-    private var xpBar: some View {
-        GeometryReader { geo in
-            let barWidth = (geo.size.width - 20) * CGFloat(max(0, min(1, xpProgress)))
-            Rectangle()
-                .fill(AppSettings.shared.activeCrabColor.opacity(0.3))
-                .frame(width: barWidth, height: 2)
-                .frame(maxWidth: geo.size.width - 20, alignment: .leading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 4)
-        }
-    }
 
     // MARK: - Shell layers
 
