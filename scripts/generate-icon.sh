@@ -15,23 +15,9 @@ import Foundation
 let size = 1024
 let canvas = CGFloat(size)
 
-// Pixel grid: 14 wide x 10 tall (crab body silhouette)
-// 1 = crab color (white), 0 = transparent
-let grid: [[Int]] = [
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-    [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-    [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-]
-
-// Eye positions: col 4-5 row 3, col 8-9 row 3
-let eyeCells: Set<String> = ["3,4","3,5","3,8","3,9"]
+// CrabView geometry: viewBox 66w x 52h
+let viewW: CGFloat = 66
+let viewH: CGFloat = 52
 
 let colorSpace = CGColorSpaceCreateDeviceRGB()
 guard let ctx = CGContext(
@@ -60,36 +46,34 @@ ctx.setFillColor(red: 0xD9/255.0, green: 0x77/255.0, blue: 0x57/255.0, alpha: 1.
 ctx.addPath(bgPath)
 ctx.fillPath()
 
-// Calculate pixel grid dimensions
-// Use ~55% of canvas width for the crab
-let gridCols = 14
-let gridRows = 10
-let crabWidth = canvas * 0.55
-let pixelSize = crabWidth / CGFloat(gridCols)
-let crabHeight = pixelSize * CGFloat(gridRows)
+// Scale crab to ~60% of canvas, centered
+let crabScale = canvas * 0.6 / viewW
+let xOff = (canvas - viewW * crabScale) / 2
+let yOff = (canvas - viewH * crabScale) / 2
 
-// Center the crab
-let xOffset = (canvas - crabWidth) / 2
-let yOffset = (canvas - crabHeight) / 2
-
-for (row, rowData) in grid.enumerated() {
-    for (col, cell) in rowData.enumerated() {
-        guard cell == 1 else { continue }
-        let key = "\(row),\(col)"
-        let isEye = eyeCells.contains(key)
-        let px = xOffset + CGFloat(col) * pixelSize
-        let py = yOffset + CGFloat(row) * pixelSize
-        let rect = CGRect(x: px, y: py, width: pixelSize, height: pixelSize)
-        if isEye {
-            // Dark eyes: near-black
-            ctx.setFillColor(red: 0x1A/255.0, green: 0x1A/255.0, blue: 0x1A/255.0, alpha: 1.0)
-        } else {
-            // White/cream body
-            ctx.setFillColor(red: 0xFF/255.0, green: 0xF5/255.0, blue: 0xED/255.0, alpha: 1.0)
-        }
-        ctx.fill(rect)
-    }
+func fillRect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, r: CGFloat, g: CGFloat, b: CGFloat) {
+    ctx.setFillColor(red: r, green: g, blue: b, alpha: 1.0)
+    ctx.fill(CGRect(x: xOff + x * crabScale, y: yOff + y * crabScale, width: w * crabScale, height: h * crabScale))
 }
+
+let bodyColor: (CGFloat, CGFloat, CGFloat) = (0xFF/255.0, 0xF5/255.0, 0xED/255.0)
+let eyeColor: (CGFloat, CGFloat, CGFloat) = (0xD9/255.0, 0x77/255.0, 0x57/255.0)
+
+// Antennae
+fillRect(0, 13, 6, 13, r: bodyColor.0, g: bodyColor.1, b: bodyColor.2)
+fillRect(60, 13, 6, 13, r: bodyColor.0, g: bodyColor.1, b: bodyColor.2)
+
+// Body
+fillRect(6, 0, 54, 39, r: bodyColor.0, g: bodyColor.1, b: bodyColor.2)
+
+// Legs (4)
+for lx: CGFloat in [6, 18, 42, 54] {
+    fillRect(lx, 39, 6, 13, r: bodyColor.0, g: bodyColor.1, b: bodyColor.2)
+}
+
+// Eyes
+fillRect(14, 12, 6, 7, r: eyeColor.0, g: eyeColor.1, b: eyeColor.2)
+fillRect(46, 12, 6, 7, r: eyeColor.0, g: eyeColor.1, b: eyeColor.2)
 
 guard let image = ctx.makeImage() else {
     print("Failed to create CGImage")

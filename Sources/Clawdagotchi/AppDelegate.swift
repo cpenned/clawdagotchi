@@ -79,41 +79,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func makeCrabMenubarImage() -> NSImage {
-        // Pixel grid: 14 wide x 10 tall
-        // 1 = crab pixel, 0 = transparent, 2 = eye (dark)
-        let grid: [[Int]] = [
-            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-            [0,0,0,1,1,2,2,1,2,2,1,0,0,0],
-            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
-            [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-            [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
-        ]
-
+        // Match CrabView geometry: viewBox 66w x 52h
         let iconSize: CGFloat = 18
-        let gridCols: CGFloat = 14
-        let gridRows: CGFloat = 10
-        let pixelW = iconSize / gridCols
-        let pixelH = iconSize / gridRows
+        let s = iconSize / 52.0
+        let xOff = (iconSize - 66 * s) / 2
 
         let image = NSImage(size: NSSize(width: iconSize, height: iconSize))
         image.lockFocus()
 
         NSColor.white.setFill()
 
-        for (rowIdx, row) in grid.enumerated() {
-            for (colIdx, cell) in row.enumerated() {
-                guard cell != 0 else { continue }
-                // NSImage coordinate origin is bottom-left; flip row
-                let x = CGFloat(colIdx) * pixelW
-                let y = iconSize - CGFloat(rowIdx + 1) * pixelH
-                let rect = NSRect(x: x, y: y, width: pixelW, height: pixelH)
-                NSBezierPath(rect: rect).fill()
-            }
+        func fill(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat) {
+            // Flip Y for NSImage (origin bottom-left)
+            let rect = NSRect(x: xOff + x * s, y: iconSize - (y + h) * s, width: w * s, height: h * s)
+            NSBezierPath(rect: rect).fill()
+        }
+
+        // Antennae
+        fill(0, 13, 6, 13)
+        fill(60, 13, 6, 13)
+
+        // Body
+        fill(6, 0, 54, 39)
+
+        // Legs (4, static)
+        for lx: CGFloat in [6, 18, 42, 54] {
+            fill(lx, 39, 6, 13)
         }
 
         image.unlockFocus()
