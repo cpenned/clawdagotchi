@@ -3,23 +3,24 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var viewModel: TamagotchiViewModel
 
+    private let baseWidth: CGFloat = 270
+    private let baseHeight: CGFloat = 330
+
+    private var widgetScale: Double { AppSettings.shared.widgetScale }
+
     var body: some View {
-        GeometryReader { geo in
-            let scale = min(geo.size.width / 270, geo.size.height / 330)
-            TamagotchiView(
-                state: viewModel.displayState,
-                sessionCount: viewModel.activeSessionCount,
-                pendingPermission: viewModel.pendingPermission,
-                funReaction: viewModel.funReaction,
-                onApprove: { viewModel.approvePermission() },
-                onDeny: { viewModel.denyPermission() },
-                onPoke: { viewModel.pokeCrab() },
-                onPet: { viewModel.petCrab() }
-            )
-            .scaleEffect(scale)
-            .frame(width: geo.size.width, height: geo.size.height)
-        }
-        .frame(minWidth: 150, minHeight: 186)
+        TamagotchiView(
+            state: viewModel.displayState,
+            sessionCount: viewModel.activeSessionCount,
+            pendingPermission: viewModel.pendingPermission,
+            funReaction: viewModel.funReaction,
+            onApprove: { viewModel.approvePermission() },
+            onDeny: { viewModel.denyPermission() },
+            onPoke: { viewModel.pokeCrab() },
+            onPet: { viewModel.petCrab() }
+        )
+        .scaleEffect(widgetScale)
+        .frame(width: baseWidth * widgetScale, height: baseHeight * widgetScale)
         .contextMenu {
             Button("Settings...") {
                 if let delegate = NSApp.delegate as? AppDelegate {

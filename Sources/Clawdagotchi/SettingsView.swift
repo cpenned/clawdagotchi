@@ -35,6 +35,20 @@ struct SettingsView: View {
                 .pickerStyle(.radioGroup)
             }
 
+            Section("Size") {
+                HStack {
+                    Image(systemName: "minus.magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    Slider(value: $settings.widgetScale, in: 0.5...1.5, step: 0.1)
+                    Image(systemName: "plus.magnifyingglass")
+                        .foregroundStyle(.secondary)
+                }
+                Text("\(Int(settings.widgetScale * 100))%")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+
             Section("Visibility") {
                 Toggle("Show in Dock", isOn: $settings.showDockIcon)
                 Toggle("Show menubar icon", isOn: $settings.showMenubarIcon)
