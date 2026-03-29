@@ -120,7 +120,7 @@ ctx.fill(CGRect(x: crabXOff + 14 * crabScale, y: crabYOff + 12 * crabScale, widt
 ctx.fill(CGRect(x: crabXOff + 46 * crabScale, y: crabYOff + 12 * crabScale, width: 6 * crabScale, height: 7 * crabScale))
 
 // --- Three black buttons below crab ---
-let btnY = crabYOff + viewH * crabScale + canvas * 0.06
+let btnY = crabYOff + viewH * crabScale + canvas * 0.14
 let btnR: CGFloat = canvas * 0.022
 let btnSpacing = canvas * 0.055
 for i in -1...1 {
