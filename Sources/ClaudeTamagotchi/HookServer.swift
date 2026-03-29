@@ -40,9 +40,26 @@ final class HookServer: @unchecked Sendable {
         self.permissionHandler = onPermission
     }
 
+    private(set) var authToken: String = ""
+
     func start() {
+        // Generate auth token and write to temp file
+        authToken = UUID().uuidString
+        let tokenPath = "/tmp/clawdagotchi.token"
+        try? authToken.write(toFile: tokenPath, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes(
+            [.posixPermissions: 0o600], ofItemAtPath: tokenPath
+        )
+
+        // Bind to localhost only
+        let params = NWParameters.tcp
+        params.requiredLocalEndpoint = NWEndpoint.hostPort(
+            host: NWEndpoint.Host("127.0.0.1"),
+            port: 7777
+        )
+
         do {
-            listener = try NWListener(using: .tcp, on: 7777)
+            listener = try NWListener(using: params)
         } catch {
             print("[HookServer] Failed to create listener: \(error)")
             return
@@ -55,7 +72,7 @@ final class HookServer: @unchecked Sendable {
         listener?.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                print("[HookServer] Listening on port 7777")
+                print("[HookServer] Listening on 127.0.0.1:7777")
             case .failed(let err):
                 print("[HookServer] Failed: \(err)")
             default:
@@ -144,6 +161,14 @@ final class HookServer: @unchecked Sendable {
         }
 
         let path = String(parts[1])
+
+        // Validate auth token
+        let authHeader = lines.first(where: { $0.lowercased().hasPrefix("authorization: bearer ") })
+        let token = authHeader.map { String($0.dropFirst("authorization: bearer ".count)) }
+        if token != authToken {
+            respond(conn, status: "403 Forbidden", body: #"{"error":"invalid token"}"#)
+            return
+        }
 
         guard let bodyRange = raw.range(of: "\r\n\r\n") else {
             respond(conn, status: "400 Bad Request", body: #"{"error":"no body"}"#)

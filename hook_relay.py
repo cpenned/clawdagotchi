@@ -3,8 +3,16 @@
 import sys
 import json
 import urllib.request
+import os
 
 EVENT = sys.argv[1] if len(sys.argv) > 1 else "unknown"
+
+TOKEN = ""
+try:
+    with open("/tmp/clawdagotchi.token", "r") as f:
+        TOKEN = f.read().strip()
+except Exception:
+    pass
 
 try:
     payload = json.load(sys.stdin)
@@ -31,7 +39,7 @@ if EVENT == "PermissionRequest":
         req = urllib.request.Request(
             "http://localhost:7777/permission",
             data=data,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"}
         )
         resp = urllib.request.urlopen(req, timeout=300)
         result = json.loads(resp.read().decode())
@@ -45,7 +53,7 @@ else:
         req = urllib.request.Request(
             "http://localhost:7777/hook",
             data=data,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"}
         )
         urllib.request.urlopen(req, timeout=2)
     except Exception:

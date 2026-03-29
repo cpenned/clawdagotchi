@@ -38,7 +38,7 @@ for event in EVENTS:
 
     hook_def = {
         "type": "command",
-        "command": f"python3 {RELAY} {event}"
+        "command": f'python3 "{RELAY}" {event}'
     }
     if event == "PermissionRequest":
         hook_def["timeout"] = 300000
