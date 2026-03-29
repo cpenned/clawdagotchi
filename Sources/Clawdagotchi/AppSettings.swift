@@ -20,6 +20,9 @@ final class AppSettings {
     var soundVolume: Float {
         didSet { UserDefaults.standard.set(soundVolume, forKey: "soundVolume") }
     }
+    var shellStyle: ShellStyle {
+        didSet { UserDefaults.standard.set(shellStyle.rawValue, forKey: "shellStyle") }
+    }
 
     private init() {
         let defaults = UserDefaults.standard
@@ -29,12 +32,14 @@ final class AppSettings {
             "showWidget": true,
             "soundEnabled": true,
             "soundVolume": Float(0.5),
+            "shellStyle": ShellStyle.salmonPink.rawValue,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
         self.showWidget = defaults.bool(forKey: "showWidget")
         self.soundEnabled = defaults.bool(forKey: "soundEnabled")
         self.soundVolume = defaults.float(forKey: "soundVolume")
+        self.shellStyle = ShellStyle(rawValue: defaults.string(forKey: "shellStyle") ?? "") ?? .salmonPink
     }
 
     func applyDockPolicy() {

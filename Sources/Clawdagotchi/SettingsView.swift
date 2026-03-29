@@ -20,6 +20,21 @@ struct SettingsView: View {
 
     private var appearanceTab: some View {
         Form {
+            Section("Shell Style") {
+                Picker("Style", selection: $settings.shellStyle) {
+                    ForEach(ShellStyle.allCases, id: \.rawValue) { style in
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(style.tintColor)
+                                .frame(width: 12, height: 12)
+                            Text(style.displayName)
+                        }
+                        .tag(style)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+            }
+
             Section("Visibility") {
                 Toggle("Show in Dock", isOn: $settings.showDockIcon)
                 Toggle("Show menubar icon", isOn: $settings.showMenubarIcon)
