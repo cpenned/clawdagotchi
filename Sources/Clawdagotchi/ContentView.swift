@@ -18,6 +18,7 @@ struct ContentView: View {
             onApprove: { viewModel.approvePermission() },
             onDeny: { viewModel.denyPermission() },
             onPoke: { viewModel.pokeCrab() },
+            onFeed: { viewModel.feedCrab() },
             onPet: { viewModel.petCrab() }
         )
         .scaleEffect(widgetScale)

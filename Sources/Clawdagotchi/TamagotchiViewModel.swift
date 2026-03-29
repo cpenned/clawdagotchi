@@ -30,6 +30,7 @@ final class TamagotchiViewModel {
     enum FunReaction: Equatable {
         case poke
         case pet
+        case feed
     }
 
     private var sessions: [String: Session] = [:]
@@ -92,6 +93,16 @@ final class TamagotchiViewModel {
         SoundManager.shared.play(.pet)
         Task {
             try? await Task.sleep(for: .seconds(1.2))
+            funReaction = nil
+        }
+    }
+
+    func feedCrab() {
+        guard permissionQueue.isEmpty else { return }
+        funReaction = .feed
+        SoundManager.shared.play(.pet)
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
             funReaction = nil
         }
     }

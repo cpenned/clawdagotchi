@@ -9,6 +9,7 @@ struct TamagotchiView: View {
     var onApprove: () -> Void = {}
     var onDeny: () -> Void = {}
     var onPoke: () -> Void = {}
+    var onFeed: () -> Void = {}
     var onPet: () -> Void = {}
 
     @State private var bobOffset: CGFloat = 0
@@ -372,7 +373,7 @@ struct TamagotchiView: View {
                 interactiveButton(baseColor: Color(white: 0.25),
                                   glowColor: .shellPinkLight, lit: sessionCount >= 1, isCenter: false, action: onPoke)
                 interactiveButton(baseColor: Color(white: 0.25),
-                                  glowColor: .shellPinkLight, lit: sessionCount >= 2, isCenter: true, action: {})
+                                  glowColor: .shellPinkLight, lit: sessionCount >= 2, isCenter: true, action: onFeed)
                 interactiveButton(baseColor: Color(white: 0.25),
                                   glowColor: .shellPinkLight, lit: sessionCount >= 3, isCenter: false, action: onPet)
             }
@@ -492,6 +493,18 @@ struct TamagotchiView: View {
             }
         case .pet:
             withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .squish }
+
+        case .feed:
+            // Nom nom — blink eyes rapidly while bobbing (eating animation)
+            Task { @MainActor in
+                for _ in 0..<4 {
+                    withAnimation(.easeInOut(duration: 0.1)) { currentEyeStyle = .blink; bobOffset = -3 }
+                    try? await Task.sleep(for: .seconds(0.15))
+                    withAnimation(.easeInOut(duration: 0.1)) { currentEyeStyle = .squish; bobOffset = 0 }
+                    try? await Task.sleep(for: .seconds(0.15))
+                }
+                withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .normal }
+            }
         }
     }
 
