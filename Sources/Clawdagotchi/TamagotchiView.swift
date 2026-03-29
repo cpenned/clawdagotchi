@@ -320,7 +320,7 @@ struct TamagotchiView: View {
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking
         )
-        .offset(y: bobOffset + 4)
+        .offset(y: bobOffset)
     }
 
     private var botNameLabel: some View {
