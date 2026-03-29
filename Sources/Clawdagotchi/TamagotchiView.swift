@@ -300,6 +300,7 @@ struct TamagotchiView: View {
                 .allowsHitTesting(false)
         }
         .frame(width: screenWidth, height: screenHeight)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
         .offset(y: -24)
     }
 
