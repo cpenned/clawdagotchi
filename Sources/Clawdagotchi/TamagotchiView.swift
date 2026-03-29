@@ -397,6 +397,14 @@ struct TamagotchiView: View {
             screenText
                 .offset(y: screenHeight / 2 - 12)
 
+            // XP progress bar at very bottom of screen
+            VStack {
+                Spacer()
+                Rectangle()
+                    .fill(style.tintColor.opacity(0.5))
+                    .frame(width: screenWidth * CGFloat(max(0, min(1, xpProgress))), height: 1.5)
+                    .frame(maxWidth: screenWidth, alignment: .leading)
+            }
         }
         .frame(width: screenWidth, height: screenHeight)
         .clipShape(RoundedRectangle(cornerRadius: 5))
