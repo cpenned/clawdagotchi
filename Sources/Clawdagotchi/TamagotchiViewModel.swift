@@ -33,7 +33,7 @@ final class TamagotchiViewModel {
     private(set) var funReaction: FunReaction?
     private(set) var moodState: MoodState = .normal
     private(set) var greetingMessage: String = ""
-    private(set) var showPoop: Bool = false
+    private(set) var poopCount: Int = 0
 
     private(set) var permissionQueue: [PendingPermission] = []
     var pendingPermission: PendingPermission? { permissionQueue.first }
@@ -51,6 +51,7 @@ final class TamagotchiViewModel {
     private var moodTask: Task<Void, Never>?
     private var lastInteractionTime: Date = Date()
     private var lastFedTime: Date = Date()
+    private var lastPoopTime: Date = Date()
 
     func start() {
         Self.shared = self
@@ -98,13 +99,12 @@ final class TamagotchiViewModel {
     func previewMood(_ mood: MoodState) {
         withAnimation(.easeInOut(duration: 0.3)) {
             moodState = mood
-            if mood == .pooping { showPoop = true }
+            if mood == .pooping { poopCount += 1 }
         }
         Task {
             try? await Task.sleep(for: .seconds(4))
             withAnimation(.easeInOut(duration: 0.3)) {
                 moodState = .normal
-                showPoop = false
             }
         }
     }
@@ -120,10 +120,26 @@ final class TamagotchiViewModel {
         let now = Date()
         let sinceInteraction = now.timeIntervalSince(lastInteractionTime)
         let sinceFed = now.timeIntervalSince(lastFedTime)
+        let sincePoop = now.timeIntervalSince(lastPoopTime)
 
-        // Don't override pooping or states that need specific actions
-        if moodState == .pooping || showPoop { return }
+        // Don't override pooping animation or states needing specific actions
+        if moodState == .pooping { return }
         if moodState == .angry || moodState == .hungry { return }
+
+        // Periodic poop every ~15 min
+        if sincePoop > 900 {
+            lastPoopTime = now
+            withAnimation { moodState = .pooping }
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(3))
+                guard let self else { return }
+                if self.moodState == .pooping {
+                    withAnimation { self.moodState = .normal }
+                }
+                withAnimation { self.poopCount += 1 }
+            }
+            return
+        }
 
         let newMood: MoodState
         if sinceInteraction > 480 {
@@ -133,20 +149,6 @@ final class TamagotchiViewModel {
         } else if sinceInteraction > 120 {
             newMood = .sleeping
         } else {
-            // Random poop chance (~10% per check when idle+normal)
-            if moodState == .normal && Int.random(in: 0..<10) == 0 {
-                withAnimation { moodState = .pooping }
-                Task { [weak self] in
-                    try? await Task.sleep(for: .seconds(3))
-                    guard let self else { return }
-                    // Pooping finishes but poop stays until pet
-                    if self.moodState == .pooping {
-                        withAnimation { self.moodState = .normal }
-                    }
-                    withAnimation { self.showPoop = true }
-                }
-                return
-            }
             newMood = .normal
         }
 
@@ -222,10 +224,10 @@ final class TamagotchiViewModel {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
 
-        // Pet clears: poop, sleeping
-        if showPoop {
+        // Pet clears: one poop, sleeping
+        if poopCount > 0 {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                showPoop = false
+                poopCount -= 1
             }
         }
         if moodState == .sleeping {

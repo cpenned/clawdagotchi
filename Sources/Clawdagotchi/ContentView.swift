@@ -15,7 +15,7 @@ struct ContentView: View {
             pendingPermission: viewModel.pendingPermission,
             pendingPermissionCount: viewModel.pendingPermissionCount,
             moodState: viewModel.moodState,
-            showPoop: viewModel.showPoop,
+            poopCount: viewModel.poopCount,
             greetingMessage: viewModel.greetingMessage,
             funReaction: viewModel.funReaction,
             onApprove: { viewModel.approvePermission() },

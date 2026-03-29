@@ -6,7 +6,7 @@ struct TamagotchiView: View {
     let pendingPermission: PendingPermission?
     let pendingPermissionCount: Int
     let moodState: MoodState
-    let showPoop: Bool
+    let poopCount: Int
     let greetingMessage: String
     let funReaction: TamagotchiViewModel.FunReaction?
     var onApprove: () -> Void = {}
@@ -329,10 +329,13 @@ struct TamagotchiView: View {
                 angrySteam
             }
 
-            // Poop stays until pet
-            if showPoop {
+            // Poops pile up — pet to clean one at a time
+            ForEach(0..<min(poopCount, 5), id: \.self) { i in
                 PixelPoop()
-                    .offset(x: screenWidth / 2 - 18, y: screenHeight / 2 - 22)
+                    .offset(
+                        x: screenWidth / 2 - 18 - CGFloat(i) * 10,
+                        y: screenHeight / 2 - 22
+                    )
             }
 
             screenText
