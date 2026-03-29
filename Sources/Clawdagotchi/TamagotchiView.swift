@@ -372,8 +372,8 @@ struct TamagotchiView: View {
 
             Spacer()
 
-            PixelStatBar(value: hunger, label: "\u{2665}")
-            PixelStatBar(value: happiness, label: "\u{2605}")
+            PixelStatBar(value: hunger, sfSymbol: "fork.knife")
+            PixelStatBar(value: happiness, sfSymbol: "heart.fill")
         }
         .frame(width: screenWidth - 12)
     }
@@ -1158,16 +1158,18 @@ struct PixelAnger: View {
 
 struct PixelStatBar: View {
     let value: Double
-    let label: String
+    let sfSymbol: String
     private let segments = 4
-    private let barColor = Color.white.opacity(0.25)
+    private let barColor = Color.white.opacity(0.30)
     private let emptyColor = Color.white.opacity(0.06)
 
     var body: some View {
         HStack(alignment: .center, spacing: 2) {
-            Text(label)
-                .font(.system(size: 7))
-                .foregroundStyle(Color.white.opacity(0.35))
+            Image(systemName: sfSymbol)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 6, height: 6)
+                .foregroundStyle(Color.white.opacity(0.30))
             HStack(spacing: 1) {
                 ForEach(0..<segments, id: \.self) { i in
                     let filled = value > Double(i) / Double(segments)

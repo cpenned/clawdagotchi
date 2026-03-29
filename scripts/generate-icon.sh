@@ -68,45 +68,39 @@ func eggPath() -> CGMutablePath {
     return p
 }
 
-// Dark internal cavity
+// Egg shell — salmon pink gradient (light top-left, dark bottom-right)
 ctx.saveGState()
 ctx.addPath(eggPath())
 ctx.clip()
-ctx.setFillColor(red: 0x08/255.0, green: 0x08/255.0, blue: 0x08/255.0, alpha: 1.0)
-ctx.fill(CGRect(x: 0, y: 0, width: canvas, height: canvas))
+
+// Gradient: shellPinkLight → shellPink → shellPinkDark
+let gradColors = [
+    CGColor(red: 0xF8/255.0, green: 0xB0/255.0, blue: 0xA0/255.0, alpha: 1.0),
+    CGColor(red: 0xF0/255.0, green: 0x90/255.0, blue: 0x80/255.0, alpha: 1.0),
+    CGColor(red: 0xC8/255.0, green: 0x6A/255.0, blue: 0x58/255.0, alpha: 1.0),
+]
+let grad = CGGradient(colorsSpace: colorSpace, colors: gradColors as CFArray, locations: [0, 0.5, 1])!
+ctx.drawLinearGradient(grad,
+    start: CGPoint(x: eggCX - eggW * 0.4, y: eggCY - eggH * 0.4),
+    end: CGPoint(x: eggCX + eggW * 0.4, y: eggCY + eggH * 0.4),
+    options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
 ctx.restoreGState()
 
-// Clear retro shell — neutral/white, low opacity
-ctx.saveGState()
-ctx.addPath(eggPath())
-ctx.clip()
-ctx.setFillColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 0.18)
-ctx.fill(CGRect(x: 0, y: 0, width: canvas, height: canvas))
-ctx.restoreGState()
-
-// Shell edge stroke
-ctx.setStrokeColor(red: 1, green: 1, blue: 1, alpha: 0.3)
-ctx.setLineWidth(4)
+// Subtle edge highlight
+ctx.setStrokeColor(red: 1, green: 1, blue: 1, alpha: 0.25)
+ctx.setLineWidth(3)
 ctx.addPath(eggPath())
 ctx.strokePath()
 
-// --- Screen bezel ---
-let scrW = canvas * 0.48
-let scrH = canvas * 0.34
+// --- Black screen ---
+let scrW = canvas * 0.46
+let scrH = canvas * 0.32
 let scrX = eggCX - scrW / 2
-let scrY = eggCY - eggH * 0.18
+let scrY = eggCY - eggH * 0.16
 
-// Outer bezel (dark)
-let bezelPath = CGPath(roundedRect: CGRect(x: scrX - 14, y: scrY - 12, width: scrW + 28, height: scrH + 24),
-                       cornerWidth: 18, cornerHeight: 18, transform: nil)
-ctx.setFillColor(red: 0x15/255.0, green: 0x15/255.0, blue: 0x15/255.0, alpha: 0.9)
-ctx.addPath(bezelPath)
-ctx.fillPath()
-
-// Screen (dark LCD)
 let screenPath = CGPath(roundedRect: CGRect(x: scrX, y: scrY, width: scrW, height: scrH),
                         cornerWidth: 10, cornerHeight: 10, transform: nil)
-ctx.setFillColor(red: 0x1A/255.0, green: 0x1A/255.0, blue: 0x1A/255.0, alpha: 1.0)
+ctx.setFillColor(red: 0x12/255.0, green: 0x12/255.0, blue: 0x12/255.0, alpha: 1.0)
 ctx.addPath(screenPath)
 ctx.fillPath()
 
@@ -138,39 +132,17 @@ for lx: CGFloat in [6, 18, 42, 54] {
 crabRect(14, 12, 6, 7, r: 0x1A/255.0, g: 0x1A/255.0, b: 0x1A/255.0)
 crabRect(46, 12, 6, 7, r: 0x1A/255.0, g: 0x1A/255.0, b: 0x1A/255.0)
 
-// --- Three buttons below screen ---
-let btnY = scrY + scrH + canvas * 0.08
-let btnR: CGFloat = canvas * 0.028
-let btnSpacing = canvas * 0.06
+// --- Three black buttons below screen ---
+let btnY = scrY + scrH + canvas * 0.06
+let btnR: CGFloat = canvas * 0.022
+let btnSpacing = canvas * 0.055
 for i in -1...1 {
     let bx = eggCX + CGFloat(i) * btnSpacing
     let btnPath = CGPath(ellipseIn: CGRect(x: bx - btnR, y: btnY - btnR, width: btnR * 2, height: btnR * 2), transform: nil)
-    ctx.setFillColor(red: 0.20, green: 0.20, blue: 0.20, alpha: 1.0)
+    ctx.setFillColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
     ctx.addPath(btnPath)
     ctx.fillPath()
-    // Highlight
-    let hlPath = CGPath(ellipseIn: CGRect(x: bx - btnR * 0.6, y: btnY - btnR * 0.8, width: btnR * 1.2, height: btnR * 0.8), transform: nil)
-    ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 0.15)
-    ctx.addPath(hlPath)
-    ctx.fillPath()
 }
-
-// --- CLAWDAGOTCHI text ---
-let textY = scrY - canvas * 0.04
-let attrs: [NSAttributedString.Key: Any] = [
-    .font: NSFont.systemFont(ofSize: canvas * 0.028, weight: .heavy),
-    .foregroundColor: NSColor(red: 1, green: 1, blue: 1, alpha: 0.3),
-]
-let text = NSAttributedString(string: "CLAWDAGOTCHI", attributes: attrs)
-let textSize = text.size()
-let line = CTLineCreateWithAttributedString(text)
-ctx.saveGState()
-// Flip back for text (CTLine draws in unflipped coords)
-ctx.translateBy(x: 0, y: canvas)
-ctx.scaleBy(x: 1, y: -1)
-ctx.textPosition = CGPoint(x: eggCX - textSize.width / 2, y: canvas - textY)
-CTLineDraw(line, ctx)
-ctx.restoreGState()
 
 guard let image = ctx.makeImage() else { exit(1) }
 let outputURL = URL(fileURLWithPath: "/tmp/AppIcon_1024.png")
