@@ -418,8 +418,15 @@ Age: \(AppSettings.shared.ageInDays) days
                 }
 
                 VStack(spacing: 8) {
-                    Button("Check for Updates...") {
-                        UpdateChecker.shared.checkNow()
+                    HStack(spacing: 12) {
+                        Button("Check for Updates...") {
+                            UpdateChecker.shared.checkNow()
+                        }
+                        Button("⭐ Star on GitHub") {
+                            if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
                     }
 
                     Text("Clawdagotchi v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")

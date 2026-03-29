@@ -35,20 +35,28 @@ data = json.dumps({
 }).encode()
 
 if EVENT == "PermissionRequest":
-    # Blocking request — hold open until user approves/denies in the app
+    # First check if server is reachable (quick 2s timeout)
+    import socket
+    server_up = False
     try:
-        req = urllib.request.Request(
-            "http://localhost:7777/permission",
-            data=data,
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"}
-        )
-        resp = urllib.request.urlopen(req, timeout=300)
-        result = json.loads(resp.read().decode())
-        # Return hookSpecificOutput to Claude Code
-        print(json.dumps(result))
+        s = socket.create_connection(("127.0.0.1", 7777), timeout=2)
+        s.close()
+        server_up = True
     except Exception:
-        # Server not running or timeout — let Claude Code handle normally
         pass
+
+    if server_up:
+        try:
+            req = urllib.request.Request(
+                "http://localhost:7777/permission",
+                data=data,
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"}
+            )
+            resp = urllib.request.urlopen(req, timeout=300)
+            result = json.loads(resp.read().decode())
+            print(json.dumps(result))
+        except Exception:
+            pass
 else:
     # Fire-and-forget for all other events
     try:
