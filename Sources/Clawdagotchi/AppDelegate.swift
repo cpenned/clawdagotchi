@@ -15,9 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "hare.fill", accessibilityDescription: "Clawdagotchi")
-            button.image?.size = NSSize(width: 18, height: 18)
-            button.image?.isTemplate = true
+            button.image = makeCrabMenubarImage()
         }
 
         let menu = NSMenu()
@@ -78,5 +76,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func quit() {
         NSApp.terminate(nil)
+    }
+
+    private func makeCrabMenubarImage() -> NSImage {
+        // Pixel grid: 14 wide x 10 tall
+        // 1 = crab pixel, 0 = transparent, 2 = eye (dark)
+        let grid: [[Int]] = [
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,0,1,1,2,2,1,2,2,1,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
+            [0,0,0,1,1,0,1,1,0,1,1,0,0,0],
+        ]
+
+        let iconSize: CGFloat = 18
+        let gridCols: CGFloat = 14
+        let gridRows: CGFloat = 10
+        let pixelW = iconSize / gridCols
+        let pixelH = iconSize / gridRows
+
+        let image = NSImage(size: NSSize(width: iconSize, height: iconSize))
+        image.lockFocus()
+
+        NSColor.white.setFill()
+
+        for (rowIdx, row) in grid.enumerated() {
+            for (colIdx, cell) in row.enumerated() {
+                guard cell != 0 else { continue }
+                // NSImage coordinate origin is bottom-left; flip row
+                let x = CGFloat(colIdx) * pixelW
+                let y = iconSize - CGFloat(rowIdx + 1) * pixelH
+                let rect = NSRect(x: x, y: y, width: pixelW, height: pixelH)
+                NSBezierPath(rect: rect).fill()
+            }
+        }
+
+        image.unlockFocus()
+        image.isTemplate = true
+        return image
     }
 }
