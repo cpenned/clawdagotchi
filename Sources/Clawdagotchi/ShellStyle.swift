@@ -96,6 +96,17 @@ enum ShellStyle: String, CaseIterable, Sendable {
         }
     }
 
+    var crabColor: Color {
+        switch self {
+        case .clearRetro: Color(white: 0.55)
+        case .salmonPink: Color(red: 0.94, green: 0.56, blue: 0.50)
+        case .hotPink: Color(red: 0.95, green: 0.45, blue: 0.70)
+        case .iceBlue: Color(red: 0.50, green: 0.72, blue: 0.95)
+        case .frost: Color(white: 0.70)
+        case .midnight: Color(red: 0.45, green: 0.35, blue: 0.65)
+        }
+    }
+
     var labelColor: Color {
         switch self {
         case .clearRetro: Color.white.opacity(0.5)

@@ -315,7 +315,7 @@ struct TamagotchiView: View {
     private var crabCharacter: some View {
         CrabView(
             size: 46,
-            color: Color.shellPink,
+            color: style.crabColor,
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking
