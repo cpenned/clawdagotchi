@@ -31,6 +31,7 @@ data = json.dumps({
     "session_id": payload.get("session_id", ""),
     "tool": payload.get("tool_name", ""),
     "tool_input": tool_input,
+    "cwd": payload.get("cwd", ""),
 }).encode()
 
 if EVENT == "PermissionRequest":

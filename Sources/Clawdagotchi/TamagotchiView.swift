@@ -369,7 +369,7 @@ struct TamagotchiView: View {
         Group {
             if state == .permissionNeeded, let perm = pendingPermission {
                 VStack(spacing: 2) {
-                    Text("Allow \(perm.tool)?")
+                    Text(perm.project.isEmpty ? "Allow \(perm.tool)?" : perm.project)
                         .font(.system(size: 6, weight: .bold, design: .monospaced))
                         .foregroundStyle(Color.orange.opacity(0.7))
 
@@ -1066,34 +1066,45 @@ struct InternalsView: View {
 // MARK: - 8-bit pixel poop
 
 struct PixelPoop: View {
+    // Ice cream swirl shape, flat bottom
     private let grid: [[Int]] = [
-        [0,0,1,0,0],
-        [0,1,0,1,0],
-        [0,1,1,1,0],
-        [1,1,1,1,1],
-        [0,1,1,1,0],
+        [0,0,0,1,0,0,0],
+        [0,0,1,1,1,0,0],
+        [0,0,0,1,1,0,0],
+        [0,0,1,1,0,0,0],
+        [0,1,1,1,1,1,0],
+        [0,1,1,1,1,1,0],
+        [1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1],
     ]
 
     var body: some View {
         Canvas { context, size in
-            let px: CGFloat = 2
+            let px: CGFloat = 1.5
             let cols = grid[0].count
             let rows = grid.count
             let ox = (size.width - CGFloat(cols) * px) / 2
-            let oy = (size.height - CGFloat(rows) * px) / 2
+            let oy = size.height - CGFloat(rows) * px
+            let brown = Color(red: 0.45, green: 0.30, blue: 0.18)
             for r in 0..<rows {
                 for c in 0..<cols {
                     if grid[r][c] == 1 {
                         let rect = CGRect(x: ox + CGFloat(c) * px, y: oy + CGFloat(r) * px, width: px, height: px)
-                        context.fill(Path(rect), with: .color(Color(white: 0.4)))
+                        context.fill(Path(rect), with: .color(brown))
                     }
                 }
             }
-            // Steam lines above
-            var s1 = Path(); s1.move(to: CGPoint(x: ox + 2 * px, y: oy - 2)); s1.addLine(to: CGPoint(x: ox + 2 * px + 1, y: oy - 5))
-            context.stroke(s1, with: .color(Color(white: 0.35)), style: StrokeStyle(lineWidth: 0.5))
-            var s2 = Path(); s2.move(to: CGPoint(x: ox + 3 * px, y: oy - 1)); s2.addLine(to: CGPoint(x: ox + 3 * px - 1, y: oy - 4))
-            context.stroke(s2, with: .color(Color(white: 0.35)), style: StrokeStyle(lineWidth: 0.5))
+            // Wavy steam lines
+            let steamX = ox + CGFloat(cols) * px / 2
+            let steamBase = oy - 1
+            for i in 0..<2 {
+                let sx = steamX + CGFloat(i) * 3 - 1.5
+                var steam = Path()
+                steam.move(to: CGPoint(x: sx, y: steamBase))
+                steam.addQuadCurve(to: CGPoint(x: sx, y: steamBase - 5),
+                                   control: CGPoint(x: sx + 2, y: steamBase - 2.5))
+                context.stroke(steam, with: .color(Color(white: 0.35)), style: StrokeStyle(lineWidth: 0.5))
+            }
         }
         .frame(width: 14, height: 16)
     }

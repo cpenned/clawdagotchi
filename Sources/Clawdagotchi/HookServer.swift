@@ -13,6 +13,7 @@ private struct HookPayload: Decodable, Sendable {
     let session_id: String
     let tool: String?
     let tool_input: String?
+    let cwd: String?
 }
 
 struct PendingPermission: Sendable, Identifiable {
@@ -20,6 +21,7 @@ struct PendingPermission: Sendable, Identifiable {
     let sessionId: String
     let tool: String
     let toolInput: String
+    let project: String
     let receivedAt: Date
 }
 
@@ -196,11 +198,13 @@ final class HookServer: @unchecked Sendable {
 
         case "/permission":
             let permId = UUID().uuidString
+            let projectName = payload.cwd.map { URL(fileURLWithPath: $0).lastPathComponent } ?? ""
             let permission = PendingPermission(
                 id: permId,
                 sessionId: payload.session_id,
                 tool: payload.tool ?? "unknown",
                 toolInput: payload.tool_input ?? "",
+                project: projectName,
                 receivedAt: Date()
             )
 
