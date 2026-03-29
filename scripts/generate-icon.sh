@@ -25,11 +25,11 @@ guard let ctx = CGContext(
 ctx.translateBy(x: 0, y: canvas)
 ctx.scaleBy(x: 1, y: -1)
 
-// macOS icon rounded rect background (subtle dark)
+// macOS icon rounded rect background — salmon orange #D97757
 let bgCorner = canvas * 0.22
 let bgPath = CGPath(roundedRect: CGRect(x: 0, y: 0, width: canvas, height: canvas),
                     cornerWidth: bgCorner, cornerHeight: bgCorner, transform: nil)
-ctx.setFillColor(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0, alpha: 1.0)
+ctx.setFillColor(red: 0xD9/255.0, green: 0x77/255.0, blue: 0x57/255.0, alpha: 1.0)
 ctx.addPath(bgPath)
 ctx.fillPath()
 
@@ -76,11 +76,11 @@ ctx.setFillColor(red: 0x08/255.0, green: 0x08/255.0, blue: 0x08/255.0, alpha: 1.
 ctx.fill(CGRect(x: 0, y: 0, width: canvas, height: canvas))
 ctx.restoreGState()
 
-// Translucent pink shell
+// Clear retro shell — neutral/white, low opacity
 ctx.saveGState()
 ctx.addPath(eggPath())
 ctx.clip()
-ctx.setFillColor(red: 0xF0/255.0, green: 0x60/255.0, blue: 0x50/255.0, alpha: 0.45)
+ctx.setFillColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 0.18)
 ctx.fill(CGRect(x: 0, y: 0, width: canvas, height: canvas))
 ctx.restoreGState()
 
@@ -123,7 +123,7 @@ func crabRect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, r: CGFloat
                     width: w * crabScale, height: h * crabScale))
 }
 
-let crabR: CGFloat = 0xD9/255.0, crabG: CGFloat = 0x77/255.0, crabB: CGFloat = 0x57/255.0
+let crabR: CGFloat = 0xD9/255.0, crabG: CGFloat = 0x77/255.0, crabB: CGFloat = 0x57/255.0  // #D97757 orange
 
 // Antennae
 crabRect(0, 13, 6, 13, r: crabR, g: crabG, b: crabB)
