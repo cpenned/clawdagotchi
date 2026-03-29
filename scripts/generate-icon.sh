@@ -35,9 +35,9 @@ ctx.fillPath()
 
 // --- Egg shell ---
 let eggCX = canvas / 2
-let eggCY = canvas * 0.48
-let eggW = canvas * 0.78
-let eggH = canvas * 0.88
+let eggCY = canvas / 2
+let eggW = canvas * 0.62
+let eggH = canvas * 0.72
 
 // Egg shape via bezier — narrower top, wider bottom
 func eggPath() -> CGMutablePath {
