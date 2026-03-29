@@ -331,13 +331,17 @@ struct TamagotchiView: View {
                 angrySteam
             }
 
-            // Poops pile up — pet to clean one at a time
+            // Poops scattered along bottom — pet to clean one at a time
             ForEach(0..<min(poopCount, 5), id: \.self) { i in
+                let positions: [(CGFloat, CGFloat)] = [
+                    (screenWidth / 2 - 16, screenHeight / 2 - 20),
+                    (-screenWidth / 2 + 16, screenHeight / 2 - 22),
+                    (screenWidth / 4, screenHeight / 2 - 18),
+                    (-screenWidth / 4 + 5, screenHeight / 2 - 21),
+                    (0, screenHeight / 2 - 19),
+                ]
                 PixelPoop()
-                    .offset(
-                        x: screenWidth / 2 - 18 - CGFloat(i) * 10,
-                        y: screenHeight / 2 - 22
-                    )
+                    .offset(x: positions[i].0, y: positions[i].1)
             }
 
             screenText
@@ -1097,7 +1101,7 @@ struct PixelPoop: View {
             let rows = grid.count
             let ox = (size.width - CGFloat(cols) * px) / 2
             let oy = size.height - CGFloat(rows) * px
-            let brown = Color(red: 0.45, green: 0.30, blue: 0.18)
+            let brown = AppSettings.shared.activeCrabColor
             for r in 0..<rows {
                 for c in 0..<cols {
                     if grid[r][c] == 1 {
