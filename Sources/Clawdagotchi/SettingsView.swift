@@ -92,6 +92,7 @@ struct SettingsView: View {
     // MARK: - Level Up
 
     @State private var previewLevel: Double = Double(AppSettings.shared.level)
+    @State private var showingResetConfirm: Bool = false
 
     private var levelTab: some View {
         Form {
@@ -179,6 +180,18 @@ struct SettingsView: View {
                     Spacer()
                     Text(nextThresholdText + " XP")
                         .foregroundStyle(.secondary)
+                }
+                Button("Reset Progress", role: .destructive) {
+                    showingResetConfirm = true
+                }
+                .alert("Reset Progress?", isPresented: $showingResetConfirm) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Reset", role: .destructive) {
+                        TamagotchiViewModel.shared?.resetProgress()
+                        previewLevel = 1
+                    }
+                } message: {
+                    Text("This will reset your level to 1 and XP to 0. This cannot be undone.")
                 }
             }
         }

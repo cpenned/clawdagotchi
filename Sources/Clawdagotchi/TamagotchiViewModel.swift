@@ -43,7 +43,7 @@ final class TamagotchiViewModel {
 
     private(set) var justLeveledUp: Bool = false
 
-    static let levelThresholds = [0, 50, 150, 350, 600, 1000, 1500, 2500]
+    static let levelThresholds = [0, 100, 350, 800, 1500, 2500, 4000, 6000]
 
     var currentLevel: Int { AppSettings.shared.level }
     var currentXP: Int { AppSettings.shared.xp }
@@ -299,6 +299,11 @@ final class TamagotchiViewModel {
     }
 
     // MARK: - XP & Level
+
+    func resetProgress() {
+        AppSettings.shared.xp = 0
+        AppSettings.shared.level = 1
+    }
 
     func grantXP(_ amount: Int) {
         AppSettings.shared.xp += amount

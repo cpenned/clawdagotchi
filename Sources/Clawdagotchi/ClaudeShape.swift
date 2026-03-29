@@ -80,15 +80,16 @@ struct CrabView: View {
     @State private var legPhase: Int = 0
     private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
 
-    // Geometry constants — extra headroom for accessories above the crab
-    private let viewW: CGFloat = 66
-    private let viewH: CGFloat = 66  // was 52, added 14 for hats/crown above head
-    private let crabOffsetY: CGFloat = 14  // shift crab body down within viewbox
+    // Geometry constants — extra room for accessories (hats above, sparkles to sides)
+    private let viewW: CGFloat = 82  // 66 + 8 padding each side
+    private let viewH: CGFloat = 72  // 52 + 14 headroom + 6 legroom
+    private let crabOffsetX: CGFloat = 8   // shift crab right to center in wider viewbox
+    private let crabOffsetY: CGFloat = 14  // shift crab down for hat room
 
     var body: some View {
         Canvas { context, canvasSize in
             let scale = size / viewH
-            let xOff = (canvasSize.width - viewW * scale) / 2
+            let xOff = (canvasSize.width - viewW * scale) / 2 + crabOffsetX * scale
             let yOff = (canvasSize.height - viewH * scale) / 2 + crabOffsetY * scale
 
             func r(_ rect: CGRect) -> Path {
