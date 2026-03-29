@@ -9,8 +9,8 @@ struct SettingsView: View {
                 .tabItem { Label("Appearance", systemImage: "paintbrush") }
             soundTab
                 .tabItem { Label("Sound", systemImage: "speaker.wave.2") }
-            helpTab
-                .tabItem { Label("Help", systemImage: "questionmark.circle") }
+            aboutTab
+                .tabItem { Label("About", systemImage: "info.circle") }
         }
         .frame(width: 360, height: 440)
         .padding(.top, 8)
@@ -118,49 +118,50 @@ struct SettingsView: View {
 
     // MARK: - Help
 
-    private var helpTab: some View {
+    private var aboutTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                helpSection("What is Clawdagotchi?",
-                    "A floating desktop pet that reacts to your Claude Code sessions in real-time. " +
-                    "It listens for hook events and shows what Claude is doing as animated crab expressions."
+                aboutSection("What is Clawdagotchi?",
+                    "A floating desktop pet that lives on your screen and reacts to your Claude Code sessions. " +
+                    "It tracks tool usage, permissions, and session activity through Claude Code hooks. " +
+                    "Take care of it — feed it, pet it, and clean up after it!"
                 )
 
-                helpSection("Crab States (Claude Activity)", """
+                aboutSection("Session Tracking", """
                 Idle — gentle bob, periodic blink
-                Thinking — eyes look side to side
-                Working — wide eyes, walking legs
-                Done — happy squish eyes, bounce
-                Permission — alert eyes, pulsing border
+                Thinking — eyes look side to side (PreToolUse)
+                Working — wide eyes, walking legs (PostToolUse)
+                Done — happy squish eyes, bounce (Stop)
+                Permission — alert eyes, approve/deny buttons
+                Buttons glow to show active session count (up to 3).
                 """)
 
-                helpSection("Crab Moods (Idle Behaviors)", """
-                Normal — happy and content
-                Sleeping — eyes close, zzz rises (2 min idle)
-                Hungry — small eyes, trembles (5 min unfed)
-                Angry — wide glare, still (8 min no interaction)
-                Pooping — squish face, "oops" (random)
-                Any button press or Claude event wakes it up!
+                aboutSection("Pet Care", """
+                Feed (middle button) — restores hunger bar
+                Pet (right button) — restores happiness, cleans poop
+                Poke (left button) — restores happiness, wakes up
+                Hunger and happiness drain over time.
+                Poops accumulate every ~15 min — pet to clean!
                 """)
 
-                helpSection("Buttons (Normal Mode)", """
-                Left — Poke (surprised jump, "hey! >_<")
-                Middle — Feed (nom nom eating)
-                Right — Pet (happy walk, "~ happy ~")
-                Buttons glow pink per active session count.
+                aboutSection("Moods", """
+                Sleeping — eyes close, zzz (after 2 min idle)
+                Hungry — small eyes, trembles (hunger bar low)
+                Angry — wide glare (happiness empty)
+                Pooping — squish face, leaves a mess
                 """)
 
-                helpSection("Buttons (Permission Mode)", """
-                Left (red) — Deny the permission
-                Middle (orange) — Info
-                Right (green) — Allow the permission
-                Screen scrolls what the tool wants to do.
+                aboutSection("Permissions", """
+                When Claude Code needs approval, the screen shows the project name and tool details.
+                Left button (red) = Deny
+                Right button (green) = Allow
+                Permissions auto-clear after 30s if handled in terminal.
                 """)
 
-                helpSection("Setup", """
-                1. Build: bash build_app.sh
-                2. Install hooks: bash install_hooks.sh
-                3. Use Claude Code normally — the crab reacts!
+                aboutSection("Setup", """
+                1. Run: bash install_hooks.sh
+                2. Launch the app
+                3. Use Claude Code — the crab reacts!
                 """)
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -177,13 +178,16 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                HStack {
-                    Spacer()
+                VStack(spacing: 4) {
                     Text("Clawdagotchi v2.0.0")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
-                    Spacer()
+                    Text("An independent fan project. Not affiliated with, sponsored by, or endorsed by Anthropic.")
+                        .font(.caption2)
+                        .foregroundStyle(.quaternary)
+                        .multilineTextAlignment(.center)
                 }
+                .frame(maxWidth: .infinity)
             }
             .padding()
         }
@@ -197,7 +201,7 @@ struct SettingsView: View {
         .controlSize(.small)
     }
 
-    private func helpSection(_ title: String, _ body: String) -> some View {
+    private func aboutSection(_ title: String, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.headline)
