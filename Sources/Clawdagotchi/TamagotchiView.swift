@@ -365,17 +365,16 @@ struct TamagotchiView: View {
     }
 
     private var statusBars: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 0) {
+            PixelStatBar(value: hunger, sfSymbol: "fork.knife")
+            Spacer()
             Text(AppSettings.shared.botName)
                 .font(.system(size: 5, weight: .bold, design: .monospaced))
                 .foregroundStyle(Color.white.opacity(0.25))
-
             Spacer()
-
-            PixelStatBar(value: hunger, sfSymbol: "fork.knife")
             PixelStatBar(value: happiness, sfSymbol: "heart.fill")
         }
-        .frame(width: screenWidth - 12)
+        .frame(width: screenWidth - 10)
     }
 
     private var screenText: some View {
@@ -1159,7 +1158,7 @@ struct PixelAnger: View {
 struct PixelStatBar: View {
     let value: Double
     let sfSymbol: String
-    private let segments = 4
+    private let segments = 3
     private let barColor = Color.white.opacity(0.30)
     private let emptyColor = Color.white.opacity(0.06)
 
