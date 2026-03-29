@@ -44,35 +44,19 @@ struct SettingsView: View {
                         Image(systemName: "speaker.wave.3.fill")
                             .foregroundStyle(.secondary)
                     }
-                    Button("Test Sound") {
-                        SoundManager.shared.play(.sessionDone)
-                    }
                 }
             }
 
             if settings.soundEnabled {
-                Section("When sounds play") {
-                    soundRow("Permission requested", "Funk chime")
-                    soundRow("Permission approved", "Pop")
-                    soundRow("Permission denied", "Basso")
-                    soundRow("Session complete", "Glass ding")
-                    soundRow("Poke the crab", "Frog squeak")
-                    soundRow("Pet the crab", "Purr")
+                Section("Sounds per action") {
+                    ForEach(SoundAction.allCases, id: \.rawValue) { action in
+                        SoundPickerRow(action: action)
+                    }
                 }
             }
         }
         .formStyle(.grouped)
         .padding()
-    }
-
-    private func soundRow(_ event: String, _ sound: String) -> some View {
-        HStack {
-            Text(event)
-            Spacer()
-            Text(sound)
-                .foregroundStyle(.secondary)
-                .font(.caption)
-        }
     }
 
     // MARK: - Help
@@ -133,6 +117,33 @@ struct SettingsView: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+struct SoundPickerRow: View {
+    let action: SoundAction
+    @State private var selected: String
+
+    init(action: SoundAction) {
+        self.action = action
+        self._selected = State(initialValue: SoundManager.shared.soundName(for: action))
+    }
+
+    var body: some View {
+        HStack {
+            Text(action.label)
+            Spacer()
+            Picker("", selection: $selected) {
+                ForEach(availableSounds, id: \.self) { name in
+                    Text(name).tag(name)
+                }
+            }
+            .frame(width: 120)
+            .onChange(of: selected) { _, newValue in
+                SoundManager.shared.setSoundName(newValue, for: action)
+                SoundManager.shared.preview(newValue)
+            }
         }
     }
 }
