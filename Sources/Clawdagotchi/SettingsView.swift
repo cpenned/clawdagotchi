@@ -84,9 +84,39 @@ struct SettingsView: View {
             Section("Seasonal") {
                 Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
                 if let seasonal = CrabAccessory.seasonalAccessory() {
-                    Text("Current: \(seasonal)")
+                    Text("Active now: \(seasonal)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else {
+                    Text("No seasonal event right now")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+
+                Picker("Preview", selection: $previewSeasonal) {
+                    Text("None").tag(Optional<CrabAccessory>.none)
+                    Text("Santa Hat (Dec)").tag(Optional<CrabAccessory>.some(.santaHat))
+                    Text("Pumpkin (Oct)").tag(Optional<CrabAccessory>.some(.pumpkin))
+                    Text("Bunny Ears (Apr)").tag(Optional<CrabAccessory>.some(.bunnyEars))
+                    Text("Heart (Feb)").tag(Optional<CrabAccessory>.some(.heartBow))
+                    Text("Confetti (Jan 1)").tag(Optional<CrabAccessory>.some(.partyPopper))
+                }
+                .pickerStyle(.menu)
+
+                if previewSeasonal != nil {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.screenDark)
+                            .frame(height: 80)
+                        CrabView(
+                            size: 40,
+                            color: AppSettings.shared.activeCrabColor,
+                            eyeColor: Color.screenDark,
+                            eyeStyle: .normal,
+                            accessories: seasonalPreviewAccessories,
+                            accessoryColor: .white
+                        )
+                    }
                 }
             }
 
@@ -101,7 +131,6 @@ struct SettingsView: View {
 
             Section("Visibility") {
                 Toggle("Show in Dock", isOn: $settings.showDockIcon)
-                Toggle("Show menubar icon", isOn: $settings.showMenubarIcon)
                 Toggle("Show floating widget", isOn: $settings.showWidget)
             }
         }
@@ -113,6 +142,17 @@ struct SettingsView: View {
 
     @State private var previewLevel: Double = Double(AppSettings.shared.level)
     @State private var showingResetConfirm: Bool = false
+    @State private var previewSeasonal: CrabAccessory? = nil
+
+    private var seasonalPreviewAccessories: [CrabAccessory] {
+        var items = CrabAccessory.allUnlocked(for: AppSettings.shared.level, seasonalEnabled: false)
+        if let seasonal = previewSeasonal {
+            // Replace head slot with seasonal
+            items.removeAll { [.partyHat, .topHat, .crown].contains($0) }
+            items.append(seasonal)
+        }
+        return items
+    }
 
     private var levelTab: some View {
         Form {

@@ -22,9 +22,6 @@ final class AppSettings {
     var showDockIcon: Bool {
         didSet { UserDefaults.standard.set(showDockIcon, forKey: "showDockIcon"); applyDockPolicy() }
     }
-    var showMenubarIcon: Bool {
-        didSet { UserDefaults.standard.set(showMenubarIcon, forKey: "showMenubarIcon") }
-    }
     var showWidget: Bool {
         didSet { UserDefaults.standard.set(showWidget, forKey: "showWidget") }
     }
@@ -104,7 +101,6 @@ final class AppSettings {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [
             "showDockIcon": false,
-            "showMenubarIcon": true,
             "showWidget": true,
             "soundEnabled": true,
             "soundVolume": Float(0.5),
@@ -129,7 +125,6 @@ final class AppSettings {
             "totalPoopsCleaned": 0,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
-        self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
         self.showWidget = defaults.bool(forKey: "showWidget")
         self.soundEnabled = defaults.bool(forKey: "soundEnabled")
         self.soundVolume = defaults.float(forKey: "soundVolume")
