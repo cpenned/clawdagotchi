@@ -21,6 +21,8 @@ struct TamagotchiView: View {
     @State private var scrollMessage: String = ""
     @State private var scrollOffset: CGFloat = 0
     @State private var showScrollMessage: Bool = false
+    @State private var permScrollOffset: CGFloat = 0
+    @State private var permScrollTimer: Task<Void, Never>?
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -329,19 +331,27 @@ struct TamagotchiView: View {
     private var screenText: some View {
         Group {
             if state == .permissionNeeded, let perm = pendingPermission {
-                VStack(spacing: 1) {
-                    Text(perm.tool)
-                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                VStack(spacing: 2) {
+                    Text("Allow \(perm.tool)?")
+                        .font(.system(size: 6, weight: .bold, design: .monospaced))
                         .foregroundStyle(Color.orange.opacity(0.7))
+
+                    // Scrolling detail of what's being requested
+                    Text(permissionDetailText(perm))
+                        .font(.system(size: 5, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.white.opacity(0.3))
+                        .fixedSize()
+                        .offset(x: permScrollOffset)
+
                     if pendingPermissionCount > 1 {
                         Text("1 of \(pendingPermissionCount)")
                             .font(.system(size: 5, weight: .medium, design: .monospaced))
-                            .foregroundStyle(Color.white.opacity(0.2))
-                    } else {
-                        Text("Allow?")
-                            .font(.system(size: 6, weight: .medium, design: .monospaced))
-                            .foregroundStyle(Color.white.opacity(0.3))
+                            .foregroundStyle(Color.white.opacity(0.15))
                     }
+                }
+                .onAppear { startPermissionScroll(perm) }
+                .onChange(of: perm.id) { _, _ in
+                    if let p = pendingPermission { startPermissionScroll(p) }
                 }
             } else if showScrollMessage {
                 Text(scrollMessage)
@@ -359,13 +369,49 @@ struct TamagotchiView: View {
         .clipped()
     }
 
+    private func permissionDetailText(_ perm: PendingPermission) -> String {
+        if perm.toolInput.isEmpty { return perm.tool }
+        return perm.toolInput
+    }
+
+    private func startPermissionScroll(_ perm: PendingPermission) {
+        permScrollTimer?.cancel()
+        permScrollOffset = 0
+
+        let text = permissionDetailText(perm)
+        // Approximate: 3.5px per character at size 5 monospaced
+        let textWidth = CGFloat(text.count) * 3.5
+        let available = screenWidth - 20
+
+        guard textWidth > available else { return }
+
+        permScrollTimer = Task { @MainActor in
+            while !Task.isCancelled {
+                permScrollOffset = available / 2 + 10
+                withAnimation(.linear(duration: max(2.0, Double(text.count) * 0.08))) {
+                    permScrollOffset = -(textWidth + 10)
+                }
+                try? await Task.sleep(for: .seconds(max(2.5, Double(text.count) * 0.08 + 0.5)))
+            }
+        }
+    }
+
     private func showMarquee(_ message: String) {
         scrollMessage = message
-        scrollOffset = screenWidth / 2 + 20
         showScrollMessage = true
-        withAnimation(.linear(duration: 2.0)) {
-            scrollOffset = -(screenWidth / 2 + 20)
+
+        let textWidth = CGFloat(message.count) * 4.0
+        let available = screenWidth - 20
+
+        if textWidth > available {
+            scrollOffset = screenWidth / 2 + 20
+            withAnimation(.linear(duration: 2.0)) {
+                scrollOffset = -(screenWidth / 2 + 20)
+            }
+        } else {
+            scrollOffset = 0
         }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             showScrollMessage = false
         }
@@ -475,6 +521,8 @@ struct TamagotchiView: View {
         eyeOffset = 0
         currentEyeStyle = .normal
         permissionPulse = false
+        permScrollTimer?.cancel()
+        permScrollOffset = 0
     }
 
     private func startAnimations(for petState: PetState) {
