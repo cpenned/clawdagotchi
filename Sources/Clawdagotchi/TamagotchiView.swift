@@ -428,7 +428,7 @@ struct TamagotchiView: View {
             accessories: CrabAccessory.allUnlocked(for: level),
             accessoryColor: .white
         )
-        .offset(y: bobOffset)
+        .offset(y: bobOffset + 4)
     }
 
     private var levelDots: some View {

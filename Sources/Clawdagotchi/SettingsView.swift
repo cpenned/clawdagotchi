@@ -7,12 +7,14 @@ struct SettingsView: View {
         TabView {
             appearanceTab
                 .tabItem { Label("Appearance", systemImage: "paintbrush") }
+            levelTab
+                .tabItem { Label("Level Up", systemImage: "star.fill") }
             soundTab
                 .tabItem { Label("Sound", systemImage: "speaker.wave.2") }
             aboutTab
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        .frame(width: 360, height: 440)
+        .frame(width: 360, height: 500)
         .padding(.top, 8)
     }
 
@@ -81,6 +83,103 @@ struct SettingsView: View {
                 Toggle("Show in Dock", isOn: $settings.showDockIcon)
                 Toggle("Show menubar icon", isOn: $settings.showMenubarIcon)
                 Toggle("Show floating widget", isOn: $settings.showWidget)
+            }
+        }
+        .formStyle(.grouped)
+        .padding()
+    }
+
+    // MARK: - Level Up
+
+    @State private var previewLevel: Double = Double(AppSettings.shared.level)
+
+    private var levelTab: some View {
+        Form {
+            Section("Preview Levels") {
+                VStack(spacing: 12) {
+                    // Crab preview
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.screenDark)
+                            .frame(height: 100)
+
+                        CrabView(
+                            size: 50,
+                            color: AppSettings.shared.activeCrabColor,
+                            eyeColor: Color.screenDark,
+                            eyeStyle: .normal,
+                            accessories: CrabAccessory.allUnlocked(for: Int(previewLevel)),
+                            accessoryColor: .white
+                        )
+                    }
+
+                    // Level slider
+                    HStack {
+                        Text("LV 1")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Slider(value: $previewLevel, in: 1...8, step: 1)
+                        Text("LV 8")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Level info
+                    let lvl = Int(previewLevel)
+                    let acc = CrabAccessory.forLevel(lvl)
+                    let threshold = lvl <= TamagotchiViewModel.levelThresholds.count
+                        ? (lvl > 1 ? TamagotchiViewModel.levelThresholds[lvl - 1] : 0)
+                        : TamagotchiViewModel.levelThresholds.last!
+                    let unlocked = lvl <= AppSettings.shared.level
+
+                    VStack(spacing: 4) {
+                        Text("Level \(lvl)")
+                            .font(.headline)
+
+                        if acc != .none {
+                            Text("Unlocks: \(acc)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("Requires: \(threshold) XP")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        if unlocked {
+                            Text("Unlocked!")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        } else {
+                            let remaining = threshold - AppSettings.shared.xp
+                            Text("\(remaining) XP to go")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section("Current Progress") {
+                HStack {
+                    Text("Level")
+                    Spacer()
+                    Text("\(AppSettings.shared.level)")
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Total XP")
+                    Spacer()
+                    Text("\(AppSettings.shared.xp)")
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Next level")
+                    Spacer()
+                    Text(nextThresholdText + " XP")
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .formStyle(.grouped)
