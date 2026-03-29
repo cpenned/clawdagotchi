@@ -34,6 +34,8 @@ final class TamagotchiViewModel {
     private(set) var moodState: MoodState = .normal
     private(set) var greetingMessage: String = ""
     private(set) var poopCount: Int = 0
+    private(set) var hunger: Double = 1.0     // 1.0 = full, 0.0 = starving
+    private(set) var happiness: Double = 1.0  // 1.0 = happy, 0.0 = miserable
 
     private(set) var permissionQueue: [PendingPermission] = []
     var pendingPermission: PendingPermission? { permissionQueue.first }
@@ -110,6 +112,12 @@ final class TamagotchiViewModel {
     }
 
     private func updateMood() {
+        // Stats decay over time (every 30s tick)
+        // Hunger drains ~1% per 30s = empty in ~50 min
+        // Happiness drains ~0.8% per 30s = empty in ~62 min
+        hunger = max(0, hunger - 0.02)
+        happiness = max(0, happiness - 0.016)
+
         guard displayState == .idle else {
             if moodState != .normal {
                 withAnimation { moodState = .normal }
@@ -142,9 +150,9 @@ final class TamagotchiViewModel {
         }
 
         let newMood: MoodState
-        if sinceInteraction > 480 {
+        if happiness <= 0 {
             newMood = .angry
-        } else if sinceFed > 300 {
+        } else if hunger <= 0.15 {
             newMood = .hungry
         } else if sinceInteraction > 120 {
             newMood = .sleeping
@@ -184,6 +192,7 @@ final class TamagotchiViewModel {
     func pokeCrab() {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
+        happiness = min(1, happiness + 0.15)
 
         // Poke clears: angry, sleeping
         if moodState == .angry || moodState == .sleeping {
@@ -204,6 +213,7 @@ final class TamagotchiViewModel {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
         lastFedTime = Date()
+        hunger = min(1, hunger + 0.35)
 
         // Feed clears: hungry, sleeping
         if moodState == .hungry || moodState == .sleeping {
@@ -223,6 +233,7 @@ final class TamagotchiViewModel {
     func petCrab() {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
+        happiness = min(1, happiness + 0.25)
 
         // Pet clears: one poop, sleeping
         if poopCount > 0 {

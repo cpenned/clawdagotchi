@@ -14,6 +14,8 @@ struct ContentView: View {
             sessionCount: viewModel.activeSessionCount,
             pendingPermission: viewModel.pendingPermission,
             pendingPermissionCount: viewModel.pendingPermissionCount,
+            hunger: viewModel.hunger,
+            happiness: viewModel.happiness,
             moodState: viewModel.moodState,
             poopCount: viewModel.poopCount,
             greetingMessage: viewModel.greetingMessage,

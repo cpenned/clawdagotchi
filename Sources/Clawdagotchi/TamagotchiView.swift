@@ -5,6 +5,8 @@ struct TamagotchiView: View {
     let sessionCount: Int
     let pendingPermission: PendingPermission?
     let pendingPermissionCount: Int
+    let hunger: Double
+    let happiness: Double
     let moodState: MoodState
     let poopCount: Int
     let greetingMessage: String
@@ -314,8 +316,8 @@ struct TamagotchiView: View {
             PixelGridOverlay()
                 .clipShape(RoundedRectangle(cornerRadius: 5))
 
-            botNameLabel
-                .offset(y: -(screenHeight / 2 - 12))
+            statusBars
+                .offset(y: -(screenHeight / 2 - 10))
 
             crabCharacter
 
@@ -362,10 +364,21 @@ struct TamagotchiView: View {
         .offset(y: bobOffset)
     }
 
-    private var botNameLabel: some View {
-        Text(AppSettings.shared.botName)
-            .font(.system(size: 7, weight: .medium, design: .monospaced))
-            .foregroundStyle(Color.white.opacity(0.2))
+    private var statusBars: some View {
+        HStack(spacing: 4) {
+            Text(AppSettings.shared.botName)
+                .font(.system(size: 5, weight: .bold, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.25))
+
+            Spacer()
+
+            // Hunger bar
+            PixelStatBar(value: hunger, icon: "\u{2665}", color: Color(red: 0.9, green: 0.4, blue: 0.3))
+
+            // Happiness bar
+            PixelStatBar(value: happiness, icon: "\u{2606}", color: Color(red: 0.3, green: 0.7, blue: 0.9))
+        }
+        .frame(width: screenWidth - 12)
     }
 
     private var screenText: some View {
@@ -1141,6 +1154,29 @@ struct PixelAnger: View {
             }
         }
         .frame(width: 14, height: 14)
+    }
+}
+
+// MARK: - Pixel stat bar
+
+struct PixelStatBar: View {
+    let value: Double  // 0.0 to 1.0
+    let icon: String
+    let color: Color
+    private let segments = 4
+
+    var body: some View {
+        HStack(spacing: 1) {
+            Text(icon)
+                .font(.system(size: 5))
+                .foregroundStyle(color.opacity(0.6))
+            ForEach(0..<segments, id: \.self) { i in
+                let filled = value > Double(i) / Double(segments)
+                Rectangle()
+                    .fill(filled ? color.opacity(0.7) : Color.white.opacity(0.08))
+                    .frame(width: 5, height: 4)
+            }
+        }
     }
 }
 

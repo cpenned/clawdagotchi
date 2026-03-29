@@ -7,7 +7,7 @@ struct ClawdagotchiApp: App {
     @State private var viewModel = TamagotchiViewModel()
 
     var body: some Scene {
-        WindowGroup {
+        Window("Clawdagotchi", id: "main") {
             ContentView(viewModel: viewModel)
                 .background(WindowConfigurator(hasPermissionPending: viewModel.pendingPermission != nil))
                 .onAppear { viewModel.start() }
@@ -16,6 +16,7 @@ struct ClawdagotchiApp: App {
         .windowStyle(.plain)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 270, height: 330)
+        .commandsRemoved()
 
         Settings {
             SettingsView()
