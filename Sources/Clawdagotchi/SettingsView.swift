@@ -408,6 +408,15 @@ XP: \(AppSettings.shared.xp) / \(nextThresholdText)
                         .foregroundStyle(.secondary)
                 }
 
+                aboutSection("Your Crab", """
+Born: \(AppSettings.shared.birthDateFormatted)
+Age: \(AppSettings.shared.ageInDays) days
+""")
+
+                Button("Export Screenshot...") {
+                    ScreenshotExporter.export()
+                }
+
                 VStack(spacing: 8) {
                     Button("Check for Updates...") {
                         UpdateChecker.shared.checkNow()

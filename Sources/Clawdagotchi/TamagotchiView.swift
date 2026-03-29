@@ -1224,8 +1224,8 @@ struct PixelAnger: View {
 struct PixelStatBar: View {
     let value: Double
     let sfSymbol: String
-    private let segments = 3
-    private let barColor = Color.white.opacity(0.30)
+    private let segments = 5
+    private let filledColor = Color.white.opacity(0.30)
     private let emptyColor = Color.white.opacity(0.06)
 
     var body: some View {
@@ -1235,12 +1235,12 @@ struct PixelStatBar: View {
                 .scaledToFit()
                 .frame(width: 6, height: 6)
                 .foregroundStyle(AppSettings.shared.activeCrabColor.opacity(0.7))
-            HStack(spacing: 1) {
+            HStack(spacing: 2) {
                 ForEach(0..<segments, id: \.self) { i in
                     let filled = value > Double(i) / Double(segments)
-                    Rectangle()
-                        .fill(filled ? barColor : emptyColor)
-                        .frame(width: 5, height: 3)
+                    Circle()
+                        .fill(filled ? filledColor : emptyColor)
+                        .frame(width: 3, height: 3)
                 }
             }
         }

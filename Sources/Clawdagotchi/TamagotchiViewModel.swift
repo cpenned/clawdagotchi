@@ -136,6 +136,11 @@ final class TamagotchiViewModel {
         let today = Self.todayString()
         let settings = AppSettings.shared
 
+        // Set birth date on first ever launch
+        if AppSettings.shared.birthDate.isEmpty {
+            AppSettings.shared.birthDate = Self.todayString()
+        }
+
         if settings.lastLoginDate == today {
             return
         }
@@ -156,6 +161,17 @@ final class TamagotchiViewModel {
 
         if settings.streak > 1 {
             greetingMessage = "\(Self.timeOfDayGreeting()) \(settings.streak) day streak!"
+        }
+
+        // Check for birthday
+        let birth = AppSettings.shared.birthDate
+        if !birth.isEmpty {
+            let birthMD = String(birth.dropFirst(5))  // "MM-dd"
+            let todayMD = String(Self.todayString().dropFirst(5))
+            if birthMD == todayMD && AppSettings.shared.ageInDays > 0 {
+                greetingMessage = "happy birthday, \(AppSettings.shared.botName)!"
+                grantXP(50)
+            }
         }
     }
 

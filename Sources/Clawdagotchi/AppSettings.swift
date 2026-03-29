@@ -66,6 +66,9 @@ final class AppSettings {
     var lastLoginDate: String {
         didSet { UserDefaults.standard.set(lastLoginDate, forKey: "lastLoginDate") }
     }
+    var birthDate: String {
+        didSet { UserDefaults.standard.set(birthDate, forKey: "birthDate") }
+    }
 
     // Lifetime stats
     var totalSessions: Int {
@@ -115,6 +118,7 @@ final class AppSettings {
             "seasonalAccessories": true,
             "streak": 0,
             "lastLoginDate": "",
+            "birthDate": "",
             "totalSessions": 0,
             "totalToolUses": 0,
             "totalPermissionsApproved": 0,
@@ -139,6 +143,7 @@ final class AppSettings {
         self.seasonalAccessories = defaults.bool(forKey: "seasonalAccessories")
         self.streak = defaults.integer(forKey: "streak")
         self.lastLoginDate = defaults.string(forKey: "lastLoginDate") ?? ""
+        self.birthDate = defaults.string(forKey: "birthDate") ?? ""
         self.totalSessions = defaults.integer(forKey: "totalSessions")
         self.totalToolUses = defaults.integer(forKey: "totalToolUses")
         self.totalPermissionsApproved = defaults.integer(forKey: "totalPermissionsApproved")
@@ -147,6 +152,24 @@ final class AppSettings {
         self.totalFeeds = defaults.integer(forKey: "totalFeeds")
         self.totalPets = defaults.integer(forKey: "totalPets")
         self.totalPoopsCleaned = defaults.integer(forKey: "totalPoopsCleaned")
+    }
+
+    var birthDateFormatted: String {
+        guard !birthDate.isEmpty else { return "Unknown" }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let date = f.date(from: birthDate) else { return birthDate }
+        let display = DateFormatter()
+        display.dateStyle = .long
+        return display.string(from: date)
+    }
+
+    var ageInDays: Int {
+        guard !birthDate.isEmpty else { return 0 }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let date = f.date(from: birthDate) else { return 0 }
+        return Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
     }
 
     func applyDockPolicy() {
