@@ -377,6 +377,9 @@ struct TamagotchiView: View {
             statusBars
                 .offset(y: -(screenHeight / 2 - 10))
 
+            levelDots
+                .offset(y: -(screenHeight / 2 - 19))
+
             crabCharacter
 
             // Rising zzz when sleeping
@@ -426,6 +429,16 @@ struct TamagotchiView: View {
             accessoryColor: .white
         )
         .offset(y: bobOffset)
+    }
+
+    private var levelDots: some View {
+        HStack(spacing: 2) {
+            ForEach(1...8, id: \.self) { i in
+                Circle()
+                    .fill(i <= level ? Color.white.opacity(0.3) : Color.white.opacity(0.06))
+                    .frame(width: 3, height: 3)
+            }
+        }
     }
 
     private var statusBars: some View {
