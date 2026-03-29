@@ -19,8 +19,8 @@ enum ShellStyle: String, CaseIterable, Sendable {
     var tintColor: Color {
         switch self {
         case .clearRetro: Color(white: 0.85)
-        case .salmonPink: Color(red: 0.94, green: 0.56, blue: 0.50)
-        case .iceBlue: Color(red: 0.55, green: 0.75, blue: 0.92)
+        case .salmonPink: Color(red: 0.98, green: 0.42, blue: 0.35)
+        case .iceBlue: Color(red: 0.30, green: 0.65, blue: 0.98)
         case .midnight: Color(white: 0.25)
         }
     }
@@ -29,8 +29,8 @@ enum ShellStyle: String, CaseIterable, Sendable {
     var tintOpacity: CGFloat {
         switch self {
         case .clearRetro: 0.18
-        case .salmonPink: 0.42
-        case .iceBlue: 0.35
+        case .salmonPink: 0.50
+        case .iceBlue: 0.45
         case .midnight: 0.55
         }
     }
@@ -39,8 +39,8 @@ enum ShellStyle: String, CaseIterable, Sendable {
     var highlightColor: Color {
         switch self {
         case .clearRetro: Color(white: 0.95)
-        case .salmonPink: Color(red: 0.98, green: 0.72, blue: 0.66)
-        case .iceBlue: Color(red: 0.75, green: 0.88, blue: 0.98)
+        case .salmonPink: Color(red: 1.0, green: 0.55, blue: 0.48)
+        case .iceBlue: Color(red: 0.50, green: 0.78, blue: 1.0)
         case .midnight: Color(white: 0.40)
         }
     }
@@ -49,8 +49,8 @@ enum ShellStyle: String, CaseIterable, Sendable {
     var shadowColor: Color {
         switch self {
         case .clearRetro: Color(white: 0.60)
-        case .salmonPink: Color(red: 0.78, green: 0.40, blue: 0.34)
-        case .iceBlue: Color(red: 0.35, green: 0.55, blue: 0.72)
+        case .salmonPink: Color(red: 0.82, green: 0.28, blue: 0.22)
+        case .iceBlue: Color(red: 0.15, green: 0.42, blue: 0.78)
         case .midnight: Color(white: 0.12)
         }
     }
