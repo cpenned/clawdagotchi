@@ -15,7 +15,7 @@ struct ClawdagotchiApp: App {
         }
         .windowStyle(.plain)
         .windowResizability(.contentMinSize)
-        .defaultSize(width: 250, height: 310)
+        .defaultSize(width: 270, height: 330)
 
         Settings {
             SettingsView()

@@ -5,7 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let scale = min(geo.size.width / 250, geo.size.height / 310)
+            let scale = min(geo.size.width / 270, geo.size.height / 330)
             TamagotchiView(
                 state: viewModel.displayState,
                 sessionCount: viewModel.activeSessionCount,

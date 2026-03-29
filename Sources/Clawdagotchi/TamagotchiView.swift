@@ -21,7 +21,7 @@ struct TamagotchiView: View {
     private let eggHeight: CGFloat = 250
     private let screenWidth: CGFloat = 110
     private let screenHeight: CGFloat = 90
-    private let padding: CGFloat = 30
+    private let padding: CGFloat = 40
 
     private var style: ShellStyle { AppSettings.shared.shellStyle }
 
