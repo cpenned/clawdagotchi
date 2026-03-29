@@ -630,8 +630,10 @@ struct TamagotchiView: View {
     private func applyMoodAnimation(_ mood: MoodState) {
         switch mood {
         case .sleeping:
+            animGeneration += 1
             blinkTimer?.cancel()
-            withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .blink }
+            currentEyeStyle = .blink
+            bobOffset = 0
             withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
                 bobOffset = 2
             }
