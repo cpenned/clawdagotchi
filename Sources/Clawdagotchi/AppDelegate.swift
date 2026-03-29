@@ -5,6 +5,7 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppSettings.shared.applyDockPolicy()
+        UpdateChecker.shared.checkOnLaunch()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
