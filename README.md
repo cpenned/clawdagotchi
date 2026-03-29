@@ -29,6 +29,12 @@
 
 Download the latest `.dmg` from [Releases](https://github.com/cpenned/clawdagotchi/releases), open it, and drag Clawdagotchi to Applications.
 
+> **macOS Gatekeeper warning:** Since the app isn't notarized with an Apple Developer ID, macOS may block it on first launch. To fix, run:
+> ```bash
+> xattr -cr /Applications/Clawdagotchi.app
+> ```
+> Then open the app normally. This only needs to be done once.
+
 Or build from source:
 
 ```bash
