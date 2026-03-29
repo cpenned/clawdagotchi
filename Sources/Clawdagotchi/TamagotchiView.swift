@@ -18,6 +18,9 @@ struct TamagotchiView: View {
     @State private var animGeneration: Int = 0
     @State private var blinkTimer: Task<Void, Never>?
     @State private var permissionPulse: Bool = false
+    @State private var scrollMessage: String = ""
+    @State private var scrollOffset: CGFloat = 0
+    @State private var showScrollMessage: Bool = false
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -340,11 +343,31 @@ struct TamagotchiView: View {
                             .foregroundStyle(Color.white.opacity(0.3))
                     }
                 }
+            } else if showScrollMessage {
+                Text(scrollMessage)
+                    .font(.system(size: 6, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.35))
+                    .fixedSize()
+                    .offset(x: scrollOffset)
             } else {
                 Text(stateLabelText)
                     .font(.system(size: 7, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color.white.opacity(0.2))
             }
+        }
+        .frame(width: screenWidth - 10, alignment: .center)
+        .clipped()
+    }
+
+    private func showMarquee(_ message: String) {
+        scrollMessage = message
+        scrollOffset = screenWidth / 2 + 20
+        showScrollMessage = true
+        withAnimation(.linear(duration: 2.0)) {
+            scrollOffset = -(screenWidth / 2 + 20)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            showScrollMessage = false
         }
     }
 
@@ -484,6 +507,7 @@ struct TamagotchiView: View {
     private func applyFunReaction(_ reaction: TamagotchiViewModel.FunReaction) {
         switch reaction {
         case .poke:
+            showMarquee("hey! >_<")
             withAnimation(.spring(response: 0.2, dampingFraction: 0.3)) { bobOffset = -10; currentEyeStyle = .wide }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { bobOffset = 0; currentEyeStyle = .squish }
@@ -492,10 +516,11 @@ struct TamagotchiView: View {
                 withAnimation { currentEyeStyle = .normal }
             }
         case .pet:
+            showMarquee("~ happy ~")
             withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .squish }
 
         case .feed:
-            // Nom nom — blink eyes rapidly while bobbing (eating animation)
+            showMarquee("nom nom nom")
             Task { @MainActor in
                 for _ in 0..<4 {
                     withAnimation(.easeInOut(duration: 0.1)) { currentEyeStyle = .blink; bobOffset = -3 }
