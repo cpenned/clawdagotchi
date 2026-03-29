@@ -6,6 +6,7 @@ struct TamagotchiView: View {
     let pendingPermission: PendingPermission?
     let pendingPermissionCount: Int
     let moodState: MoodState
+    let showPoop: Bool
     let greetingMessage: String
     let funReaction: TamagotchiViewModel.FunReaction?
     var onApprove: () -> Void = {}
@@ -29,6 +30,9 @@ struct TamagotchiView: View {
     @State private var zzzOpacity: Double = 0
     @State private var zzzTimer: Task<Void, Never>?
     @State private var hasShownGreeting: Bool = false
+    @State private var angrySteamOffset: CGFloat = 0
+    @State private var angrySteamOpacity: Double = 0
+    @State private var angrySteamTimer: Task<Void, Never>?
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -320,6 +324,18 @@ struct TamagotchiView: View {
                 risingZzz
             }
 
+            // Angry steam
+            if moodState == .angry {
+                angrySteam
+            }
+
+            // Poop stays until pet
+            if showPoop {
+                Text("\u{1F4A9}")
+                    .font(.system(size: 10))
+                    .offset(x: screenWidth / 2 - 18, y: screenHeight / 2 - 20)
+            }
+
             screenText
                 .offset(y: screenHeight / 2 - 12)
 
@@ -485,6 +501,35 @@ struct TamagotchiView: View {
         }
     }
 
+    // MARK: - Angry steam animation
+
+    private var angrySteam: some View {
+        Text("\u{1F4A2}")
+            .font(.system(size: 8))
+            .opacity(angrySteamOpacity)
+            .offset(x: -18, y: -20 + angrySteamOffset)
+    }
+
+    private func startAngrySteamAnimation() {
+        angrySteamTimer?.cancel()
+        angrySteamTimer = Task { @MainActor in
+            while !Task.isCancelled {
+                angrySteamOffset = 0
+                angrySteamOpacity = 0.8
+                withAnimation(.easeOut(duration: 1.5)) {
+                    angrySteamOffset = -15
+                    angrySteamOpacity = 0
+                }
+                try? await Task.sleep(for: .seconds(3.0))
+            }
+        }
+    }
+
+    private func stopAngrySteamAnimation() {
+        angrySteamTimer?.cancel()
+        angrySteamOpacity = 0
+    }
+
     private func stopZzzAnimation() {
         zzzTimer?.cancel()
         zzzOpacity = 0
@@ -504,8 +549,8 @@ struct TamagotchiView: View {
 
         case .hungry:
             stopZzzAnimation()
+            stopAngrySteamAnimation()
             withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .tiny }
-            // Slight tremble
             withAnimation(.easeInOut(duration: 0.15).repeatForever(autoreverses: true)) {
                 bobOffset = 0.5
             }
@@ -514,9 +559,11 @@ struct TamagotchiView: View {
             stopZzzAnimation()
             withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .wide }
             bobOffset = 0
+            startAngrySteamAnimation()
 
         case .pooping:
             stopZzzAnimation()
+            stopAngrySteamAnimation()
             withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .squish }
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(2))
@@ -525,6 +572,7 @@ struct TamagotchiView: View {
 
         case .normal:
             stopZzzAnimation()
+            stopAngrySteamAnimation()
             withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .normal }
             // Restore normal idle bob
             if state == .idle {

@@ -28,7 +28,7 @@ struct SettingsView: View {
             Section("Character Color") {
                 Picker("", selection: $settings.useCustomCrabColor) {
                     HStack(spacing: 6) {
-                        Circle().fill(Color(red: 0.94, green: 0.56, blue: 0.50)).frame(width: 10, height: 10)
+                        Circle().fill(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)).frame(width: 10, height: 10)
                         Text("Always salmon")
                     }.tag(false)
                     HStack(spacing: 6) {

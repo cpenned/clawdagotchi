@@ -51,7 +51,7 @@ final class AppSettings {
     }
 
     var activeCrabColor: Color {
-        useCustomCrabColor ? shellStyle.crabColor : Color(red: 0.94, green: 0.56, blue: 0.50)
+        useCustomCrabColor ? shellStyle.crabColor : Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)
     }
 
     private init() {

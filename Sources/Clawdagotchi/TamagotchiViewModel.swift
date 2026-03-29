@@ -21,6 +21,7 @@ enum MoodState: Equatable, Sendable {
 @Observable
 final class TamagotchiViewModel {
     static var shared: TamagotchiViewModel?
+
     struct Session: Sendable {
         var state: PetState
         var lastEventTime: Date
@@ -32,6 +33,7 @@ final class TamagotchiViewModel {
     private(set) var funReaction: FunReaction?
     private(set) var moodState: MoodState = .normal
     private(set) var greetingMessage: String = ""
+    private(set) var showPoop: Bool = false
 
     private(set) var permissionQueue: [PendingPermission] = []
     var pendingPermission: PendingPermission? { permissionQueue.first }
@@ -81,8 +83,6 @@ final class TamagotchiViewModel {
         moodTask?.cancel()
     }
 
-    // MARK: - Time of day greeting
-
     private static func timeOfDayGreeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
@@ -98,20 +98,13 @@ final class TamagotchiViewModel {
     func previewMood(_ mood: MoodState) {
         withAnimation(.easeInOut(duration: 0.3)) {
             moodState = mood
+            if mood == .pooping { showPoop = true }
         }
         Task {
             try? await Task.sleep(for: .seconds(4))
             withAnimation(.easeInOut(duration: 0.3)) {
                 moodState = .normal
-            }
-        }
-    }
-
-    private func touchInteraction() {
-        lastInteractionTime = Date()
-        if moodState != .normal {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                moodState = .normal
+                showPoop = false
             }
         }
     }
@@ -128,8 +121,9 @@ final class TamagotchiViewModel {
         let sinceInteraction = now.timeIntervalSince(lastInteractionTime)
         let sinceFed = now.timeIntervalSince(lastFedTime)
 
-        // Don't override pooping (it's a timed event)
-        if moodState == .pooping { return }
+        // Don't override pooping or states that need specific actions
+        if moodState == .pooping || showPoop { return }
+        if moodState == .angry || moodState == .hungry { return }
 
         let newMood: MoodState
         if sinceInteraction > 480 {
@@ -144,9 +138,12 @@ final class TamagotchiViewModel {
                 withAnimation { moodState = .pooping }
                 Task { [weak self] in
                     try? await Task.sleep(for: .seconds(3))
-                    if self?.moodState == .pooping {
-                        withAnimation { self?.moodState = .normal }
+                    guard let self else { return }
+                    // Pooping finishes but poop stays until pet
+                    if self.moodState == .pooping {
+                        withAnimation { self.moodState = .normal }
                     }
+                    withAnimation { self.showPoop = true }
                 }
                 return
             }
@@ -167,7 +164,7 @@ final class TamagotchiViewModel {
         server?.respondToPermission(id: perm.id, decision: "allow")
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionApproved)
-        touchInteraction()
+        lastInteractionTime = Date()
         updateDisplayState()
     }
 
@@ -176,15 +173,23 @@ final class TamagotchiViewModel {
         server?.respondToPermission(id: perm.id, decision: "deny", reason: "Denied from Clawdagotchi")
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionDenied)
-        touchInteraction()
+        lastInteractionTime = Date()
         updateDisplayState()
     }
 
-    // MARK: - Fun interactions
+    // MARK: - Fun interactions (each clears a specific mood)
 
     func pokeCrab() {
         guard permissionQueue.isEmpty else { return }
-        touchInteraction()
+        lastInteractionTime = Date()
+
+        // Poke clears: angry, sleeping
+        if moodState == .angry || moodState == .sleeping {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                moodState = .normal
+            }
+        }
+
         funReaction = .poke
         SoundManager.shared.play(.poke)
         Task {
@@ -195,8 +200,16 @@ final class TamagotchiViewModel {
 
     func feedCrab() {
         guard permissionQueue.isEmpty else { return }
-        touchInteraction()
+        lastInteractionTime = Date()
         lastFedTime = Date()
+
+        // Feed clears: hungry, sleeping
+        if moodState == .hungry || moodState == .sleeping {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                moodState = .normal
+            }
+        }
+
         funReaction = .feed
         SoundManager.shared.play(.pet)
         Task {
@@ -207,7 +220,20 @@ final class TamagotchiViewModel {
 
     func petCrab() {
         guard permissionQueue.isEmpty else { return }
-        touchInteraction()
+        lastInteractionTime = Date()
+
+        // Pet clears: poop, sleeping
+        if showPoop {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                showPoop = false
+            }
+        }
+        if moodState == .sleeping {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                moodState = .normal
+            }
+        }
+
         funReaction = .pet
         SoundManager.shared.play(.pet)
         Task {
@@ -222,7 +248,11 @@ final class TamagotchiViewModel {
         let sessionId = event.sessionId
         let now = Date()
 
-        touchInteraction()
+        lastInteractionTime = now
+        // Claude activity clears all moods
+        if moodState != .normal {
+            withAnimation { moodState = .normal }
+        }
 
         if !event.tool.isEmpty {
             lastToolUsed = event.tool
@@ -253,7 +283,7 @@ final class TamagotchiViewModel {
 
     private func handlePermission(_ perm: PendingPermission) {
         SoundManager.shared.play(.permissionAlert)
-        touchInteraction()
+        lastInteractionTime = Date()
         permissionQueue.append(perm)
         sessions[perm.sessionId] = Session(state: .permissionNeeded, lastEventTime: perm.receivedAt)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
