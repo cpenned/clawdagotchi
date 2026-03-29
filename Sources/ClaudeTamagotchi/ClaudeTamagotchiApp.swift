@@ -13,7 +13,7 @@ struct ClaudeTamagotchiApp: App {
                 .onDisappear { viewModel.stop() }
         }
         .windowStyle(.plain)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .defaultSize(width: 250, height: 310)
     }
 }

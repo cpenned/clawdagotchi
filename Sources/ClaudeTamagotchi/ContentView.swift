@@ -4,16 +4,22 @@ struct ContentView: View {
     @Bindable var viewModel: TamagotchiViewModel
 
     var body: some View {
-        TamagotchiView(
-            state: viewModel.displayState,
-            sessionCount: viewModel.activeSessionCount,
-            pendingPermission: viewModel.pendingPermission,
-            funReaction: viewModel.funReaction,
-            onApprove: { viewModel.approvePermission() },
-            onDeny: { viewModel.denyPermission() },
-            onPoke: { viewModel.pokeCrab() },
-            onPet: { viewModel.petCrab() }
-        )
+        GeometryReader { geo in
+            let scale = min(geo.size.width / 250, geo.size.height / 310)
+            TamagotchiView(
+                state: viewModel.displayState,
+                sessionCount: viewModel.activeSessionCount,
+                pendingPermission: viewModel.pendingPermission,
+                funReaction: viewModel.funReaction,
+                onApprove: { viewModel.approvePermission() },
+                onDeny: { viewModel.denyPermission() },
+                onPoke: { viewModel.pokeCrab() },
+                onPet: { viewModel.petCrab() }
+            )
+            .scaleEffect(scale)
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .frame(minWidth: 150, minHeight: 186)
         .contextMenu {
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
