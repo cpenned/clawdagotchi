@@ -11,6 +11,9 @@ struct TamagotchiView: View {
     let poopCount: Int
     let greetingMessage: String
     let funReaction: TamagotchiViewModel.FunReaction?
+    let level: Int
+    let xpProgress: Double
+    let justLeveledUp: Bool
     var onApprove: () -> Void = {}
     var onDeny: () -> Void = {}
     var onPoke: () -> Void = {}
@@ -69,6 +72,7 @@ struct TamagotchiView: View {
             screenInset
             lcdScreen
             buttons
+            xpBar
         }
         .frame(width: eggWidth + padding * 2, height: eggHeight + padding * 2)
         .rotation3DEffect(.degrees(3), axis: (x: 1, y: -0.5, z: 0), perspective: 0.8)
@@ -91,6 +95,31 @@ struct TamagotchiView: View {
         .onDisappear { blinkTimer?.cancel(); zzzTimer?.cancel() }
         .onChange(of: moodState) { _, newMood in
             applyMoodAnimation(newMood)
+        }
+        .onChange(of: justLeveledUp) { _, didLevelUp in
+            if didLevelUp {
+                showMarquee("LEVEL UP!")
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.4).repeatCount(3, autoreverses: true)) {
+                    bobOffset = -8
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(.easeOut(duration: 0.3)) { bobOffset = 0 }
+                }
+            }
+        }
+    }
+
+    // MARK: - XP bar
+
+    private var xpBar: some View {
+        GeometryReader { geo in
+            let barWidth = (geo.size.width - 20) * CGFloat(max(0, min(1, xpProgress)))
+            Rectangle()
+                .fill(AppSettings.shared.activeCrabColor.opacity(0.3))
+                .frame(width: barWidth, height: 2)
+                .frame(maxWidth: geo.size.width - 20, alignment: .leading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 4)
         }
     }
 
@@ -392,7 +421,8 @@ struct TamagotchiView: View {
             color: AppSettings.shared.activeCrabColor,
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
-            animateLegs: isWalking
+            animateLegs: isWalking,
+            accessory: CrabAccessory.forLevel(level)
         )
         .offset(y: bobOffset)
     }
@@ -509,7 +539,7 @@ struct TamagotchiView: View {
             case .hungry: return "i'm hungry!"
             case .angry: return "hmph!"
             case .pooping: return "oops"
-            case .normal: return "~"
+            case .normal: return "LV \(level)"
             }
         }
         switch state {

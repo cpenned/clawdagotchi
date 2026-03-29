@@ -41,6 +41,27 @@ final class TamagotchiViewModel {
     var pendingPermission: PendingPermission? { permissionQueue.first }
     var pendingPermissionCount: Int { permissionQueue.count }
 
+    private(set) var justLeveledUp: Bool = false
+
+    static let levelThresholds = [0, 50, 150, 350, 600, 1000, 1500, 2500]
+
+    var currentLevel: Int { AppSettings.shared.level }
+    var currentXP: Int { AppSettings.shared.xp }
+    var xpForNextLevel: Int {
+        let thresholds = Self.levelThresholds
+        if currentLevel >= thresholds.count { return thresholds.last! }
+        return thresholds[currentLevel]
+    }
+    var xpProgress: Double {
+        let thresholds = Self.levelThresholds
+        if currentLevel >= thresholds.count { return 1.0 }
+        let prevThreshold = currentLevel > 1 ? thresholds[currentLevel - 1] : 0
+        let nextThreshold = thresholds[currentLevel]
+        let range = nextThreshold - prevThreshold
+        guard range > 0 else { return 1.0 }
+        return Double(currentXP - prevThreshold) / Double(range)
+    }
+
     enum FunReaction: Equatable {
         case poke
         case pet
@@ -192,6 +213,7 @@ final class TamagotchiViewModel {
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionApproved)
         lastInteractionTime = Date()
+        grantXP(5)
         updateDisplayState()
     }
 
@@ -201,6 +223,7 @@ final class TamagotchiViewModel {
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionDenied)
         lastInteractionTime = Date()
+        grantXP(3)
         updateDisplayState()
     }
 
@@ -220,6 +243,7 @@ final class TamagotchiViewModel {
 
         funReaction = .poke
         SoundManager.shared.play(.poke)
+        grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(0.8))
             funReaction = nil
@@ -241,6 +265,7 @@ final class TamagotchiViewModel {
 
         funReaction = .feed
         SoundManager.shared.play(.feed)
+        grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(1.5))
             funReaction = nil
@@ -266,9 +291,34 @@ final class TamagotchiViewModel {
 
         funReaction = .pet
         SoundManager.shared.play(.pet)
+        grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(1.2))
             funReaction = nil
+        }
+    }
+
+    // MARK: - XP & Level
+
+    func grantXP(_ amount: Int) {
+        AppSettings.shared.xp += amount
+        checkLevelUp()
+    }
+
+    private func checkLevelUp() {
+        let thresholds = Self.levelThresholds
+        var newLevel = AppSettings.shared.level
+        while newLevel < thresholds.count && AppSettings.shared.xp >= thresholds[newLevel] {
+            newLevel += 1
+        }
+        if newLevel > AppSettings.shared.level {
+            AppSettings.shared.level = newLevel
+            SoundManager.shared.play(.levelUp)
+            justLeveledUp = true
+            Task {
+                try? await Task.sleep(for: .seconds(3))
+                justLeveledUp = false
+            }
         }
     }
 
@@ -295,13 +345,16 @@ final class TamagotchiViewModel {
         switch event.event {
         case "PreToolUse":
             sessions[sessionId] = Session(state: .thinking, lastEventTime: now)
+            grantXP(1)
 
         case "PostToolUse":
             sessions[sessionId] = Session(state: .working, lastEventTime: now)
+            grantXP(2)
 
         case "Stop", "SubagentStop":
             sessions[sessionId] = Session(state: .done, lastEventTime: now)
             SoundManager.shared.play(.sessionDone)
+            grantXP(10)
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(2))
                 self?.sessions.removeValue(forKey: sessionId)

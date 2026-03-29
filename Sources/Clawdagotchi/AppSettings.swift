@@ -49,6 +49,12 @@ final class AppSettings {
     var useCustomCrabColor: Bool {
         didSet { UserDefaults.standard.set(useCustomCrabColor, forKey: "useCustomCrabColor") }
     }
+    var xp: Int {
+        didSet { UserDefaults.standard.set(xp, forKey: "xp") }
+    }
+    var level: Int {
+        didSet { UserDefaults.standard.set(level, forKey: "level") }
+    }
 
     var activeCrabColor: Color {
         useCustomCrabColor ? shellStyle.crabColor : Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)
@@ -67,6 +73,8 @@ final class AppSettings {
             "floatPolicy": FloatPolicy.always.rawValue,
             "botName": "Clawd",
             "useCustomCrabColor": true,
+            "xp": 0,
+            "level": 1,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
@@ -78,6 +86,8 @@ final class AppSettings {
         self.floatPolicy = FloatPolicy(rawValue: defaults.string(forKey: "floatPolicy") ?? "") ?? .always
         self.botName = defaults.string(forKey: "botName") ?? "Clawd"
         self.useCustomCrabColor = defaults.bool(forKey: "useCustomCrabColor")
+        self.xp = defaults.integer(forKey: "xp")
+        self.level = defaults.integer(forKey: "level")
     }
 
     func applyDockPolicy() {

@@ -36,6 +36,23 @@ enum EyeStyle: Equatable {
     case tiny
 }
 
+// MARK: - Crab accessories (unlocked by level)
+
+enum CrabAccessory: Int, CaseIterable, Sendable {
+    case none = 1
+    case bowTie = 2
+    case partyHat = 3
+    case sunglasses = 4
+    case topHat = 5
+    case crown = 6
+    case halo = 7
+    case starAura = 8
+
+    static func forLevel(_ level: Int) -> CrabAccessory {
+        CrabAccessory(rawValue: min(level, 8)) ?? .none
+    }
+}
+
 // MARK: - Canvas crab (claude-island style with dynamic eyes)
 
 struct CrabView: View {
@@ -44,6 +61,7 @@ struct CrabView: View {
     var eyeColor: Color = .black
     var eyeStyle: EyeStyle = .normal
     var animateLegs: Bool = false
+    var accessory: CrabAccessory = .none
 
     @State private var legPhase: Int = 0
     private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
@@ -138,6 +156,88 @@ struct CrabView: View {
                 // Small dots (hungry look)
                 context.fill(r(CGRect(x: leftEyeX + 1, y: eyeY + 2, width: 4, height: 4)), with: .color(eyeColor))
                 context.fill(r(CGRect(x: rightEyeX + 1, y: eyeY + 2, width: 4, height: 4)), with: .color(eyeColor))
+            }
+
+            // MARK: Accessories
+            switch accessory {
+            case .none:
+                break
+
+            case .bowTie:
+                let bcx = xOff + 33 * scale
+                let bcy = yOff + 38 * scale
+                let bw = CGFloat(4) * scale
+                let bh = CGFloat(3) * scale
+                var leftTri = Path()
+                leftTri.move(to: CGPoint(x: bcx, y: bcy))
+                leftTri.addLine(to: CGPoint(x: bcx - bw, y: bcy - bh))
+                leftTri.addLine(to: CGPoint(x: bcx - bw, y: bcy + bh))
+                leftTri.closeSubpath()
+                context.fill(leftTri, with: .color(color))
+                var rightTri = Path()
+                rightTri.move(to: CGPoint(x: bcx, y: bcy))
+                rightTri.addLine(to: CGPoint(x: bcx + bw, y: bcy - bh))
+                rightTri.addLine(to: CGPoint(x: bcx + bw, y: bcy + bh))
+                rightTri.closeSubpath()
+                context.fill(rightTri, with: .color(color))
+                context.fill(Path(CGRect(x: bcx - scale, y: bcy - scale, width: 2 * scale, height: 2 * scale)), with: .color(color))
+
+            case .partyHat:
+                var hat = Path()
+                hat.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-8) * scale))
+                hat.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + 0 * scale))
+                hat.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + 0 * scale))
+                hat.closeSubpath()
+                context.fill(hat, with: .color(color))
+
+            case .sunglasses:
+                context.fill(r(CGRect(x: 10, y: 11, width: 46, height: 3)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: 28, y: 11, width: 10, height: 3)), with: .color(eyeColor))
+
+            case .topHat:
+                context.fill(r(CGRect(x: 20, y: -2, width: 26, height: 3)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: 25, y: -14, width: 16, height: 12)), with: .color(eyeColor))
+
+            case .crown:
+                let goldenColor = Color(red: 1.0, green: 0.85, blue: 0.3)
+                var crown = Path()
+                crown.move(to: CGPoint(x: xOff + 22 * scale, y: yOff + (-2) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + (-8) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 30 * scale, y: yOff + (-4) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-10) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 36 * scale, y: yOff + (-4) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + (-8) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 44 * scale, y: yOff + (-2) * scale))
+                crown.closeSubpath()
+                context.fill(crown, with: .color(goldenColor))
+
+            case .halo:
+                let haloRect = CGRect(
+                    x: xOff + (33 - 10) * scale,
+                    y: yOff + (-10 - 3) * scale,
+                    width: 20 * scale,
+                    height: 6 * scale
+                )
+                context.stroke(
+                    Path(ellipseIn: haloRect),
+                    with: .color(color.opacity(0.6)),
+                    style: StrokeStyle(lineWidth: 2 * scale)
+                )
+
+            case .starAura:
+                let diamondPositions: [(CGFloat, CGFloat)] = [(0, 5), (62, 5), (5, 42), (57, 42)]
+                let ds = CGFloat(2) * scale
+                for (dx, dy) in diamondPositions {
+                    let cx2 = xOff + dx * scale
+                    let cy2 = yOff + dy * scale
+                    var diamond = Path()
+                    diamond.move(to: CGPoint(x: cx2, y: cy2 - ds))
+                    diamond.addLine(to: CGPoint(x: cx2 + ds, y: cy2))
+                    diamond.addLine(to: CGPoint(x: cx2, y: cy2 + ds))
+                    diamond.addLine(to: CGPoint(x: cx2 - ds, y: cy2))
+                    diamond.closeSubpath()
+                    context.fill(diamond, with: .color(color))
+                }
             }
         }
         .frame(width: size * (viewW / viewH), height: size)

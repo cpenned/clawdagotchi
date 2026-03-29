@@ -118,6 +118,13 @@ struct SettingsView: View {
 
     // MARK: - Help
 
+    private var nextThresholdText: String {
+        let thresholds = TamagotchiViewModel.levelThresholds
+        let level = AppSettings.shared.level
+        if level >= thresholds.count { return "MAX" }
+        return "\(thresholds[level])"
+    }
+
     private var aboutTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -126,6 +133,11 @@ struct SettingsView: View {
                     "It tracks tool usage, permissions, and session activity through Claude Code hooks. " +
                     "Take care of it — feed it, pet it, and clean up after it!"
                 )
+
+                aboutSection("Your Crab", """
+Level \(AppSettings.shared.level) — \(CrabAccessory.forLevel(AppSettings.shared.level)) unlocked
+XP: \(AppSettings.shared.xp) / \(nextThresholdText)
+""")
 
                 aboutSection("Session Tracking", """
                 Idle — gentle bob, periodic blink
