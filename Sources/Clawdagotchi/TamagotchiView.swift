@@ -423,7 +423,7 @@ struct TamagotchiView: View {
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking,
             accessory: CrabAccessory.forLevel(level),
-            accessoryColor: style.tintColor
+            accessoryColor: .white
         )
         .offset(y: bobOffset)
     }
