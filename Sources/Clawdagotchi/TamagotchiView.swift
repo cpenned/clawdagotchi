@@ -74,14 +74,14 @@ struct TamagotchiView: View {
     }
 
     private var translucentShell: some View {
-        // Semi-transparent pink shell — Nothing-style see-through plastic
+        // Semi-transparent salmon shell — Nothing-style see-through plastic
         EggShape()
             .fill(
                 LinearGradient(
                     colors: [
-                        Color.shellPinkLight.opacity(0.35),
-                        Color.shellPink.opacity(0.25),
-                        Color.shellPinkDark.opacity(0.30),
+                        Color.shellPinkLight.opacity(0.50),
+                        Color.shellPink.opacity(0.40),
+                        Color.shellPinkDark.opacity(0.45),
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -214,7 +214,7 @@ struct TamagotchiView: View {
     private var crabCharacter: some View {
         CrabView(
             size: 46,
-            color: Color(white: 0.55),
+            color: Color.shellPink,
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking

@@ -49,6 +49,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func openSettingsFromKeyboard() {
+        openSettings()
+    }
+
     @objc private func openSettings() {
         if let existing = settingsWindow, existing.isVisible {
             existing.makeKeyAndOrderFront(nil)

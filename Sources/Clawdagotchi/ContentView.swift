@@ -21,6 +21,11 @@ struct ContentView: View {
         }
         .frame(minWidth: 150, minHeight: 186)
         .contextMenu {
+            Button("Settings...") {
+                if let delegate = NSApp.delegate as? AppDelegate {
+                    delegate.openSettingsFromKeyboard()
+                }
+            }
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
