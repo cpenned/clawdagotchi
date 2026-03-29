@@ -75,7 +75,6 @@ struct TamagotchiView: View {
             xpBar
         }
         .frame(width: eggWidth + padding * 2, height: eggHeight + padding * 2)
-        .rotation3DEffect(.degrees(3), axis: (x: 1, y: -0.5, z: 0), perspective: 0.8)
         .onChange(of: state) { _, newState in
             resetAnimations()
             startAnimations(for: newState)
