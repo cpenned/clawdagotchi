@@ -50,37 +50,41 @@ echo ""
 # Create DMG
 echo "=== Creating DMG ==="
 mkdir -p "$RELEASE_DIR"
-
-# Remove existing DMG
 rm -f "$DMG_PATH"
 
-if command -v create-dmg &> /dev/null; then
-    echo "Using create-dmg..."
+# Stage folder with app + Applications symlink
+STAGE_DIR="$BUILD_DIR/dmg-stage"
+rm -rf "$STAGE_DIR"
+mkdir -p "$STAGE_DIR"
+cp -r "$APP_PATH" "$STAGE_DIR/"
+ln -s /Applications "$STAGE_DIR/Applications"
+
+BG_IMG="$SCRIPT_DIR/dmg_background.png"
+
+if command -v create-dmg &> /dev/null && [ -f "$BG_IMG" ]; then
+    echo "Using create-dmg with background..."
     create-dmg \
         --volname "$APP_NAME" \
         --window-size 600 400 \
-        --icon-size 100 \
-        --icon "$APP_NAME.app" 150 200 \
-        --app-drop-link 450 200 \
+        --background "$BG_IMG" \
+        --icon-size 120 \
+        --icon "$APP_NAME.app" 150 210 \
+        --icon "Applications" 450 210 \
         --hide-extension "$APP_NAME.app" \
+        --text-size 14 \
         "$DMG_PATH" \
-        "$APP_PATH" || true
+        "$STAGE_DIR" || true
+fi
 
-    # create-dmg returns non-zero if no signing identity, but DMG is still created
-    if [ ! -f "$DMG_PATH" ]; then
-        echo "create-dmg failed, falling back to hdiutil..."
-        hdiutil create -volname "$APP_NAME" \
-            -srcfolder "$APP_PATH" \
-            -ov -format UDZO \
-            "$DMG_PATH"
-    fi
-else
-    echo "Using hdiutil (install create-dmg for prettier DMG: brew install create-dmg)"
+if [ ! -f "$DMG_PATH" ]; then
+    echo "Falling back to hdiutil..."
     hdiutil create -volname "$APP_NAME" \
-        -srcfolder "$APP_PATH" \
+        -srcfolder "$STAGE_DIR" \
         -ov -format UDZO \
         "$DMG_PATH"
 fi
+
+rm -rf "$STAGE_DIR"
 
 echo ""
 echo "=== Done ==="
