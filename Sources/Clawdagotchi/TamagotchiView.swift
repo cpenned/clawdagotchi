@@ -1048,7 +1048,7 @@ struct InternalsView: View {
 
             // --- Silkscreen text labels ---
             let labels: [(String, CGPoint)] = [
-                ("v2.0", CGPoint(x: cx + 55, y: cy + 88)),
+                ("v1.0", CGPoint(x: cx + 55, y: cy + 88)),
                 ("GND",  CGPoint(x: cx - 25, y: cy + 60)),
                 ("VCC",  CGPoint(x: cx + 25, y: cy + 60)),
                 ("3V3",  CGPoint(x: cx - 68, y: cy + 35)),

@@ -408,8 +408,12 @@ XP: \(AppSettings.shared.xp) / \(nextThresholdText)
                         .foregroundStyle(.secondary)
                 }
 
-                VStack(spacing: 4) {
-                    Text("Clawdagotchi v2.0.0")
+                VStack(spacing: 8) {
+                    Button("Check for Updates...") {
+                        UpdateChecker.shared.checkNow()
+                    }
+
+                    Text("Clawdagotchi v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                     Text("An independent fan project. Not affiliated with, sponsored by, or endorsed by Anthropic.")
