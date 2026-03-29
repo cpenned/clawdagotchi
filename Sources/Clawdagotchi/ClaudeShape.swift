@@ -200,15 +200,15 @@ struct CrabView: View {
                 context.fill(Path(CGRect(x: bcx - scale, y: bcy - scale, width: 2 * scale, height: 2 * scale)), with: .color(accessoryColor))
 
             case .partyHat:
-                // Cone hat sitting on top of head
+                // Larger cone hat
                 var hat = Path()
-                hat.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-5) * scale))
-                hat.addLine(to: CGPoint(x: xOff + 27 * scale, y: yOff + 1 * scale))
-                hat.addLine(to: CGPoint(x: xOff + 39 * scale, y: yOff + 1 * scale))
+                hat.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-12) * scale))
+                hat.addLine(to: CGPoint(x: xOff + 22 * scale, y: yOff + 2 * scale))
+                hat.addLine(to: CGPoint(x: xOff + 44 * scale, y: yOff + 2 * scale))
                 hat.closeSubpath()
                 context.fill(hat, with: .color(accessoryColor))
-                // Small pom-pom on top
-                let pomRect = CGRect(x: xOff + 31 * scale, y: yOff + (-7) * scale, width: 4 * scale, height: 3 * scale)
+                // Pom-pom on top
+                let pomRect = CGRect(x: xOff + 30 * scale, y: yOff + (-15) * scale, width: 6 * scale, height: 5 * scale)
                 context.fill(Path(ellipseIn: pomRect), with: .color(accessoryColor))
 
             case .sunglasses:
@@ -229,13 +229,13 @@ struct CrabView: View {
 
             case .crown:
                 var crown = Path()
-                crown.move(to: CGPoint(x: xOff + 24 * scale, y: yOff + (-1) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 27 * scale, y: yOff + (-5) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 30 * scale, y: yOff + (-3) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-7) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 36 * scale, y: yOff + (-3) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 39 * scale, y: yOff + (-5) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 42 * scale, y: yOff + (-1) * scale))
+                crown.move(to: CGPoint(x: xOff + 18 * scale, y: yOff + 0 * scale))
+                crown.addLine(to: CGPoint(x: xOff + 23 * scale, y: yOff + (-8) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 28 * scale, y: yOff + (-4) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-12) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 38 * scale, y: yOff + (-4) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 43 * scale, y: yOff + (-8) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 48 * scale, y: yOff + 0 * scale))
                 crown.closeSubpath()
                 context.fill(crown, with: .color(accessoryColor))
 
