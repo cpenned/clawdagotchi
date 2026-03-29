@@ -1168,7 +1168,7 @@ struct PixelStatBar: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 6, height: 6)
-                .foregroundStyle(Color.white.opacity(0.30))
+                .foregroundStyle(AppSettings.shared.activeCrabColor.opacity(0.7))
             HStack(spacing: 1) {
                 ForEach(0..<segments, id: \.self) { i in
                     let filled = value > Double(i) / Double(segments)
