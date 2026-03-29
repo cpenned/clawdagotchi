@@ -437,6 +437,7 @@ struct TamagotchiView: View {
                 }
             }
         }
+        .offset(y: isCenter ? 0 : -6)
         .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.3), value: lit)
     }
