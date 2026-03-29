@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_NAME="ClaudeTamagotchi"
+APP_NAME="Clawdagotchi"
 APP_BUNDLE="${SCRIPT_DIR}/${APP_NAME}.app"
 
 echo "Building ${APP_NAME} (release)..."

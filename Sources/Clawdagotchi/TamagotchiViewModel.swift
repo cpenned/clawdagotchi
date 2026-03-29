@@ -58,13 +58,15 @@ final class TamagotchiViewModel {
         guard pendingPermission != nil else { return }
         server?.respondToPermission(decision: "allow")
         pendingPermission = nil
+        SoundManager.shared.play(.permissionApproved)
         updateDisplayState()
     }
 
     func denyPermission() {
         guard pendingPermission != nil else { return }
-        server?.respondToPermission(decision: "deny", reason: "Denied from Tamagotchi")
+        server?.respondToPermission(decision: "deny", reason: "Denied from Clawdagotchi")
         pendingPermission = nil
+        SoundManager.shared.play(.permissionDenied)
         updateDisplayState()
     }
 
@@ -73,6 +75,7 @@ final class TamagotchiViewModel {
     func pokeCrab() {
         guard pendingPermission == nil else { return }
         funReaction = .poke
+        SoundManager.shared.play(.poke)
         Task {
             try? await Task.sleep(for: .seconds(0.8))
             funReaction = nil
@@ -82,6 +85,7 @@ final class TamagotchiViewModel {
     func petCrab() {
         guard pendingPermission == nil else { return }
         funReaction = .pet
+        SoundManager.shared.play(.pet)
         Task {
             try? await Task.sleep(for: .seconds(1.2))
             funReaction = nil
@@ -107,6 +111,7 @@ final class TamagotchiViewModel {
 
         case "Stop", "SubagentStop":
             sessions[sessionId] = Session(state: .done, lastEventTime: now)
+            SoundManager.shared.play(.sessionDone)
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(2))
                 self?.sessions.removeValue(forKey: sessionId)
@@ -121,6 +126,7 @@ final class TamagotchiViewModel {
     }
 
     private func handlePermission(_ perm: PendingPermission) {
+        SoundManager.shared.play(.permissionAlert)
         pendingPermission = perm
         sessions[perm.sessionId] = Session(state: .permissionNeeded, lastEventTime: perm.receivedAt)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {

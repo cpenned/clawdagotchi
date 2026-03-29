@@ -2,7 +2,8 @@ import SwiftUI
 import AppKit
 
 @main
-struct ClaudeTamagotchiApp: App {
+struct ClawdagotchiApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var viewModel = TamagotchiViewModel()
 
     var body: some Scene {
