@@ -401,8 +401,8 @@ struct TamagotchiView: View {
             VStack {
                 Spacer()
                 Rectangle()
-                    .fill(style.tintColor.opacity(0.5))
-                    .frame(width: screenWidth * CGFloat(max(0, min(1, xpProgress))), height: 1.5)
+                    .fill(AppSettings.shared.activeCrabColor.opacity(0.5))
+                    .frame(width: screenWidth * CGFloat(max(0, min(1, xpProgress))), height: 1)
                     .frame(maxWidth: screenWidth, alignment: .leading)
             }
         }
@@ -444,7 +444,7 @@ struct TamagotchiView: View {
             Spacer()
             Text(AppSettings.shared.botName)
                 .font(.system(size: 5, weight: .bold, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.25))
+                .foregroundStyle(Color.white.opacity(0.5))
             Spacer()
             PixelStatBar(value: happiness, sfSymbol: "heart.fill")
         }
