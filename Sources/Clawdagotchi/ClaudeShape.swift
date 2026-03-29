@@ -51,6 +51,19 @@ enum CrabAccessory: Int, CaseIterable, Sendable {
     static func forLevel(_ level: Int) -> CrabAccessory {
         CrabAccessory(rawValue: min(level, 8)) ?? .none
     }
+
+    static func allUnlocked(for level: Int) -> [CrabAccessory] {
+        var items: [CrabAccessory] = []
+        if level >= 2 { items.append(.bowTie) }
+        if level >= 4 { items.append(.sunglasses) }
+        // Head item: highest unlocked wins
+        if level >= 6 { items.append(.crown) }
+        else if level >= 5 { items.append(.topHat) }
+        else if level >= 3 { items.append(.partyHat) }
+        if level >= 7 { items.append(.halo) }
+        if level >= 8 { items.append(.starAura) }
+        return items
+    }
 }
 
 // MARK: - Canvas crab (claude-island style with dynamic eyes)
@@ -61,7 +74,7 @@ struct CrabView: View {
     var eyeColor: Color = .black
     var eyeStyle: EyeStyle = .normal
     var animateLegs: Bool = false
-    var accessory: CrabAccessory = .none
+    var accessories: [CrabAccessory] = []
     var accessoryColor: Color = .white
 
     @State private var legPhase: Int = 0
@@ -159,8 +172,9 @@ struct CrabView: View {
                 context.fill(r(CGRect(x: rightEyeX + 1, y: eyeY + 2, width: 4, height: 4)), with: .color(eyeColor))
             }
 
-            // MARK: Accessories
-            switch accessory {
+            // MARK: Accessories (draw all unlocked)
+            for acc in accessories {
+            switch acc {
             case .none:
                 break
 
@@ -240,6 +254,7 @@ struct CrabView: View {
                     context.fill(diamond, with: .color(accessoryColor))
                 }
             }
+            } // end for acc
         }
         .frame(width: size * (viewW / viewH), height: size)
         .onReceive(legTimer) { _ in

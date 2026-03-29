@@ -420,12 +420,12 @@ struct TamagotchiView: View {
 
     private var crabCharacter: some View {
         CrabView(
-            size: 42,
+            size: 34,
             color: AppSettings.shared.activeCrabColor,
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking,
-            accessory: CrabAccessory.forLevel(level),
+            accessories: CrabAccessory.allUnlocked(for: level),
             accessoryColor: .white
         )
         .offset(y: bobOffset)
