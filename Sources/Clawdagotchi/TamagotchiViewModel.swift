@@ -99,6 +99,7 @@ final class TamagotchiViewModel {
         }
 
         greetingMessage = Self.timeOfDayGreeting()
+        checkDailyLogin()
 
         // Also check for stale permissions (handled in terminal instead of Tamagotchi)
         Task { [weak self] in
@@ -122,6 +123,45 @@ final class TamagotchiViewModel {
         server?.stop()
         expiryTask?.cancel()
         moodTask?.cancel()
+    }
+
+    private func checkDailyLogin() {
+        let today = Self.todayString()
+        let settings = AppSettings.shared
+
+        if settings.lastLoginDate == today {
+            return
+        }
+
+        let yesterday = Self.yesterdayString()
+        if settings.lastLoginDate == yesterday {
+            settings.streak += 1
+        } else if settings.lastLoginDate.isEmpty {
+            settings.streak = 1
+        } else {
+            settings.streak = 1
+        }
+
+        settings.lastLoginDate = today
+
+        let bonusXP = min(5 + settings.streak, 25)
+        grantXP(bonusXP)
+
+        if settings.streak > 1 {
+            greetingMessage = "\(Self.timeOfDayGreeting()) \(settings.streak) day streak!"
+        }
+    }
+
+    private static func todayString() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: Date())
+    }
+
+    private static func yesterdayString() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: Date().addingTimeInterval(-86400))
     }
 
     private static func timeOfDayGreeting() -> String {
@@ -213,6 +253,7 @@ final class TamagotchiViewModel {
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionApproved)
         lastInteractionTime = Date()
+        AppSettings.shared.totalPermissionsApproved += 1
         grantXP(5)
         updateDisplayState()
     }
@@ -223,6 +264,7 @@ final class TamagotchiViewModel {
         permissionQueue.removeFirst()
         SoundManager.shared.play(.permissionDenied)
         lastInteractionTime = Date()
+        AppSettings.shared.totalPermissionsDenied += 1
         grantXP(3)
         updateDisplayState()
     }
@@ -243,6 +285,7 @@ final class TamagotchiViewModel {
 
         funReaction = .poke
         SoundManager.shared.play(.poke)
+        AppSettings.shared.totalPokes += 1
         grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(0.8))
@@ -265,6 +308,7 @@ final class TamagotchiViewModel {
 
         funReaction = .feed
         SoundManager.shared.play(.feed)
+        AppSettings.shared.totalFeeds += 1
         grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(1.5))
@@ -282,6 +326,7 @@ final class TamagotchiViewModel {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 poopCount -= 1
             }
+            AppSettings.shared.totalPoopsCleaned += 1
         }
         if moodState == .sleeping {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
@@ -291,6 +336,7 @@ final class TamagotchiViewModel {
 
         funReaction = .pet
         SoundManager.shared.play(.pet)
+        AppSettings.shared.totalPets += 1
         grantXP(1)
         Task {
             try? await Task.sleep(for: .seconds(1.2))
@@ -350,14 +396,17 @@ final class TamagotchiViewModel {
         switch event.event {
         case "PreToolUse":
             sessions[sessionId] = Session(state: .thinking, lastEventTime: now)
+            AppSettings.shared.totalToolUses += 1
             grantXP(1)
 
         case "PostToolUse":
             sessions[sessionId] = Session(state: .working, lastEventTime: now)
+            AppSettings.shared.totalToolUses += 1
             grantXP(2)
 
         case "Stop", "SubagentStop":
             sessions[sessionId] = Session(state: .done, lastEventTime: now)
+            AppSettings.shared.totalSessions += 1
             SoundManager.shared.play(.sessionDone)
             grantXP(10)
             Task { [weak self] in

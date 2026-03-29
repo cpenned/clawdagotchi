@@ -9,6 +9,8 @@ struct SettingsView: View {
                 .tabItem { Label("Appearance", systemImage: "paintbrush") }
             levelTab
                 .tabItem { Label("Level Up", systemImage: "star.fill") }
+            statsTab
+                .tabItem { Label("Stats", systemImage: "chart.bar") }
             soundTab
                 .tabItem { Label("Sound", systemImage: "speaker.wave.2") }
             aboutTab
@@ -197,6 +199,52 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
+    }
+
+    // MARK: - Stats
+
+    private var statsTab: some View {
+        Form {
+            Section("Streak") {
+                HStack {
+                    Text("Current streak")
+                    Spacer()
+                    Text("\(AppSettings.shared.streak) days")
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Last login")
+                    Spacer()
+                    Text(AppSettings.shared.lastLoginDate.isEmpty ? "Never" : AppSettings.shared.lastLoginDate)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Claude Code") {
+                statRow("Sessions completed", AppSettings.shared.totalSessions)
+                statRow("Tools used", AppSettings.shared.totalToolUses)
+                statRow("Permissions approved", AppSettings.shared.totalPermissionsApproved)
+                statRow("Permissions denied", AppSettings.shared.totalPermissionsDenied)
+            }
+
+            Section("Pet Care") {
+                statRow("Pokes", AppSettings.shared.totalPokes)
+                statRow("Feeds", AppSettings.shared.totalFeeds)
+                statRow("Pets", AppSettings.shared.totalPets)
+                statRow("Poops cleaned", AppSettings.shared.totalPoopsCleaned)
+            }
+        }
+        .formStyle(.grouped)
+        .padding()
+    }
+
+    private func statRow(_ label: String, _ value: Int) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text("\(value)")
+                .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - Sound

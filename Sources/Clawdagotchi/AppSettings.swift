@@ -56,6 +56,40 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(level, forKey: "level") }
     }
 
+    // Streak
+    var streak: Int {
+        didSet { UserDefaults.standard.set(streak, forKey: "streak") }
+    }
+    var lastLoginDate: String {
+        didSet { UserDefaults.standard.set(lastLoginDate, forKey: "lastLoginDate") }
+    }
+
+    // Lifetime stats
+    var totalSessions: Int {
+        didSet { UserDefaults.standard.set(totalSessions, forKey: "totalSessions") }
+    }
+    var totalToolUses: Int {
+        didSet { UserDefaults.standard.set(totalToolUses, forKey: "totalToolUses") }
+    }
+    var totalPermissionsApproved: Int {
+        didSet { UserDefaults.standard.set(totalPermissionsApproved, forKey: "totalPermissionsApproved") }
+    }
+    var totalPermissionsDenied: Int {
+        didSet { UserDefaults.standard.set(totalPermissionsDenied, forKey: "totalPermissionsDenied") }
+    }
+    var totalPokes: Int {
+        didSet { UserDefaults.standard.set(totalPokes, forKey: "totalPokes") }
+    }
+    var totalFeeds: Int {
+        didSet { UserDefaults.standard.set(totalFeeds, forKey: "totalFeeds") }
+    }
+    var totalPets: Int {
+        didSet { UserDefaults.standard.set(totalPets, forKey: "totalPets") }
+    }
+    var totalPoopsCleaned: Int {
+        didSet { UserDefaults.standard.set(totalPoopsCleaned, forKey: "totalPoopsCleaned") }
+    }
+
     var activeCrabColor: Color {
         useCustomCrabColor ? shellStyle.crabColor : Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)
     }
@@ -75,6 +109,16 @@ final class AppSettings {
             "useCustomCrabColor": true,
             "xp": 0,
             "level": 1,
+            "streak": 0,
+            "lastLoginDate": "",
+            "totalSessions": 0,
+            "totalToolUses": 0,
+            "totalPermissionsApproved": 0,
+            "totalPermissionsDenied": 0,
+            "totalPokes": 0,
+            "totalFeeds": 0,
+            "totalPets": 0,
+            "totalPoopsCleaned": 0,
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showMenubarIcon = defaults.bool(forKey: "showMenubarIcon")
@@ -88,6 +132,16 @@ final class AppSettings {
         self.useCustomCrabColor = defaults.bool(forKey: "useCustomCrabColor")
         self.xp = defaults.integer(forKey: "xp")
         self.level = defaults.integer(forKey: "level")
+        self.streak = defaults.integer(forKey: "streak")
+        self.lastLoginDate = defaults.string(forKey: "lastLoginDate") ?? ""
+        self.totalSessions = defaults.integer(forKey: "totalSessions")
+        self.totalToolUses = defaults.integer(forKey: "totalToolUses")
+        self.totalPermissionsApproved = defaults.integer(forKey: "totalPermissionsApproved")
+        self.totalPermissionsDenied = defaults.integer(forKey: "totalPermissionsDenied")
+        self.totalPokes = defaults.integer(forKey: "totalPokes")
+        self.totalFeeds = defaults.integer(forKey: "totalFeeds")
+        self.totalPets = defaults.integer(forKey: "totalPets")
+        self.totalPoopsCleaned = defaults.integer(forKey: "totalPoopsCleaned")
     }
 
     func applyDockPolicy() {
