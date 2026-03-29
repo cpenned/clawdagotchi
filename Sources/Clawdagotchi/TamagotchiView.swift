@@ -422,7 +422,8 @@ struct TamagotchiView: View {
             eyeColor: Color.screenDark,
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking,
-            accessory: CrabAccessory.forLevel(level)
+            accessory: CrabAccessory.forLevel(level),
+            accessoryColor: style.tintColor
         )
         .offset(y: bobOffset)
     }
@@ -613,8 +614,8 @@ struct TamagotchiView: View {
     private func applyMoodAnimation(_ mood: MoodState) {
         switch mood {
         case .sleeping:
-            withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .sleepy }
-            // Override idle bob to much slower
+            blinkTimer?.cancel()
+            withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .blink }
             withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
                 bobOffset = 2
             }

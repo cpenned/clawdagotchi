@@ -62,6 +62,7 @@ struct CrabView: View {
     var eyeStyle: EyeStyle = .normal
     var animateLegs: Bool = false
     var accessory: CrabAccessory = .none
+    var accessoryColor: Color = .white
 
     @State private var legPhase: Int = 0
     private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
@@ -173,14 +174,14 @@ struct CrabView: View {
                 leftTri.addLine(to: CGPoint(x: bcx - bw, y: bcy - bh))
                 leftTri.addLine(to: CGPoint(x: bcx - bw, y: bcy + bh))
                 leftTri.closeSubpath()
-                context.fill(leftTri, with: .color(color))
+                context.fill(leftTri, with: .color(accessoryColor))
                 var rightTri = Path()
                 rightTri.move(to: CGPoint(x: bcx, y: bcy))
                 rightTri.addLine(to: CGPoint(x: bcx + bw, y: bcy - bh))
                 rightTri.addLine(to: CGPoint(x: bcx + bw, y: bcy + bh))
                 rightTri.closeSubpath()
-                context.fill(rightTri, with: .color(color))
-                context.fill(Path(CGRect(x: bcx - scale, y: bcy - scale, width: 2 * scale, height: 2 * scale)), with: .color(color))
+                context.fill(rightTri, with: .color(accessoryColor))
+                context.fill(Path(CGRect(x: bcx - scale, y: bcy - scale, width: 2 * scale, height: 2 * scale)), with: .color(accessoryColor))
 
             case .partyHat:
                 var hat = Path()
@@ -188,7 +189,7 @@ struct CrabView: View {
                 hat.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + 0 * scale))
                 hat.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + 0 * scale))
                 hat.closeSubpath()
-                context.fill(hat, with: .color(color))
+                context.fill(hat, with: .color(accessoryColor))
 
             case .sunglasses:
                 context.fill(r(CGRect(x: 10, y: 11, width: 46, height: 3)), with: .color(eyeColor))
@@ -220,7 +221,7 @@ struct CrabView: View {
                 )
                 context.stroke(
                     Path(ellipseIn: haloRect),
-                    with: .color(color.opacity(0.6)),
+                    with: .color(accessoryColor.opacity(0.6)),
                     style: StrokeStyle(lineWidth: 2 * scale)
                 )
 
@@ -236,7 +237,7 @@ struct CrabView: View {
                     diamond.addLine(to: CGPoint(x: cx2, y: cy2 + ds))
                     diamond.addLine(to: CGPoint(x: cx2 - ds, y: cy2))
                     diamond.closeSubpath()
-                    context.fill(diamond, with: .color(color))
+                    context.fill(diamond, with: .color(accessoryColor))
                 }
             }
         }
