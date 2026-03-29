@@ -211,7 +211,7 @@ final class TamagotchiViewModel {
         }
 
         funReaction = .feed
-        SoundManager.shared.play(.pet)
+        SoundManager.shared.play(.feed)
         Task {
             try? await Task.sleep(for: .seconds(1.5))
             funReaction = nil

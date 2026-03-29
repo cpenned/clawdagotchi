@@ -152,8 +152,6 @@ struct CrabView: View {
 // MARK: - Colors
 
 extension Color {
-    static let shellPink = Color(red: 0xF0 / 255.0, green: 0x90 / 255.0, blue: 0x80 / 255.0)
     static let shellPinkLight = Color(red: 0xF8 / 255.0, green: 0xB0 / 255.0, blue: 0xA0 / 255.0)
-    static let shellPinkDark = Color(red: 0xC8 / 255.0, green: 0x6A / 255.0, blue: 0x58 / 255.0)
     static let screenDark = Color(red: 0x1A / 255.0, green: 0x1A / 255.0, blue: 0x1A / 255.0)
 }

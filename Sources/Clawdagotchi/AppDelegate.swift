@@ -34,10 +34,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem?.menu = menu
     }
 
-    func updateMenubarVisibility() {
-        statusItem?.isVisible = AppSettings.shared.showMenubarIcon
-    }
-
     @objc private func toggleWidget() {
         AppSettings.shared.showWidget.toggle()
         if let window = NSApp.windows.first(where: { $0.title != "Settings" && !$0.title.isEmpty || $0.level == .floating }) {

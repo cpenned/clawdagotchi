@@ -6,6 +6,7 @@ enum SoundAction: String, CaseIterable {
     case permissionDenied = "permissionDenied"
     case sessionDone = "sessionDone"
     case poke = "poke"
+    case feed = "feed"
     case pet = "pet"
 
     var label: String {
@@ -15,6 +16,7 @@ enum SoundAction: String, CaseIterable {
         case .permissionDenied: "Permission denied"
         case .sessionDone: "Session complete"
         case .poke: "Poke the crab"
+        case .feed: "Feed the crab"
         case .pet: "Pet the crab"
         }
     }
@@ -26,6 +28,7 @@ enum SoundAction: String, CaseIterable {
         case .permissionDenied: "Basso"
         case .sessionDone: "Glass"
         case .poke: "Frog"
+        case .feed: "Bottle"
         case .pet: "Purr"
         }
     }
