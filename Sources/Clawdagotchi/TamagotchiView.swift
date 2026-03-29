@@ -1274,7 +1274,7 @@ struct LCDBackgroundView: View {
             let x = CGFloat((i * 7 + 13) % Int(w))
             let y = CGFloat((i * 11 + 7) % Int(h))
             let size = CGFloat((i % 2) + 1)
-            let opacity = 0.06 + Double(i % 4) * 0.01
+            let opacity = 0.15 + Double(i % 4) * 0.03
             context.fill(Path(CGRect(x: x, y: y, width: size, height: size)), with: .color(color.opacity(opacity)))
         }
     }
@@ -1289,8 +1289,8 @@ struct LCDBackgroundView: View {
             let spacing = h / CGFloat(dotCount + 2)
             for dot in 0..<dotCount {
                 let y = startY + CGFloat(dot) * spacing
-                let opacity = 0.06 + Double(dot) * 0.015
-                context.fill(Path(CGRect(x: x, y: y, width: 1, height: 2)), with: .color(color.opacity(opacity)))
+                let opacity = 0.15 + Double(dot) * 0.04
+                context.fill(Path(CGRect(x: x, y: y, width: 1.5, height: 3)), with: .color(color.opacity(opacity)))
             }
         }
     }
@@ -1311,7 +1311,7 @@ struct LCDBackgroundView: View {
                     path.addLine(to: CGPoint(x: xi, y: y))
                 }
             }
-            context.stroke(path, with: .color(color.opacity(0.07)), style: StrokeStyle(lineWidth: 0.5))
+            context.stroke(path, with: .color(color.opacity(0.18)), style: StrokeStyle(lineWidth: 0.8))
         }
     }
 
@@ -1327,14 +1327,13 @@ struct LCDBackgroundView: View {
             (15, 85, 55, 85, 55, 55),
         ]
         for (x1, y1, x2, y2, x3, y3) in segments {
-            // Scale to actual view size
             let sx = w / 110
             let sy = h / 90
             var path = Path()
             path.move(to: CGPoint(x: x1 * sx, y: y1 * sy))
             path.addLine(to: CGPoint(x: x2 * sx, y: y2 * sy))
             path.addLine(to: CGPoint(x: x3 * sx, y: y3 * sy))
-            context.stroke(path, with: .color(color.opacity(0.08)), style: StrokeStyle(lineWidth: 0.5))
+            context.stroke(path, with: .color(color.opacity(0.20)), style: StrokeStyle(lineWidth: 0.8))
         }
     }
 
@@ -1343,9 +1342,9 @@ struct LCDBackgroundView: View {
             let x = CGFloat((i * 11 + 7) % Int(w - 10)) + 5
             let y = CGFloat((i * 13 + 9) % Int(h - 10)) + 5
             let radius = CGFloat(2 + (i % 4))
-            let opacity = 0.06 + Double(i % 4) * 0.01
+            let opacity = 0.15 + Double(i % 4) * 0.03
             let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
-            context.stroke(Path(ellipseIn: rect), with: .color(color.opacity(opacity)), style: StrokeStyle(lineWidth: 0.5))
+            context.stroke(Path(ellipseIn: rect), with: .color(color.opacity(opacity)), style: StrokeStyle(lineWidth: 0.8))
         }
     }
 }
