@@ -205,14 +205,43 @@ struct TamagotchiView: View {
     }
 
     private var specularHighlight: some View {
-        Ellipse()
-            .fill(RadialGradient(
-                colors: [Color.white.opacity(style.specularIntensity), Color.white.opacity(0.0)],
-                center: .center, startRadius: 0, endRadius: 40
-            ))
-            .frame(width: 70, height: 28)
-            .offset(x: -30, y: -(eggHeight * 0.30))
-            .allowsHitTesting(false)
+        // Curved crescent highlight — follows the egg's upper-left curvature
+        Canvas { context, size in
+            let cx = size.width / 2
+            let cy = size.height / 2
+
+            // Long narrow arc stroke that tapers via gradient
+            var arc = Path()
+            arc.addArc(
+                center: CGPoint(x: cx + 15, y: cy + 40),
+                radius: 55,
+                startAngle: .degrees(200),
+                endAngle: .degrees(260),
+                clockwise: false
+            )
+            context.stroke(
+                arc,
+                with: .color(.white.opacity(style.specularIntensity * 0.6)),
+                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+            )
+
+            // Softer wider glow behind the streak
+            var glow = Path()
+            glow.addArc(
+                center: CGPoint(x: cx + 15, y: cy + 40),
+                radius: 55,
+                startAngle: .degrees(205),
+                endAngle: .degrees(255),
+                clockwise: false
+            )
+            context.stroke(
+                glow,
+                with: .color(.white.opacity(style.specularIntensity * 0.2)),
+                style: StrokeStyle(lineWidth: 20, lineCap: .round)
+            )
+        }
+        .frame(width: eggWidth, height: eggHeight)
+        .allowsHitTesting(false)
     }
 
     private var brandLabel: some View {
