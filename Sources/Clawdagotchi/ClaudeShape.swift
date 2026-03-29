@@ -198,39 +198,49 @@ struct CrabView: View {
                 context.fill(Path(CGRect(x: bcx - scale, y: bcy - scale, width: 2 * scale, height: 2 * scale)), with: .color(accessoryColor))
 
             case .partyHat:
+                // Cone hat sitting on top of head
                 var hat = Path()
-                hat.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-8) * scale))
-                hat.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + 0 * scale))
-                hat.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + 0 * scale))
+                hat.move(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-5) * scale))
+                hat.addLine(to: CGPoint(x: xOff + 27 * scale, y: yOff + 1 * scale))
+                hat.addLine(to: CGPoint(x: xOff + 39 * scale, y: yOff + 1 * scale))
                 hat.closeSubpath()
                 context.fill(hat, with: .color(accessoryColor))
+                // Small pom-pom on top
+                let pomRect = CGRect(x: xOff + 31 * scale, y: yOff + (-7) * scale, width: 4 * scale, height: 3 * scale)
+                context.fill(Path(ellipseIn: pomRect), with: .color(accessoryColor))
 
             case .sunglasses:
-                context.fill(r(CGRect(x: 10, y: 11, width: 46, height: 3)), with: .color(accessoryColor))
-                context.fill(r(CGRect(x: 28, y: 11, width: 10, height: 3)), with: .color(accessoryColor))
+                // Left lens
+                context.fill(r(CGRect(x: 11, y: 10, width: 12, height: 6)), with: .color(accessoryColor))
+                // Right lens
+                context.fill(r(CGRect(x: 43, y: 10, width: 12, height: 6)), with: .color(accessoryColor))
+                // Bridge
+                context.fill(r(CGRect(x: 23, y: 12, width: 20, height: 2)), with: .color(accessoryColor))
 
             case .topHat:
-                context.fill(r(CGRect(x: 20, y: -2, width: 26, height: 3)), with: .color(accessoryColor))
-                context.fill(r(CGRect(x: 25, y: -14, width: 16, height: 12)), with: .color(accessoryColor))
+                // Brim
+                context.fill(r(CGRect(x: 22, y: -1, width: 22, height: 3)), with: .color(accessoryColor))
+                // Crown (shorter to avoid clipping)
+                context.fill(r(CGRect(x: 26, y: -8, width: 14, height: 7)), with: .color(accessoryColor))
 
             case .crown:
                 var crown = Path()
-                crown.move(to: CGPoint(x: xOff + 22 * scale, y: yOff + (-2) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + (-8) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 30 * scale, y: yOff + (-4) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-10) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 36 * scale, y: yOff + (-4) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + (-8) * scale))
-                crown.addLine(to: CGPoint(x: xOff + 44 * scale, y: yOff + (-2) * scale))
+                crown.move(to: CGPoint(x: xOff + 24 * scale, y: yOff + (-1) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 27 * scale, y: yOff + (-5) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 30 * scale, y: yOff + (-3) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 33 * scale, y: yOff + (-7) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 36 * scale, y: yOff + (-3) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 39 * scale, y: yOff + (-5) * scale))
+                crown.addLine(to: CGPoint(x: xOff + 42 * scale, y: yOff + (-1) * scale))
                 crown.closeSubpath()
                 context.fill(crown, with: .color(accessoryColor))
 
             case .halo:
                 let haloRect = CGRect(
                     x: xOff + (33 - 10) * scale,
-                    y: yOff + (-10 - 3) * scale,
+                    y: yOff + (-6) * scale,
                     width: 20 * scale,
-                    height: 6 * scale
+                    height: 5 * scale
                 )
                 context.stroke(
                     Path(ellipseIn: haloRect),
