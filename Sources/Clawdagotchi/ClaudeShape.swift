@@ -80,15 +80,16 @@ struct CrabView: View {
     @State private var legPhase: Int = 0
     private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
 
-    // Geometry constants (viewBox: 66 wide x 52 tall)
+    // Geometry constants — extra headroom for accessories above the crab
     private let viewW: CGFloat = 66
-    private let viewH: CGFloat = 52
+    private let viewH: CGFloat = 66  // was 52, added 14 for hats/crown above head
+    private let crabOffsetY: CGFloat = 14  // shift crab body down within viewbox
 
     var body: some View {
         Canvas { context, canvasSize in
             let scale = size / viewH
             let xOff = (canvasSize.width - viewW * scale) / 2
-            let yOff = (canvasSize.height - viewH * scale) / 2
+            let yOff = (canvasSize.height - viewH * scale) / 2 + crabOffsetY * scale
 
             func r(_ rect: CGRect) -> Path {
                 Path(CGRect(
@@ -210,12 +211,14 @@ struct CrabView: View {
                 context.fill(Path(ellipseIn: pomRect), with: .color(accessoryColor))
 
             case .sunglasses:
-                // Left lens
-                context.fill(r(CGRect(x: 11, y: 10, width: 12, height: 6)), with: .color(accessoryColor))
-                // Right lens
-                context.fill(r(CGRect(x: 43, y: 10, width: 12, height: 6)), with: .color(accessoryColor))
-                // Bridge
-                context.fill(r(CGRect(x: 23, y: 12, width: 20, height: 2)), with: .color(accessoryColor))
+                // Left lens box around left eye
+                context.stroke(r(CGRect(x: 11, y: 9, width: 14, height: 10)), with: .color(accessoryColor),
+                               style: StrokeStyle(lineWidth: 1.5 * scale))
+                // Right lens box around right eye
+                context.stroke(r(CGRect(x: 43, y: 9, width: 14, height: 10)), with: .color(accessoryColor),
+                               style: StrokeStyle(lineWidth: 1.5 * scale))
+                // Bridge between lenses
+                context.fill(r(CGRect(x: 25, y: 13, width: 18, height: 2)), with: .color(accessoryColor))
 
             case .topHat:
                 // Brim
