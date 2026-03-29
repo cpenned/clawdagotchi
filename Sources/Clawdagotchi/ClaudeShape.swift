@@ -206,15 +206,14 @@ struct CrabView: View {
                 context.fill(hat, with: .color(accessoryColor))
 
             case .sunglasses:
-                context.fill(r(CGRect(x: 10, y: 11, width: 46, height: 3)), with: .color(eyeColor))
-                context.fill(r(CGRect(x: 28, y: 11, width: 10, height: 3)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: 10, y: 11, width: 46, height: 3)), with: .color(accessoryColor))
+                context.fill(r(CGRect(x: 28, y: 11, width: 10, height: 3)), with: .color(accessoryColor))
 
             case .topHat:
-                context.fill(r(CGRect(x: 20, y: -2, width: 26, height: 3)), with: .color(eyeColor))
-                context.fill(r(CGRect(x: 25, y: -14, width: 16, height: 12)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: 20, y: -2, width: 26, height: 3)), with: .color(accessoryColor))
+                context.fill(r(CGRect(x: 25, y: -14, width: 16, height: 12)), with: .color(accessoryColor))
 
             case .crown:
-                let goldenColor = Color(red: 1.0, green: 0.85, blue: 0.3)
                 var crown = Path()
                 crown.move(to: CGPoint(x: xOff + 22 * scale, y: yOff + (-2) * scale))
                 crown.addLine(to: CGPoint(x: xOff + 26 * scale, y: yOff + (-8) * scale))
@@ -224,7 +223,7 @@ struct CrabView: View {
                 crown.addLine(to: CGPoint(x: xOff + 40 * scale, y: yOff + (-8) * scale))
                 crown.addLine(to: CGPoint(x: xOff + 44 * scale, y: yOff + (-2) * scale))
                 crown.closeSubpath()
-                context.fill(crown, with: .color(goldenColor))
+                context.fill(crown, with: .color(accessoryColor))
 
             case .halo:
                 let haloRect = CGRect(
