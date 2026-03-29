@@ -53,6 +53,7 @@ struct TamagotchiView: View {
             buttons
         }
         .frame(width: eggWidth + padding * 2, height: eggHeight + padding * 2)
+        .rotation3DEffect(.degrees(3), axis: (x: 1, y: -0.5, z: 0), perspective: 0.8)
         .onChange(of: state) { _, newState in
             resetAnimations()
             startAnimations(for: newState)
@@ -294,14 +295,6 @@ struct TamagotchiView: View {
             screenText
                 .offset(y: screenHeight / 2 - 12)
 
-            // Glass reflection — diagonal white line
-            Rectangle()
-                .fill(Color.white.opacity(0.03))
-                .frame(width: screenWidth * 1.5, height: 4)
-                .rotationEffect(.degrees(-28))
-                .offset(x: -10, y: -15)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-                .allowsHitTesting(false)
         }
         .frame(width: screenWidth, height: screenHeight)
         .clipShape(RoundedRectangle(cornerRadius: 5))
