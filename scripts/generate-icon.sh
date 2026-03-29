@@ -92,48 +92,35 @@ ctx.setLineWidth(3)
 ctx.addPath(eggPath())
 ctx.strokePath()
 
-// --- Black screen ---
-let scrW = canvas * 0.46
-let scrH = canvas * 0.32
-let scrX = eggCX - scrW / 2
-let scrY = eggCY - eggH * 0.16
-
-let screenPath = CGPath(roundedRect: CGRect(x: scrX, y: scrY, width: scrW, height: scrH),
-                        cornerWidth: 10, cornerHeight: 10, transform: nil)
-ctx.setFillColor(red: 0x12/255.0, green: 0x12/255.0, blue: 0x12/255.0, alpha: 1.0)
-ctx.addPath(screenPath)
-ctx.fillPath()
-
-// --- Crab on screen ---
+// --- Black crab centered on egg ---
 let viewW: CGFloat = 66
 let viewH: CGFloat = 52
-let crabScale = min(scrW * 0.65 / viewW, scrH * 0.65 / viewH)
-let crabXOff = scrX + (scrW - viewW * crabScale) / 2
-let crabYOff = scrY + (scrH - viewH * crabScale) / 2
+let crabScale = canvas * 0.45 / viewW
+let crabXOff = eggCX - (viewW * crabScale) / 2
+let crabYOff = eggCY - (viewH * crabScale) / 2 - canvas * 0.04
 
-func crabRect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, r: CGFloat, g: CGFloat, b: CGFloat) {
-    ctx.setFillColor(red: r, green: g, blue: b, alpha: 1.0)
+func crabRect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat) {
+    ctx.setFillColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1.0)
     ctx.fill(CGRect(x: crabXOff + x * crabScale, y: crabYOff + y * crabScale,
                     width: w * crabScale, height: h * crabScale))
 }
 
-let crabR: CGFloat = 0xD9/255.0, crabG: CGFloat = 0x77/255.0, crabB: CGFloat = 0x57/255.0  // #D97757 orange
-
 // Antennae
-crabRect(0, 13, 6, 13, r: crabR, g: crabG, b: crabB)
-crabRect(60, 13, 6, 13, r: crabR, g: crabG, b: crabB)
+crabRect(0, 13, 6, 13)
+crabRect(60, 13, 6, 13)
 // Body
-crabRect(6, 0, 54, 39, r: crabR, g: crabG, b: crabB)
+crabRect(6, 0, 54, 39)
 // Legs
 for lx: CGFloat in [6, 18, 42, 54] {
-    crabRect(lx, 39, 6, 13, r: crabR, g: crabG, b: crabB)
+    crabRect(lx, 39, 6, 13)
 }
-// Eyes
-crabRect(14, 12, 6, 7, r: 0x1A/255.0, g: 0x1A/255.0, b: 0x1A/255.0)
-crabRect(46, 12, 6, 7, r: 0x1A/255.0, g: 0x1A/255.0, b: 0x1A/255.0)
+// Eyes (cutout — use egg gradient color as approximation)
+ctx.setFillColor(red: 0xF0/255.0, green: 0x90/255.0, blue: 0x80/255.0, alpha: 1.0)
+ctx.fill(CGRect(x: crabXOff + 14 * crabScale, y: crabYOff + 12 * crabScale, width: 6 * crabScale, height: 7 * crabScale))
+ctx.fill(CGRect(x: crabXOff + 46 * crabScale, y: crabYOff + 12 * crabScale, width: 6 * crabScale, height: 7 * crabScale))
 
-// --- Three black buttons below screen ---
-let btnY = scrY + scrH + canvas * 0.06
+// --- Three black buttons below crab ---
+let btnY = crabYOff + viewH * crabScale + canvas * 0.06
 let btnR: CGFloat = canvas * 0.022
 let btnSpacing = canvas * 0.055
 for i in -1...1 {
