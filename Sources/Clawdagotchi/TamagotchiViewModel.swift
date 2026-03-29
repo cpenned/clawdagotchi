@@ -20,6 +20,7 @@ enum MoodState: Equatable, Sendable {
 @MainActor
 @Observable
 final class TamagotchiViewModel {
+    static var shared: TamagotchiViewModel?
     struct Session: Sendable {
         var state: PetState
         var lastEventTime: Date
@@ -50,6 +51,7 @@ final class TamagotchiViewModel {
     private var lastFedTime: Date = Date()
 
     func start() {
+        Self.shared = self
         server = HookServer(
             onEvent: { [weak self] event in self?.handleEvent(event) },
             onPermission: { [weak self] perm in self?.handlePermission(perm) }
@@ -92,6 +94,18 @@ final class TamagotchiViewModel {
     }
 
     // MARK: - Mood system
+
+    func previewMood(_ mood: MoodState) {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            moodState = mood
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            withAnimation(.easeInOut(duration: 0.3)) {
+                moodState = .normal
+            }
+        }
+    }
 
     private func touchInteraction() {
         lastInteractionTime = Date()

@@ -163,6 +163,20 @@ struct SettingsView: View {
                 3. Use Claude Code normally — the crab reacts!
                 """)
 
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Preview Moods")
+                        .font(.headline)
+                    HStack(spacing: 8) {
+                        moodPreviewButton("Sleep", .sleeping)
+                        moodPreviewButton("Hungry", .hungry)
+                        moodPreviewButton("Angry", .angry)
+                        moodPreviewButton("Poop", .pooping)
+                    }
+                    Text("Triggers the mood on the live widget for 4 seconds.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 HStack {
                     Spacer()
                     Text("Clawdagotchi v2.0.0")
@@ -173,6 +187,14 @@ struct SettingsView: View {
             }
             .padding()
         }
+    }
+
+    private func moodPreviewButton(_ label: String, _ mood: MoodState) -> some View {
+        Button(label) {
+            TamagotchiViewModel.shared?.previewMood(mood)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
     }
 
     private func helpSection(_ title: String, _ body: String) -> some View {
