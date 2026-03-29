@@ -1,0 +1,16 @@
+Clawdagotchi
+Copyright 2024-2026 Chris Pennington
+
+This project includes code adapted from:
+
+Claude Island (https://github.com/farouqaldori/claude-island)
+Copyright Farouq Aldori
+Licensed under the Apache License, Version 2.0
+
+Adapted components:
+- CrabView canvas drawing geometry (ClaudeCrabIcon body/antennae/legs proportions)
+- Walking leg animation phase pattern
+- Permission hook architecture concepts
+
+The Claude Code mascot ("Clawd") is a trademark of Anthropic.
+This is an independent fan project, not affiliated with or endorsed by Anthropic.
