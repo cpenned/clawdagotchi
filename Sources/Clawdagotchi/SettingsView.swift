@@ -126,26 +126,35 @@ struct SettingsView: View {
                     "It listens for hook events and shows what Claude is doing as animated crab expressions."
                 )
 
-                helpSection("Crab Expressions", """
-                Idle — gentle bob, periodic blink (zzz)
-                Thinking — eyes look side to side (...)
-                Working — wide eyes, walking legs (>>>)
-                Done — happy squish eyes, bounce (^_^)
+                helpSection("Crab States (Claude Activity)", """
+                Idle — gentle bob, periodic blink
+                Thinking — eyes look side to side
+                Working — wide eyes, walking legs
+                Done — happy squish eyes, bounce
                 Permission — alert eyes, pulsing border
                 """)
 
+                helpSection("Crab Moods (Idle Behaviors)", """
+                Normal — happy and content
+                Sleeping — eyes close, zzz rises (2 min idle)
+                Hungry — small eyes, trembles (5 min unfed)
+                Angry — wide glare, still (8 min no interaction)
+                Pooping — squish face, "oops" (random)
+                Any button press or Claude event wakes it up!
+                """)
+
                 helpSection("Buttons (Normal Mode)", """
-                Left — Poke the crab (surprised jump)
-                Middle — (reserved)
-                Right — Pet the crab (happy walk)
+                Left — Poke (surprised jump, "hey! >_<")
+                Middle — Feed (nom nom eating)
+                Right — Pet (happy walk, "~ happy ~")
                 Buttons glow pink per active session count.
                 """)
 
                 helpSection("Buttons (Permission Mode)", """
                 Left (red) — Deny the permission
-                Middle (orange) — Shows tool name
+                Middle (orange) — Info
                 Right (green) — Allow the permission
-                The screen shows the tool requesting access.
+                Screen scrolls what the tool wants to do.
                 """)
 
                 helpSection("Setup", """

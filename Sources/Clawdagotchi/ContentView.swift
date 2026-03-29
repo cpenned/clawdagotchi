@@ -14,6 +14,8 @@ struct ContentView: View {
             sessionCount: viewModel.activeSessionCount,
             pendingPermission: viewModel.pendingPermission,
             pendingPermissionCount: viewModel.pendingPermissionCount,
+            moodState: viewModel.moodState,
+            greetingMessage: viewModel.greetingMessage,
             funReaction: viewModel.funReaction,
             onApprove: { viewModel.approvePermission() },
             onDeny: { viewModel.denyPermission() },

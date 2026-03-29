@@ -32,6 +32,8 @@ enum EyeStyle: Equatable {
     case blink
     case squish
     case wide
+    case sleepy
+    case tiny
 }
 
 // MARK: - Canvas crab (claude-island style with dynamic eyes)
@@ -126,6 +128,16 @@ struct CrabView: View {
             case .wide:
                 context.fill(r(CGRect(x: leftEyeX - 1, y: eyeY - 1, width: 8, height: 9)), with: .color(eyeColor))
                 context.fill(r(CGRect(x: rightEyeX - 1, y: eyeY - 1, width: 8, height: 9)), with: .color(eyeColor))
+
+            case .sleepy:
+                // Half-closed: thin slit with a line above (droopy lid)
+                context.fill(r(CGRect(x: leftEyeX, y: eyeY + 3, width: 6, height: 3)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: rightEyeX, y: eyeY + 3, width: 6, height: 3)), with: .color(eyeColor))
+
+            case .tiny:
+                // Small dots (hungry look)
+                context.fill(r(CGRect(x: leftEyeX + 1, y: eyeY + 2, width: 4, height: 4)), with: .color(eyeColor))
+                context.fill(r(CGRect(x: rightEyeX + 1, y: eyeY + 2, width: 4, height: 4)), with: .color(eyeColor))
             }
         }
         .frame(width: size * (viewW / viewH), height: size)

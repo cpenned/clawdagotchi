@@ -5,6 +5,8 @@ struct TamagotchiView: View {
     let sessionCount: Int
     let pendingPermission: PendingPermission?
     let pendingPermissionCount: Int
+    let moodState: MoodState
+    let greetingMessage: String
     let funReaction: TamagotchiViewModel.FunReaction?
     var onApprove: () -> Void = {}
     var onDeny: () -> Void = {}
@@ -23,6 +25,10 @@ struct TamagotchiView: View {
     @State private var showScrollMessage: Bool = false
     @State private var permScrollOffset: CGFloat = 0
     @State private var permScrollTimer: Task<Void, Never>?
+    @State private var zzzOffset: CGFloat = 0
+    @State private var zzzOpacity: Double = 0
+    @State private var zzzTimer: Task<Void, Never>?
+    @State private var hasShownGreeting: Bool = false
 
     private let eggWidth: CGFloat = 190
     private let eggHeight: CGFloat = 250
@@ -67,8 +73,19 @@ struct TamagotchiView: View {
         .onChange(of: funReaction) { _, reaction in
             if let reaction { applyFunReaction(reaction) }
         }
-        .onAppear { startAnimations(for: state) }
-        .onDisappear { blinkTimer?.cancel() }
+        .onAppear {
+            startAnimations(for: state)
+            if !hasShownGreeting && !greetingMessage.isEmpty {
+                hasShownGreeting = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showMarquee(greetingMessage)
+                }
+            }
+        }
+        .onDisappear { blinkTimer?.cancel(); zzzTimer?.cancel() }
+        .onChange(of: moodState) { _, newMood in
+            applyMoodAnimation(newMood)
+        }
     }
 
     // MARK: - Shell layers
@@ -298,6 +315,11 @@ struct TamagotchiView: View {
 
             crabCharacter
 
+            // Rising zzz when sleeping
+            if moodState == .sleeping {
+                risingZzz
+            }
+
             screenText
                 .offset(y: screenHeight / 2 - 12)
 
@@ -388,10 +410,10 @@ struct TamagotchiView: View {
         permScrollTimer = Task { @MainActor in
             while !Task.isCancelled {
                 permScrollOffset = available / 2 + 10
-                withAnimation(.linear(duration: max(2.0, Double(text.count) * 0.08))) {
+                withAnimation(.linear(duration: max(4.0, Double(text.count) * 0.18))) {
                     permScrollOffset = -(textWidth + 10)
                 }
-                try? await Task.sleep(for: .seconds(max(2.5, Double(text.count) * 0.08 + 0.5)))
+                try? await Task.sleep(for: .seconds(max(5.0, Double(text.count) * 0.18 + 1.0)))
             }
         }
     }
@@ -404,26 +426,111 @@ struct TamagotchiView: View {
         let available = screenWidth - 20
 
         if textWidth > available {
+            let duration = max(4.0, Double(message.count) * 0.2)
             scrollOffset = screenWidth / 2 + 20
-            withAnimation(.linear(duration: 2.0)) {
+            withAnimation(.linear(duration: duration)) {
                 scrollOffset = -(screenWidth / 2 + 20)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.5) {
+                showScrollMessage = false
             }
         } else {
             scrollOffset = 0
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            showScrollMessage = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                showScrollMessage = false
+            }
         }
     }
 
     private var stateLabelText: String {
+        if state == .idle {
+            switch moodState {
+            case .sleeping: return "zzz..."
+            case .hungry: return "hungry..."
+            case .angry: return "hmph!"
+            case .pooping: return "oops"
+            case .normal: return "~"
+            }
+        }
         switch state {
-        case .idle: "zzz"
-        case .thinking: "..."
-        case .working: ">>>"
-        case .done: "^_^"
-        case .permissionNeeded: ""
+        case .idle: return "~"
+        case .thinking: return "..."
+        case .working: return ">>>"
+        case .done: return "^_^"
+        case .permissionNeeded: return ""
+        }
+    }
+
+    // MARK: - Rising zzz animation
+
+    private var risingZzz: some View {
+        Text("z z z")
+            .font(.system(size: 6, weight: .bold, design: .monospaced))
+            .foregroundStyle(Color.white.opacity(zzzOpacity))
+            .offset(x: 20, y: -15 + zzzOffset)
+    }
+
+    private func startZzzAnimation() {
+        zzzTimer?.cancel()
+        zzzTimer = Task { @MainActor in
+            while !Task.isCancelled {
+                zzzOffset = 0
+                zzzOpacity = 0.4
+                withAnimation(.easeOut(duration: 2.0)) {
+                    zzzOffset = -20
+                    zzzOpacity = 0
+                }
+                try? await Task.sleep(for: .seconds(2.5))
+            }
+        }
+    }
+
+    private func stopZzzAnimation() {
+        zzzTimer?.cancel()
+        zzzOpacity = 0
+    }
+
+    // MARK: - Mood animations
+
+    private func applyMoodAnimation(_ mood: MoodState) {
+        switch mood {
+        case .sleeping:
+            withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .sleepy }
+            // Override idle bob to much slower
+            withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                bobOffset = 2
+            }
+            startZzzAnimation()
+
+        case .hungry:
+            stopZzzAnimation()
+            withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .tiny }
+            // Slight tremble
+            withAnimation(.easeInOut(duration: 0.15).repeatForever(autoreverses: true)) {
+                bobOffset = 0.5
+            }
+
+        case .angry:
+            stopZzzAnimation()
+            withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .wide }
+            bobOffset = 0
+
+        case .pooping:
+            stopZzzAnimation()
+            withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .squish }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(2))
+                showMarquee("oops")
+            }
+
+        case .normal:
+            stopZzzAnimation()
+            withAnimation(.easeInOut(duration: 0.3)) { currentEyeStyle = .normal }
+            // Restore normal idle bob
+            if state == .idle {
+                resetAnimations()
+                startAnimations(for: .idle)
+            }
         }
     }
 
