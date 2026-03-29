@@ -67,7 +67,15 @@ final class TamagotchiViewModel {
         case poke
         case pet
         case feed
+        case randomEvent(String)
     }
+
+    private(set) var simonSaysActive: Bool = false
+    private(set) var simonPattern: [Int] = []
+    private(set) var simonStep: Int = 0
+    private(set) var simonShowingPattern: Bool = false
+    private(set) var simonHighlight: Int? = nil
+    private var simonLength: Int = 3
 
     private var sessions: [String: Session] = [:]
     private var server: HookServer?
@@ -77,6 +85,7 @@ final class TamagotchiViewModel {
     private var lastInteractionTime: Date = Date()
     private var lastFedTime: Date = Date()
     private var lastPoopTime: Date = Date()
+    private var lastRandomEventTime: Date = Date()
 
     func start() {
         Self.shared = self
@@ -158,6 +167,7 @@ final class TamagotchiViewModel {
 
         let bonusXP = min(5 + settings.streak, 25)
         grantXP(bonusXP)
+        checkAndNotifyAchievements()
 
         if settings.streak > 1 {
             greetingMessage = "\(Self.timeOfDayGreeting()) \(settings.streak) day streak!"
@@ -269,6 +279,15 @@ final class TamagotchiViewModel {
                 moodState = newMood
             }
         }
+
+        if displayState == .idle && moodState == .normal && !simonSaysActive && Int.random(in: 0..<20) == 0 {
+            startSimonSays()
+        }
+
+        let sinceLastEvent = Date().timeIntervalSince(lastRandomEventTime)
+        if displayState == .idle && sinceLastEvent > 300 && !simonSaysActive && Int.random(in: 0..<33) == 0 {
+            triggerRandomEvent()
+        }
     }
 
     // MARK: - Permission actions
@@ -313,6 +332,7 @@ final class TamagotchiViewModel {
         SoundManager.shared.play(.poke)
         AppSettings.shared.totalPokes += 1
         grantXP(1)
+        checkAndNotifyAchievements()
         Task {
             try? await Task.sleep(for: .seconds(0.8))
             funReaction = nil
@@ -336,6 +356,7 @@ final class TamagotchiViewModel {
         SoundManager.shared.play(.feed)
         AppSettings.shared.totalFeeds += 1
         grantXP(1)
+        checkAndNotifyAchievements()
         Task {
             try? await Task.sleep(for: .seconds(1.5))
             funReaction = nil
@@ -364,8 +385,98 @@ final class TamagotchiViewModel {
         SoundManager.shared.play(.pet)
         AppSettings.shared.totalPets += 1
         grantXP(1)
+        checkAndNotifyAchievements()
         Task {
             try? await Task.sleep(for: .seconds(1.2))
+            funReaction = nil
+        }
+    }
+
+    // MARK: - Achievements
+
+    private func checkAndNotifyAchievements() {
+        let newAchievements = AchievementManager.shared.checkAchievements()
+        for achievement in newAchievements {
+            grantXP(achievement.xpBonus)
+            funReaction = .randomEvent("\(achievement.name)!")
+            Task {
+                try? await Task.sleep(for: .seconds(2.0))
+                funReaction = nil
+            }
+        }
+    }
+
+    // MARK: - Simon Says
+
+    func startSimonSays() {
+        guard !simonSaysActive, displayState == .idle, permissionQueue.isEmpty else { return }
+        simonSaysActive = true
+        simonStep = 0
+        simonPattern = (0..<simonLength).map { _ in Int.random(in: 0...2) }
+        simonShowingPattern = true
+        showSimonPattern()
+    }
+
+    private func showSimonPattern() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.5))
+            for button in simonPattern {
+                guard simonSaysActive else { return }
+                simonHighlight = button
+                SoundManager.shared.play(.poke)
+                try? await Task.sleep(for: .seconds(0.4))
+                simonHighlight = nil
+                try? await Task.sleep(for: .seconds(0.2))
+            }
+            simonShowingPattern = false
+        }
+    }
+
+    func simonInput(_ button: Int) {
+        guard simonSaysActive, !simonShowingPattern else { return }
+        if button == simonPattern[simonStep] {
+            simonStep += 1
+            SoundManager.shared.play(.simonCorrect)
+            if simonStep >= simonPattern.count {
+                let reward = 5 * simonPattern.count
+                grantXP(reward)
+                simonSaysActive = false
+                simonLength = min(simonLength + 1, 7)
+                funReaction = .randomEvent("nice! +\(reward)xp")
+                Task { try? await Task.sleep(for: .seconds(1.5)); funReaction = nil }
+            }
+        } else {
+            SoundManager.shared.play(.simonWrong)
+            simonSaysActive = false
+            simonLength = 3
+            funReaction = .randomEvent("oops!")
+            Task { try? await Task.sleep(for: .seconds(1.5)); funReaction = nil }
+        }
+    }
+
+    func cancelSimonSays() {
+        simonSaysActive = false
+        simonShowingPattern = false
+        simonHighlight = nil
+        simonLength = 3
+    }
+
+    // MARK: - Random Events
+
+    private func triggerRandomEvent() {
+        lastRandomEventTime = Date()
+        let events: [(String, Int)] = [
+            ("caught a bug!", 15),
+            ("found treasure!", 25),
+            ("make a wish!", 10),
+            ("made a friend!", 10),
+            ("power nap!", 5),
+        ]
+        let (message, xp) = events.randomElement()!
+        grantXP(xp)
+        funReaction = .randomEvent("\(message) +\(xp)xp")
+        Task {
+            try? await Task.sleep(for: .seconds(2.0))
             funReaction = nil
         }
     }
@@ -405,6 +516,8 @@ final class TamagotchiViewModel {
         let sessionId = event.sessionId
         let now = Date()
 
+        if simonSaysActive { cancelSimonSays() }
+
         lastInteractionTime = now
         // Claude activity clears all moods
         if moodState != .normal {
@@ -443,6 +556,7 @@ final class TamagotchiViewModel {
             return
         }
 
+        checkAndNotifyAchievements()
         updateDisplayState()
     }
 

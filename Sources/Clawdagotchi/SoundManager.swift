@@ -9,6 +9,8 @@ enum SoundAction: String, CaseIterable {
     case feed = "feed"
     case pet = "pet"
     case levelUp = "levelUp"
+    case simonCorrect = "simonCorrect"
+    case simonWrong = "simonWrong"
 
     var label: String {
         switch self {
@@ -20,6 +22,8 @@ enum SoundAction: String, CaseIterable {
         case .feed: "Feed the crab"
         case .pet: "Pet the crab"
         case .levelUp: "Level up"
+        case .simonCorrect: "Simon correct"
+        case .simonWrong: "Simon wrong"
         }
     }
 
@@ -33,6 +37,8 @@ enum SoundAction: String, CaseIterable {
         case .feed: "Bottle"
         case .pet: "Purr"
         case .levelUp: "Hero"
+        case .simonCorrect: "Tink"
+        case .simonWrong: "Basso"
         }
     }
 

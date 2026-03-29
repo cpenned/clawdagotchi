@@ -11,6 +11,8 @@ struct SettingsView: View {
                 .tabItem { Label("Level Up", systemImage: "star.fill") }
             statsTab
                 .tabItem { Label("Stats", systemImage: "chart.bar") }
+            achievementsTab
+                .tabItem { Label("Badges", systemImage: "trophy") }
             soundTab
                 .tabItem { Label("Sound", systemImage: "speaker.wave.2") }
             aboutTab
@@ -290,6 +292,39 @@ struct SettingsView: View {
                 statRow("Feeds", AppSettings.shared.totalFeeds)
                 statRow("Pets", AppSettings.shared.totalPets)
                 statRow("Poops cleaned", AppSettings.shared.totalPoopsCleaned)
+            }
+        }
+        .formStyle(.grouped)
+        .padding()
+    }
+
+    // MARK: - Achievements
+
+    private var achievementsTab: some View {
+        Form {
+            Section("\(AppSettings.shared.unlockedAchievements.count) / \(AchievementManager.all.count) Unlocked") {
+                ForEach(AchievementManager.all) { achievement in
+                    let unlocked = AppSettings.shared.unlockedAchievements.contains(achievement.id)
+                    HStack {
+                        Image(systemName: unlocked ? "trophy.fill" : "trophy")
+                            .foregroundStyle(unlocked ? .yellow : .gray)
+                            .frame(width: 20)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(achievement.name)
+                                .font(.body)
+                                .foregroundStyle(unlocked ? .primary : .secondary)
+                            Text(achievement.description)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if unlocked {
+                            Text("+\(achievement.xpBonus) XP")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
+                        }
+                    }
+                }
             }
         }
         .formStyle(.grouped)

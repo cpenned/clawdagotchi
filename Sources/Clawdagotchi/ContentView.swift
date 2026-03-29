@@ -23,11 +23,15 @@ struct ContentView: View {
             level: viewModel.currentLevel,
             xpProgress: viewModel.xpProgress,
             justLeveledUp: viewModel.justLeveledUp,
+            simonSaysActive: viewModel.simonSaysActive,
+            simonShowingPattern: viewModel.simonShowingPattern,
+            simonHighlight: viewModel.simonHighlight,
             onApprove: { viewModel.approvePermission() },
             onDeny: { viewModel.denyPermission() },
             onPoke: { viewModel.pokeCrab() },
             onFeed: { viewModel.feedCrab() },
-            onPet: { viewModel.petCrab() }
+            onPet: { viewModel.petCrab() },
+            onSimonInput: { viewModel.simonInput($0) }
         )
         .scaleEffect(widgetScale)
         .frame(width: baseWidth * widgetScale, height: baseHeight * widgetScale)

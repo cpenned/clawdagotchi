@@ -14,11 +14,15 @@ struct TamagotchiView: View {
     let level: Int
     let xpProgress: Double
     let justLeveledUp: Bool
+    let simonSaysActive: Bool
+    let simonShowingPattern: Bool
+    let simonHighlight: Int?
     var onApprove: () -> Void = {}
     var onDeny: () -> Void = {}
     var onPoke: () -> Void = {}
     var onFeed: () -> Void = {}
     var onPet: () -> Void = {}
+    var onSimonInput: (Int) -> Void = { _ in }
 
     @State private var bobOffset: CGFloat = 0
     @State private var eyeOffset: CGFloat = 0
@@ -545,6 +549,8 @@ struct TamagotchiView: View {
 
     private var stateLabelText: String {
         if state == .idle {
+            if simonSaysActive && simonShowingPattern { return "watch..." }
+            if simonSaysActive && !simonShowingPattern { return "your turn!" }
             switch moodState {
             case .sleeping: return "zzz..."
             case .hungry: return "i'm hungry!"
@@ -677,6 +683,25 @@ struct TamagotchiView: View {
                                   glowColor: .orange, lit: true, isCenter: true, action: {})
                 interactiveButton(baseColor: Color(red: 0.15, green: 0.5, blue: 0.2),
                                   glowColor: .green, lit: true, isCenter: false, action: onApprove)
+            } else if simonSaysActive {
+                let simonAction: (Int) -> () -> Void = { idx in
+                    simonShowingPattern ? { } : { onSimonInput(idx) }
+                }
+                interactiveButton(baseColor: Color(white: 0.25),
+                                  glowColor: simonHighlight == 0 ? .yellow : .shellPinkLight,
+                                  lit: simonHighlight == 0,
+                                  isCenter: false,
+                                  action: simonAction(0))
+                interactiveButton(baseColor: Color(white: 0.25),
+                                  glowColor: simonHighlight == 1 ? .yellow : .shellPinkLight,
+                                  lit: simonHighlight == 1,
+                                  isCenter: true,
+                                  action: simonAction(1))
+                interactiveButton(baseColor: Color(white: 0.25),
+                                  glowColor: simonHighlight == 2 ? .yellow : .shellPinkLight,
+                                  lit: simonHighlight == 2,
+                                  isCenter: false,
+                                  action: simonAction(2))
             } else {
                 interactiveButton(baseColor: Color(white: 0.25),
                                   glowColor: .shellPinkLight, lit: sessionCount >= 1, isCenter: false, action: onPoke)
@@ -816,6 +841,12 @@ struct TamagotchiView: View {
                     try? await Task.sleep(for: .seconds(0.15))
                 }
                 withAnimation(.easeInOut(duration: 0.2)) { currentEyeStyle = .normal }
+            }
+        case .randomEvent(let msg):
+            showMarquee(msg)
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.4)) { bobOffset = -6 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { bobOffset = 0 }
             }
         }
     }

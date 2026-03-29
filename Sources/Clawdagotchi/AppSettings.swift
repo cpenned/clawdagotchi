@@ -95,6 +95,14 @@ final class AppSettings {
     var totalPoopsCleaned: Int {
         didSet { UserDefaults.standard.set(totalPoopsCleaned, forKey: "totalPoopsCleaned") }
     }
+    var unlockedAchievements: Set<String> {
+        didSet {
+            let array = Array(unlockedAchievements)
+            if let data = try? JSONEncoder().encode(array) {
+                UserDefaults.standard.set(String(data: data, encoding: .utf8), forKey: "unlockedAchievements")
+            }
+        }
+    }
 
     var activeCrabColor: Color {
         useCustomCrabColor ? shellStyle.crabColor : Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)
@@ -127,6 +135,7 @@ final class AppSettings {
             "totalFeeds": 0,
             "totalPets": 0,
             "totalPoopsCleaned": 0,
+            "unlockedAchievements": "[]",
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
         self.showWidget = defaults.bool(forKey: "showWidget")
@@ -152,6 +161,13 @@ final class AppSettings {
         self.totalFeeds = defaults.integer(forKey: "totalFeeds")
         self.totalPets = defaults.integer(forKey: "totalPets")
         self.totalPoopsCleaned = defaults.integer(forKey: "totalPoopsCleaned")
+        if let str = defaults.string(forKey: "unlockedAchievements"),
+           let data = str.data(using: .utf8),
+           let array = try? JSONDecoder().decode([String].self, from: data) {
+            self.unlockedAchievements = Set(array)
+        } else {
+            self.unlockedAchievements = []
+        }
     }
 
     var birthDateFormatted: String {
