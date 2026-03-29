@@ -3,8 +3,8 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var viewModel: TamagotchiViewModel
 
-    private let baseWidth: CGFloat = 270
-    private let baseHeight: CGFloat = 330
+    private let baseWidth: CGFloat = 290
+    private let baseHeight: CGFloat = 350
 
     private var widgetScale: Double { AppSettings.shared.widgetScale }
 

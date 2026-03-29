@@ -81,10 +81,10 @@ struct CrabView: View {
     private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
 
     // Geometry constants — extra room for accessories (hats above, sparkles to sides)
-    private let viewW: CGFloat = 82  // 66 + 8 padding each side
-    private let viewH: CGFloat = 72  // 52 + 14 headroom + 6 legroom
-    private let crabOffsetX: CGFloat = 8   // shift crab right to center in wider viewbox
-    private let crabOffsetY: CGFloat = 14  // shift crab down for hat room
+    private let viewW: CGFloat = 86  // 66 + 10 padding each side
+    private let viewH: CGFloat = 80  // 52 + 22 headroom + 6 legroom
+    private let crabOffsetX: CGFloat = 10  // center crab in wider viewbox
+    private let crabOffsetY: CGFloat = 22  // shift crab down for hat/headphone room
 
     var body: some View {
         Canvas { context, canvasSize in
