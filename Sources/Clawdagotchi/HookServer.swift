@@ -46,12 +46,13 @@ final class HookServer: @unchecked Sendable {
     private(set) var authToken: String = ""
 
     func start() {
-        // Generate auth token and write to temp file
+        // Generate auth token and write to temp file with permissions set atomically
         authToken = UUID().uuidString
         let tokenPath = "/tmp/clawdagotchi.token"
-        try? authToken.write(toFile: tokenPath, atomically: true, encoding: .utf8)
-        try? FileManager.default.setAttributes(
-            [.posixPermissions: 0o600], ofItemAtPath: tokenPath
+        FileManager.default.createFile(
+            atPath: tokenPath,
+            contents: authToken.data(using: .utf8),
+            attributes: [.posixPermissions: 0o600]
         )
 
         // Bind to localhost only

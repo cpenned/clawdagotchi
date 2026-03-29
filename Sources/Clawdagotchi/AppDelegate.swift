@@ -7,6 +7,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppSettings.shared.applyDockPolicy()
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        try? FileManager.default.removeItem(atPath: "/tmp/clawdagotchi.token")
+    }
+
     func openSettingsFromKeyboard() {
         NSApp.activate(ignoringOtherApps: true)
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)

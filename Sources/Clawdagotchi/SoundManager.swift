@@ -39,15 +39,15 @@ enum SoundAction: String, CaseIterable {
     var settingsKey: String { "sound_\(rawValue)" }
 }
 
-let availableSounds = [
-    "Basso", "Blow", "Bottle", "Frog", "Funk",
-    "Glass", "Hero", "Morse", "Ping", "Pop",
-    "Purr", "Sosumi", "Submarine", "Tink",
-]
-
 @MainActor
 final class SoundManager {
     static let shared = SoundManager()
+
+    static let availableSounds = [
+        "Basso", "Blow", "Bottle", "Frog", "Funk",
+        "Glass", "Hero", "Morse", "Ping", "Pop",
+        "Purr", "Sosumi", "Submarine", "Tink",
+    ]
     private init() {}
 
     func soundName(for action: SoundAction) -> String {

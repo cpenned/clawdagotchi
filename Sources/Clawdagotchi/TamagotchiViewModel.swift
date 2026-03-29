@@ -54,6 +54,7 @@ final class TamagotchiViewModel {
     }
     var xpProgress: Double {
         let thresholds = Self.levelThresholds
+        guard currentLevel >= 1 else { return 0 }
         if currentLevel >= thresholds.count { return 1.0 }
         let prevThreshold = currentLevel > 1 ? thresholds[currentLevel - 1] : 0
         let nextThreshold = thresholds[currentLevel]
@@ -72,6 +73,7 @@ final class TamagotchiViewModel {
     private var server: HookServer?
     private var expiryTask: Task<Void, Never>?
     private var moodTask: Task<Void, Never>?
+    private var permissionExpiryTask: Task<Void, Never>?
     private var lastInteractionTime: Date = Date()
     private var lastFedTime: Date = Date()
     private var lastPoopTime: Date = Date()
@@ -102,7 +104,7 @@ final class TamagotchiViewModel {
         checkDailyLogin()
 
         // Also check for stale permissions (handled in terminal instead of Tamagotchi)
-        Task { [weak self] in
+        permissionExpiryTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(5))
                 self?.expireStalePermissions()
@@ -112,6 +114,10 @@ final class TamagotchiViewModel {
 
     private func expireStalePermissions() {
         let cutoff = Date().addingTimeInterval(-30)
+        let stale = permissionQueue.filter { $0.receivedAt < cutoff }
+        for perm in stale {
+            server?.respondToPermission(id: perm.id, decision: "deny", reason: "Timed out in Clawdagotchi")
+        }
         let before = permissionQueue.count
         permissionQueue.removeAll { $0.receivedAt < cutoff }
         if permissionQueue.count != before {
@@ -123,6 +129,7 @@ final class TamagotchiViewModel {
         server?.stop()
         expiryTask?.cancel()
         moodTask?.cancel()
+        permissionExpiryTask?.cancel()
     }
 
     private func checkDailyLogin() {
@@ -152,16 +159,19 @@ final class TamagotchiViewModel {
         }
     }
 
-    private static func todayString() -> String {
+    private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: Date())
+        return f
+    }()
+
+    private static func todayString() -> String {
+        dateFormatter.string(from: Date())
     }
 
     private static func yesterdayString() -> String {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: Date().addingTimeInterval(-86400))
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        return dateFormatter.string(from: yesterday)
     }
 
     private static func timeOfDayGreeting() -> String {
@@ -396,8 +406,6 @@ final class TamagotchiViewModel {
         switch event.event {
         case "PreToolUse":
             sessions[sessionId] = Session(state: .thinking, lastEventTime: now)
-            AppSettings.shared.totalToolUses += 1
-            grantXP(1)
 
         case "PostToolUse":
             sessions[sessionId] = Session(state: .working, lastEventTime: now)

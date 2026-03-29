@@ -457,7 +457,7 @@ struct SoundPickerRow: View {
             Text(action.label)
             Spacer()
             Picker("", selection: $selected) {
-                ForEach(availableSounds, id: \.self) { name in
+                ForEach(SoundManager.availableSounds, id: \.self) { name in
                     Text(name).tag(name)
                 }
             }
