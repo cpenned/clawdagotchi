@@ -95,7 +95,7 @@ ctx.strokePath()
 // --- Black crab centered on egg ---
 let viewW: CGFloat = 66
 let viewH: CGFloat = 52
-let crabScale = canvas * 0.45 / viewW
+let crabScale = canvas * 0.32 / viewW
 let crabXOff = eggCX - (viewW * crabScale) / 2
 let crabYOff = eggCY - (viewH * crabScale) / 2 - canvas * 0.04
 
