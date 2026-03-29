@@ -15,7 +15,8 @@ private struct HookPayload: Decodable, Sendable {
     let tool_input: String?
 }
 
-struct PendingPermission: Sendable {
+struct PendingPermission: Sendable, Identifiable {
+    let id: String
     let sessionId: String
     let tool: String
     let toolInput: String
@@ -28,8 +29,8 @@ final class HookServer: @unchecked Sendable {
     private let eventHandler: @MainActor @Sendable (HookEvent) -> Void
     private let permissionHandler: @MainActor @Sendable (PendingPermission) -> Void
 
-    // Held connection for permission response
-    private var pendingConnection: NWConnection?
+    // Held connections for permission responses, keyed by permission ID
+    private var pendingConnections: [String: NWConnection] = [:]
     private let lock = NSLock()
 
     init(
@@ -87,18 +88,17 @@ final class HookServer: @unchecked Sendable {
         listener?.cancel()
         listener = nil
         lock.lock()
-        pendingConnection?.cancel()
-        pendingConnection = nil
+        for conn in pendingConnections.values { conn.cancel() }
+        pendingConnections.removeAll()
         lock.unlock()
     }
 
-    func respondToPermission(decision: String, reason: String? = nil) {
+    func respondToPermission(id: String, decision: String, reason: String? = nil) {
         lock.lock()
-        guard let conn = pendingConnection else {
+        guard let conn = pendingConnections.removeValue(forKey: id) else {
             lock.unlock()
             return
         }
-        pendingConnection = nil
         lock.unlock()
 
         var responseDict: [String: Any] = [
@@ -195,17 +195,17 @@ final class HookServer: @unchecked Sendable {
             respond(conn, status: "200 OK", body: #"{"ok":true}"#)
 
         case "/permission":
+            let permId = UUID().uuidString
             let permission = PendingPermission(
+                id: permId,
                 sessionId: payload.session_id,
                 tool: payload.tool ?? "unknown",
                 toolInput: payload.tool_input ?? "",
                 receivedAt: Date()
             )
 
-            // Cancel any previous pending connection
             lock.lock()
-            pendingConnection?.cancel()
-            pendingConnection = conn
+            pendingConnections[permId] = conn
             lock.unlock()
 
             let handler = self.permissionHandler

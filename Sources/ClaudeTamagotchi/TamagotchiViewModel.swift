@@ -6,7 +6,6 @@ enum PetState: Equatable, Sendable {
     case thinking
     case working
     case done
-    case permissionNeeded
 }
 
 @MainActor
@@ -19,28 +18,15 @@ final class TamagotchiViewModel {
 
     private(set) var displayState: PetState = .idle
     private(set) var activeSessionCount: Int = 0
-    private(set) var lastToolUsed: String = ""
-    private(set) var funReaction: FunReaction?
-
-    // Permission queue
-    private(set) var permissionQueue: [PendingPermission] = []
-    var pendingPermission: PendingPermission? { permissionQueue.first }
-    var pendingPermissionCount: Int { permissionQueue.count }
-
-    enum FunReaction: Equatable {
-        case poke
-        case pet
-    }
 
     private var sessions: [String: Session] = [:]
     private var server: HookServer?
     private var expiryTask: Task<Void, Never>?
 
     func start() {
-        server = HookServer(
-            onEvent: { [weak self] event in self?.handleEvent(event) },
-            onPermission: { [weak self] perm in self?.handlePermission(perm) }
-        )
+        server = HookServer { [weak self] event in
+            self?.handleEvent(event)
+        }
         server?.start()
 
         expiryTask = Task { [weak self] in
@@ -56,55 +42,9 @@ final class TamagotchiViewModel {
         expiryTask?.cancel()
     }
 
-    // MARK: - Permission actions
-
-    func approvePermission() {
-        guard let perm = pendingPermission else { return }
-        server?.respondToPermission(id: perm.id, decision: "allow")
-        permissionQueue.removeFirst()
-        SoundManager.shared.play(.permissionApproved)
-        updateDisplayState()
-    }
-
-    func denyPermission() {
-        guard let perm = pendingPermission else { return }
-        server?.respondToPermission(id: perm.id, decision: "deny", reason: "Denied from Clawdagotchi")
-        permissionQueue.removeFirst()
-        SoundManager.shared.play(.permissionDenied)
-        updateDisplayState()
-    }
-
-    // MARK: - Fun interactions
-
-    func pokeCrab() {
-        guard permissionQueue.isEmpty else { return }
-        funReaction = .poke
-        SoundManager.shared.play(.poke)
-        Task {
-            try? await Task.sleep(for: .seconds(0.8))
-            funReaction = nil
-        }
-    }
-
-    func petCrab() {
-        guard permissionQueue.isEmpty else { return }
-        funReaction = .pet
-        SoundManager.shared.play(.pet)
-        Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            funReaction = nil
-        }
-    }
-
-    // MARK: - Event handling
-
     private func handleEvent(_ event: HookEvent) {
         let sessionId = event.sessionId
         let now = Date()
-
-        if !event.tool.isEmpty {
-            lastToolUsed = event.tool
-        }
 
         switch event.event {
         case "PreToolUse":
@@ -115,7 +55,6 @@ final class TamagotchiViewModel {
 
         case "Stop", "SubagentStop":
             sessions[sessionId] = Session(state: .done, lastEventTime: now)
-            SoundManager.shared.play(.sessionDone)
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(2))
                 self?.sessions.removeValue(forKey: sessionId)
@@ -129,16 +68,6 @@ final class TamagotchiViewModel {
         updateDisplayState()
     }
 
-    private func handlePermission(_ perm: PendingPermission) {
-        SoundManager.shared.play(.permissionAlert)
-        permissionQueue.append(perm)
-        sessions[perm.sessionId] = Session(state: .permissionNeeded, lastEventTime: perm.receivedAt)
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            displayState = .permissionNeeded
-        }
-        activeSessionCount = sessions.count
-    }
-
     private func expireStaleSessions() {
         let cutoff = Date().addingTimeInterval(-60)
         let before = sessions.count
@@ -150,13 +79,6 @@ final class TamagotchiViewModel {
 
     private func updateDisplayState() {
         activeSessionCount = sessions.count
-
-        if !permissionQueue.isEmpty {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                displayState = .permissionNeeded
-            }
-            return
-        }
 
         if sessions.isEmpty {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {

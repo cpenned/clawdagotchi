@@ -13,6 +13,7 @@ struct ContentView: View {
             state: viewModel.displayState,
             sessionCount: viewModel.activeSessionCount,
             pendingPermission: viewModel.pendingPermission,
+            pendingPermissionCount: viewModel.pendingPermissionCount,
             funReaction: viewModel.funReaction,
             onApprove: { viewModel.approvePermission() },
             onDeny: { viewModel.denyPermission() },

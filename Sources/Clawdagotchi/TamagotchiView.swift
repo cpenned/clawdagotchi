@@ -4,6 +4,7 @@ struct TamagotchiView: View {
     let state: PetState
     let sessionCount: Int
     let pendingPermission: PendingPermission?
+    let pendingPermissionCount: Int
     let funReaction: TamagotchiViewModel.FunReaction?
     var onApprove: () -> Void = {}
     var onDeny: () -> Void = {}
@@ -319,7 +320,7 @@ struct TamagotchiView: View {
             eyeStyle: currentEyeStyle,
             animateLegs: isWalking
         )
-        .offset(y: bobOffset - 4)
+        .offset(y: bobOffset + 4)
     }
 
     private var botNameLabel: some View {
@@ -335,9 +336,15 @@ struct TamagotchiView: View {
                     Text(perm.tool)
                         .font(.system(size: 7, weight: .bold, design: .monospaced))
                         .foregroundStyle(Color.orange.opacity(0.7))
-                    Text("Allow?")
-                        .font(.system(size: 6, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Color.white.opacity(0.3))
+                    if pendingPermissionCount > 1 {
+                        Text("1 of \(pendingPermissionCount)")
+                            .font(.system(size: 5, weight: .medium, design: .monospaced))
+                            .foregroundStyle(Color.white.opacity(0.2))
+                    } else {
+                        Text("Allow?")
+                            .font(.system(size: 6, weight: .medium, design: .monospaced))
+                            .foregroundStyle(Color.white.opacity(0.3))
+                    }
                 }
             } else {
                 Text(stateLabelText)
