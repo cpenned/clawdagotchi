@@ -553,7 +553,7 @@ struct TamagotchiView: View {
             case .hungry: return "i'm hungry!"
             case .angry: return "hmph!"
             case .pooping: return "oops"
-            case .normal: return "LV \(level)"
+            case .normal: return justLeveledUp ? "LV \(level)" : "~"
             }
         }
         switch state {
