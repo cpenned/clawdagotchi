@@ -45,7 +45,7 @@ enum CrabAccessory: Int, CaseIterable, Sendable {
     case sunglasses = 4
     case topHat = 5
     case crown = 6
-    case halo = 7
+    case headphones = 7
     case starAura = 8
 
     static func forLevel(_ level: Int) -> CrabAccessory {
@@ -60,7 +60,7 @@ enum CrabAccessory: Int, CaseIterable, Sendable {
         if level >= 6 { items.append(.crown) }
         else if level >= 5 { items.append(.topHat) }
         else if level >= 3 { items.append(.partyHat) }
-        if level >= 7 { items.append(.halo) }
+        if level >= 7 { items.append(.headphones) }
         if level >= 8 { items.append(.starAura) }
         return items
     }
@@ -238,32 +238,40 @@ struct CrabView: View {
                 crown.closeSubpath()
                 context.fill(crown, with: .color(accessoryColor))
 
-            case .halo:
-                let haloRect = CGRect(
-                    x: xOff + (33 - 10) * scale,
-                    y: yOff + (-6) * scale,
-                    width: 20 * scale,
-                    height: 5 * scale
-                )
-                context.stroke(
-                    Path(ellipseIn: haloRect),
-                    with: .color(accessoryColor.opacity(0.6)),
-                    style: StrokeStyle(lineWidth: 2 * scale)
-                )
+            case .headphones:
+                // Headband arc over the top of head
+                var band = Path()
+                band.addArc(center: CGPoint(x: xOff + 33 * scale, y: yOff + 6 * scale),
+                            radius: 22 * scale,
+                            startAngle: .degrees(200), endAngle: .degrees(340), clockwise: false)
+                context.stroke(band, with: .color(accessoryColor),
+                               style: StrokeStyle(lineWidth: 2 * scale, lineCap: .round))
+                // Left ear cup
+                context.fill(r(CGRect(x: 4, y: 8, width: 6, height: 10)), with: .color(accessoryColor))
+                // Right ear cup
+                context.fill(r(CGRect(x: 56, y: 8, width: 6, height: 10)), with: .color(accessoryColor))
 
             case .starAura:
-                let diamondPositions: [(CGFloat, CGFloat)] = [(0, 5), (62, 5), (5, 42), (57, 42)]
-                let ds = CGFloat(2) * scale
-                for (dx, dy) in diamondPositions {
-                    let cx2 = xOff + dx * scale
-                    let cy2 = yOff + dy * scale
-                    var diamond = Path()
-                    diamond.move(to: CGPoint(x: cx2, y: cy2 - ds))
-                    diamond.addLine(to: CGPoint(x: cx2 + ds, y: cy2))
-                    diamond.addLine(to: CGPoint(x: cx2, y: cy2 + ds))
-                    diamond.addLine(to: CGPoint(x: cx2 - ds, y: cy2))
-                    diamond.closeSubpath()
-                    context.fill(diamond, with: .color(accessoryColor))
+                // 6 sparkle crosses around the body
+                let sparkles: [(CGFloat, CGFloat)] = [
+                    (-4, 3), (66, 3), (-3, 35), (67, 35), (10, -5), (56, -5)
+                ]
+                for (sx, sy) in sparkles {
+                    let cx2 = xOff + sx * scale
+                    let cy2 = yOff + sy * scale
+                    let arm = 3 * scale
+                    // Vertical line
+                    var v = Path()
+                    v.move(to: CGPoint(x: cx2, y: cy2 - arm))
+                    v.addLine(to: CGPoint(x: cx2, y: cy2 + arm))
+                    context.stroke(v, with: .color(accessoryColor.opacity(0.7)),
+                                   style: StrokeStyle(lineWidth: 1 * scale, lineCap: .round))
+                    // Horizontal line
+                    var h = Path()
+                    h.move(to: CGPoint(x: cx2 - arm, y: cy2))
+                    h.addLine(to: CGPoint(x: cx2 + arm, y: cy2))
+                    context.stroke(h, with: .color(accessoryColor.opacity(0.7)),
+                                   style: StrokeStyle(lineWidth: 1 * scale, lineCap: .round))
                 }
             }
             } // end for acc
