@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var settings = AppSettings.shared
+    @State private var selectedTab: SettingsTab = .appearance
 
     var body: some View {
         TabView {
@@ -491,6 +492,59 @@ Age: \(AppSettings.shared.ageInDays) days
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    @ViewBuilder
+    private func settingsSection<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label.uppercased())
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color(white: 0.33))
+                .tracking(1.5)
+            VStack(spacing: 0) {
+                content()
+            }
+            .background(Color(white: 0.145))
+            .cornerRadius(6)
+        }
+    }
+
+    private func settingsRow(_ label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.white)
+            Spacer()
+            Text(value)
+                .font(.system(size: 11))
+                .foregroundStyle(Color(white: 0.6))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+}
+
+enum SettingsTab: String, CaseIterable {
+    case appearance = "Appearance"
+    case levelUp = "Level Up"
+    case stats = "Stats"
+    case badges = "Badges"
+    case sound = "Sound"
+    case about = "About"
+}
+
+struct PillTabButtonStyle: ButtonStyle {
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 5)
+            .background(isSelected ? Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0) : Color.clear)
+            .foregroundStyle(isSelected ? Color.white : Color(white: 0.4))
+            .cornerRadius(6)
+            .contentShape(Rectangle())
     }
 }
 
