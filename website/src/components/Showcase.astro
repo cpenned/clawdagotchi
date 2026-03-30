@@ -1,25 +1,16 @@
 ---
-const accessories = [
-  { name: 'None', level: 1, color: '#D97757' },
-  { name: 'Bow Tie', level: 2, color: '#D97757' },
-  { name: 'Party Hat', level: 3, color: '#D97757' },
-  { name: 'Sunglasses', level: 4, color: '#D97757' },
-  { name: 'Top Hat', level: 5, color: '#D97757' },
-  { name: 'Crown', level: 6, color: '#D97757' },
-  { name: 'Headphones', level: 7, color: '#D97757' },
-  { name: '✨ Max', level: 8, color: '#D97757' },
+// Each level shows all stacked accessories for that level
+// Matches Swift's CrabAccessory.allUnlocked(for:) logic
+const levels = [
+  { level: 1, name: 'None', accessories: [] },
+  { level: 2, name: 'Bow Tie', accessories: ['bowTie'] },
+  { level: 3, name: 'Party Hat', accessories: ['bowTie', 'partyHat'] },
+  { level: 4, name: 'Sunglasses', accessories: ['bowTie', 'sunglasses', 'partyHat'] },
+  { level: 5, name: 'Top Hat', accessories: ['bowTie', 'sunglasses', 'topHat'] },
+  { level: 6, name: 'Crown', accessories: ['bowTie', 'sunglasses', 'crown'] },
+  { level: 7, name: 'Headphones', accessories: ['bowTie', 'sunglasses', 'crown', 'headphones'] },
+  { level: 8, name: 'Star Aura', accessories: ['bowTie', 'sunglasses', 'crown', 'headphones', 'starAura'] },
 ]
-
-const accessoryEmojis: Record<string, string> = {
-  'None': '',
-  'Bow Tie': '🎀',
-  'Party Hat': '🎉',
-  'Sunglasses': '🕶️',
-  'Top Hat': '🎩',
-  'Crown': '👑',
-  'Headphones': '🎧',
-  '✨ Max': '✨',
-}
 ---
 
 <section class="py-24 px-6 overflow-hidden">
@@ -29,59 +20,85 @@ const accessoryEmojis: Record<string, string> = {
         Dress up your crab
       </h2>
       <p class="text-[var(--text-secondary)] text-lg max-w-xl mx-auto">
-        Level up to unlock new accessories. Show off your dedication.
+        Level up to unlock new accessories. They stack as you progress.
       </p>
     </div>
 
     <div class="flex gap-4 overflow-x-auto pb-4 justify-start md:justify-center scrollbar-hide">
-      {accessories.map(acc => (
+      {levels.map(({ level, name, accessories }) => (
         <div class="flex-shrink-0 flex flex-col items-center gap-3">
-          <div class="w-20 h-20 bg-[var(--card)] border border-[var(--border)] rounded-2xl flex flex-col items-center justify-center gap-1 hover:border-[rgba(217,119,87,0.3)] transition-colors">
-            <!-- Mini crab SVG -->
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <div class="w-24 h-24 bg-[var(--card)] border border-[var(--border)] rounded-2xl flex items-center justify-center hover:border-[rgba(217,119,87,0.3)] transition-colors">
+            <!-- SVG crab matching Swift CrabView geometry -->
+            <!-- ViewBox: 86x80, crabOffsetX=10, crabOffsetY=22 -->
+            <svg width="48" height="48" viewBox="0 0 86 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Antennae -->
+              <rect x="10" y="35" width="6" height="13" fill="#D97757"/>
+              <rect x="70" y="35" width="6" height="13" fill="#D97757"/>
               <!-- Body -->
-              <rect x="9" y="13" width="18" height="13" rx="3" fill="#D97757"/>
-              <!-- Claws -->
-              <rect x="3" y="12" width="6" height="5" rx="2" fill="#D97757"/>
-              <rect x="27" y="12" width="6" height="5" rx="2" fill="#D97757"/>
+              <rect x="16" y="22" width="54" height="39" fill="#D97757"/>
               <!-- Legs -->
-              <rect x="10" y="26" width="3" height="5" rx="1.5" fill="#D97757"/>
-              <rect x="16.5" y="26" width="3" height="5" rx="1.5" fill="#D97757"/>
-              <rect x="23" y="26" width="3" height="5" rx="1.5" fill="#D97757"/>
+              <rect x="16" y="61" width="6" height="13" fill="#D97757"/>
+              <rect x="28" y="61" width="6" height="13" fill="#D97757"/>
+              <rect x="52" y="61" width="6" height="13" fill="#D97757"/>
+              <rect x="64" y="61" width="6" height="13" fill="#D97757"/>
               <!-- Eyes -->
-              <rect x="13" y="16" width="4" height="4" rx="1" fill="#1A1A1A"/>
-              <rect x="19" y="16" width="4" height="4" rx="1" fill="#1A1A1A"/>
-              {/* Accessory overlay */}
-              {acc.name === 'Sunglasses' && (
-                <>
-                  <rect x="11" y="14" width="6" height="7" rx="1" fill="none" stroke="white" stroke-width="1"/>
-                  <rect x="19" y="14" width="6" height="7" rx="1" fill="none" stroke="white" stroke-width="1"/>
-                  <line x1="17" y1="17.5" x2="19" y2="17.5" stroke="white" stroke-width="1"/>
-                </>
+              <rect x="24" y="34" width="6" height="7" fill="#1A1A1A"/>
+              <rect x="56" y="34" width="6" height="7" fill="#1A1A1A"/>
+
+              <!-- Accessories (white, matching Swift coordinates) -->
+              {accessories.includes('bowTie') && (
+                <g>
+                  <polygon points="43,60 39,57 39,63" fill="white"/>
+                  <polygon points="43,60 47,57 47,63" fill="white"/>
+                  <rect x="42" y="59" width="2" height="2" fill="white"/>
+                </g>
               )}
-              {acc.name === 'Bow Tie' && (
-                <text x="18" y="12" text-anchor="middle" font-size="8" fill="#ff6eb4">🎀</text>
+              {accessories.includes('partyHat') && (
+                <g>
+                  <polygon points="43,10 32,24 54,24" fill="white"/>
+                  <ellipse cx="43" cy="7" rx="3" ry="2.5" fill="white"/>
+                </g>
               )}
-              {acc.name === 'Crown' && (
-                <text x="18" y="11" text-anchor="middle" font-size="9">👑</text>
+              {accessories.includes('sunglasses') && (
+                <g>
+                  <rect x="21" y="31" width="14" height="10" fill="none" stroke="white" stroke-width="1.5"/>
+                  <rect x="53" y="31" width="14" height="10" fill="none" stroke="white" stroke-width="1.5"/>
+                  <rect x="35" y="35" width="18" height="2" fill="white"/>
+                </g>
               )}
-              {acc.name === 'Top Hat' && (
-                <text x="18" y="10" text-anchor="middle" font-size="9">🎩</text>
+              {accessories.includes('topHat') && (
+                <g>
+                  <rect x="32" y="21" width="22" height="3" fill="white"/>
+                  <rect x="36" y="14" width="14" height="7" fill="white"/>
+                </g>
               )}
-              {acc.name === 'Party Hat' && (
-                <text x="18" y="10" text-anchor="middle" font-size="9">🎉</text>
+              {accessories.includes('crown') && (
+                <g>
+                  <polygon points="28,22 33,14 38,18 43,10 48,18 53,14 58,22" fill="white"/>
+                </g>
               )}
-              {acc.name === 'Headphones' && (
-                <text x="18" y="12" text-anchor="middle" font-size="9">🎧</text>
+              {accessories.includes('headphones') && (
+                <g>
+                  <path d="M 20 30 A 22 22 0 0 1 66 30" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                  <rect x="14" y="30" width="6" height="10" fill="white"/>
+                  <rect x="66" y="30" width="6" height="10" fill="white"/>
+                </g>
               )}
-              {acc.name === '✨ Max' && (
-                <text x="18" y="10" text-anchor="middle" font-size="9">✨</text>
+              {accessories.includes('starAura') && (
+                <g opacity="0.7">
+                  {[[-4,25],[70,25],[-3,57],[71,57],[20,17],[66,17]].map(([sx,sy], i) => (
+                    <g key={i}>
+                      <line x1={10+sx} y1={22+sy-3} x2={10+sx} y2={22+sy+3} stroke="white" stroke-width="1" stroke-linecap="round"/>
+                      <line x1={10+sx-3} y1={22+sy} x2={10+sx+3} y2={22+sy} stroke="white" stroke-width="1" stroke-linecap="round"/>
+                    </g>
+                  ))}
+                </g>
               )}
             </svg>
           </div>
           <div class="text-center">
-            <p class="text-white text-xs font-medium">{acc.name}</p>
-            <p class="text-[var(--text-secondary)] text-xs">LV {acc.level}</p>
+            <p class="text-white text-xs font-medium">{name}</p>
+            <p class="text-[var(--text-secondary)] text-xs">LV {level}</p>
           </div>
         </div>
       ))}
