@@ -37,26 +37,22 @@ final class UpdateChecker {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                if !silent { showUpToDate() }
+                if !silent { showCheckFailed() }
                 return
             }
 
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let tagName = json["tag_name"] as? String,
                   let htmlURL = json["html_url"] as? String else {
-                if !silent { showUpToDate() }
+                if !silent { showCheckFailed() }
                 return
             }
 
-            let latestVersion = tagName.replacingOccurrences(of: "v", with: "")
+            let latestVersion = tagName.hasPrefix("v") ? String(tagName.dropFirst()) : tagName
 
-            // Extract DMG asset download URL
-            var dmgURL: String? = nil
-            if let assets = json["assets"] as? [[String: Any]] {
-                dmgURL = assets
-                    .first { ($0["name"] as? String)?.hasSuffix(".dmg") == true }
-                    .flatMap { $0["browser_download_url"] as? String }
-            }
+            let dmgURL: String? = (json["assets"] as? [[String: Any]])?
+                .first { ($0["name"] as? String)?.hasSuffix(".dmg") == true }
+                .flatMap { $0["browser_download_url"] as? String }
 
             if isNewer(latestVersion, than: currentVersion) {
                 showUpdateAvailable(version: latestVersion, releaseURL: htmlURL, dmgURL: dmgURL)
@@ -64,7 +60,7 @@ final class UpdateChecker {
                 showUpToDate()
             }
         } catch {
-            if !silent { showUpToDate() }
+            if !silent { showCheckFailed() }
         }
     }
 
@@ -110,6 +106,15 @@ final class UpdateChecker {
                 await downloadAndInstall(version: version, dmgURL: dmgURL, releaseURL: releaseURL)
             }
         }
+    }
+
+    private func showCheckFailed() {
+        let alert = NSAlert()
+        alert.messageText = "Update Check Failed"
+        alert.informativeText = "Could not reach GitHub. Check your connection and try again."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     private func showUpToDate() {
