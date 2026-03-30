@@ -241,7 +241,6 @@ final class TamagotchiViewModel {
 
         let now = Date()
         let sinceInteraction = now.timeIntervalSince(lastInteractionTime)
-        let sinceFed = now.timeIntervalSince(lastFedTime)
         let sincePoop = now.timeIntervalSince(lastPoopTime)
 
         // Don't override pooping animation or states needing specific actions

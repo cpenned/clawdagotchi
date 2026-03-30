@@ -86,7 +86,7 @@ struct SettingsView: View {
             Section("Seasonal") {
                 Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
                 if let seasonal = CrabAccessory.seasonalAccessory() {
-                    Text("Active now: \(seasonal)")
+                    Text("Active now: \(String(describing: seasonal))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
@@ -200,7 +200,7 @@ struct SettingsView: View {
                             .font(.headline)
 
                         if acc != .none {
-                            Text("Unlocks: \(acc)")
+                            Text("Unlocks: \(String(describing: acc))")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
