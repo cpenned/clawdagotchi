@@ -29,12 +29,6 @@
 
 Download the latest `.dmg` from [Releases](https://github.com/cpenned/clawdagotchi/releases), open it, and drag Clawdagotchi to Applications.
 
-On first launch, macOS may show a Gatekeeper warning. Run this once to fix it:
-
-```bash
-xattr -cr /Applications/Clawdagotchi.app
-```
-
 Or build from source:
 
 ```bash
