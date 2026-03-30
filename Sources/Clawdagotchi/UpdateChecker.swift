@@ -171,12 +171,43 @@ final class UpdateChecker {
     }
 
     private func installUpdate(dmgPath: URL, releaseURL: String) {
-        // Task 3
+        let mountPoint = "/tmp/clawdagotchi-update-mount"
+        let appDestination = Bundle.main.bundlePath
+
+        shell("hdiutil detach '\(mountPoint)' -quiet 2>/dev/null || true")
+
+        let mountResult = shell("hdiutil attach -nobrowse -quiet '\(dmgPath.path)' -mountpoint '\(mountPoint)'")
+        guard mountResult == 0 else {
+            openReleasesPage(releaseURL)
+            return
+        }
+
+        let copyResult = shell("ditto '\(mountPoint)/Clawdagotchi.app' '\(appDestination)'")
+
+        shell("hdiutil detach '\(mountPoint)' -quiet")
+
+        guard copyResult == 0 else {
+            openReleasesPage(releaseURL)
+            return
+        }
+
+        try? FileManager.default.removeItem(at: dmgPath)
+
+        let config = NSWorkspace.OpenConfiguration()
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config) { _, _ in }
+
+        NSApp.terminate(nil)
     }
 
     @discardableResult
     private func shell(_ command: String) -> Int32 {
-        // Task 3
-        return -1
+        let process = Process()
+        process.launchPath = "/bin/sh"
+        process.arguments = ["-c", command]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try? process.run()
+        process.waitUntilExit()
+        return process.terminationStatus
     }
 }
