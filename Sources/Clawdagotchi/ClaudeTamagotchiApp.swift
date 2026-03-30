@@ -20,6 +20,8 @@ struct ClawdagotchiApp: App {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .pasteboard) {}
             CommandGroup(replacing: .undoRedo) {}
+            CommandGroup(replacing: .sidebar) {}
+            CommandGroup(replacing: .textEditing) {}
             CommandGroup(replacing: .windowList) {}
             CommandGroup(replacing: .windowArrangement) {}
             CommandGroup(replacing: .help) {}
