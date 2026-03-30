@@ -58,6 +58,9 @@ final class AppSettings {
     var seasonalAccessories: Bool {
         didSet { UserDefaults.standard.set(seasonalAccessories, forKey: "seasonalAccessories") }
     }
+    var hooksPromptShown: Bool {
+        didSet { UserDefaults.standard.set(hooksPromptShown, forKey: "hooksPromptShown") }
+    }
 
     // Streak
     var streak: Int {
@@ -124,6 +127,7 @@ final class AppSettings {
             "level": 1,
             "backgroundTheme": BackgroundTheme.none.rawValue,
             "seasonalAccessories": true,
+            "hooksPromptShown": false,
             "streak": 0,
             "lastLoginDate": "",
             "birthDate": "",
@@ -150,6 +154,7 @@ final class AppSettings {
         self.level = defaults.integer(forKey: "level")
         self.backgroundTheme = BackgroundTheme(rawValue: defaults.string(forKey: "backgroundTheme") ?? "") ?? .none
         self.seasonalAccessories = defaults.bool(forKey: "seasonalAccessories")
+        self.hooksPromptShown = defaults.bool(forKey: "hooksPromptShown")
         self.streak = defaults.integer(forKey: "streak")
         self.lastLoginDate = defaults.string(forKey: "lastLoginDate") ?? ""
         self.birthDate = defaults.string(forKey: "birthDate") ?? ""
