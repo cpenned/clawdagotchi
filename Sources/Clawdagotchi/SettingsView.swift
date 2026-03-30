@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var settings = AppSettings.shared
     @State private var selectedTab: SettingsTab = .appearance
+    @State private var hooksInstalled: Bool = HookInstaller.areHooksInstalled()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -566,11 +567,40 @@ Left button (red) = Deny
 Right button (green) = Allow
 """)
 
-                darkAboutSection("Setup", """
-1. Run: bash install_hooks.sh
-2. Launch the app
-3. Use Claude Code — the crab reacts!
-""")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("CLAUDE CODE HOOKS")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.33))
+                        .tracking(1.5)
+                    HStack {
+                        Text(hooksInstalled ? "Installed" : "Not installed")
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(hooksInstalled ? Color.salmon : Color(white: 0.4))
+                        Spacer()
+                        if !hooksInstalled {
+                            Button("Install Hooks") {
+                                do {
+                                    try HookInstaller.install()
+                                    hooksInstalled = true
+                                } catch {
+                                    let alert = NSAlert()
+                                    alert.messageText = "Installation Failed"
+                                    alert.informativeText = error.localizedDescription
+                                    alert.alertStyle = .critical
+                                    alert.addButton(withTitle: "OK")
+                                    alert.runModal()
+                                }
+                            }
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(Color.salmon)
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(white: 0.145))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .onAppear { hooksInstalled = HookInstaller.areHooksInstalled() }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Preview Moods")
