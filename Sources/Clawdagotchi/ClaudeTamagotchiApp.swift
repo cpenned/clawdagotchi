@@ -16,7 +16,21 @@ struct ClawdagotchiApp: App {
         .windowStyle(.plain)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 290, height: 350)
-        .commandsRemoved()
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .pasteboard) {}
+            CommandGroup(replacing: .undoRedo) {}
+            CommandGroup(replacing: .windowList) {}
+            CommandGroup(replacing: .windowArrangement) {}
+            CommandGroup(replacing: .help) {}
+            CommandGroup(after: .appInfo) {
+                Button("Star on GitHub") {
+                    if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+            }
+        }
 
         Settings {
             SettingsView()
