@@ -38,9 +38,9 @@ const {
     <meta name="twitter:image" content="https://clawdagotchi.com/og-image.png" />
   </head>
   <body>
-    <div class="pixel-bg-top" aria-hidden="true"></div>
-    <div class="pixel-bg-bottom" aria-hidden="true"></div>
-    <div class="relative z-10">
+    <div data-pixel-top aria-hidden="true"></div>
+    <div data-pixel-bottom aria-hidden="true"></div>
+    <div style="position:relative;z-index:10">
       <slot />
     </div>
   </body>
