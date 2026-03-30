@@ -1,0 +1,48 @@
+---
+---
+
+<section class="py-10 px-6">
+  <div class="max-w-6xl mx-auto flex flex-col items-center gap-3">
+    <p class="text-(--text-secondary) text-sm">or install with Homebrew</p>
+    <div class="overflow-x-auto max-w-full">
+      <button
+        class="brew-copy group flex items-center gap-3 bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.18)] rounded-md px-5 py-3 transition-colors cursor-pointer"
+        data-command="brew install --cask cpenned/tap/clawdagotchi"
+      >
+        <code class="text-(--accent) font-mono text-sm whitespace-nowrap">
+          brew install --cask cpenned/tap/clawdagotchi
+        </code>
+        <span class="copy-icon text-(--text-secondary) group-hover:text-white transition-colors flex-shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </span>
+        <span class="check-icon hidden text-green-400 flex-shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.brew-copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const command = btn.dataset.command ?? '';
+      await navigator.clipboard.writeText(command);
+
+      const copyIcon = btn.querySelector('.copy-icon');
+      const checkIcon = btn.querySelector('.check-icon');
+      copyIcon?.classList.add('hidden');
+      checkIcon?.classList.remove('hidden');
+
+      setTimeout(() => {
+        copyIcon?.classList.remove('hidden');
+        checkIcon?.classList.add('hidden');
+      }, 2000);
+    });
+  });
+</script>
