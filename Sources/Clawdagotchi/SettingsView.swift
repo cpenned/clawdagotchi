@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var settings = AppSettings.shared
     @State private var selectedTab: SettingsTab = .appearance
-    @State private var hooksInstalled: Bool = HookInstaller.areHooksInstalled()
+    @State private var hooksInstalled: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
