@@ -49,119 +49,237 @@ struct SettingsView: View {
     // MARK: - Appearance
 
     private var appearanceTab: some View {
-        Form {
-            Section("Pet Name") {
-                TextField("Name", text: $settings.botName)
-                    .textFieldStyle(.roundedBorder)
-            }
-
-            Section("Character Color") {
-                Picker("", selection: $settings.useCustomCrabColor) {
-                    HStack(spacing: 6) {
-                        Circle().fill(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0)).frame(width: 10, height: 10)
-                        Text("Always salmon")
-                    }.tag(false)
-                    HStack(spacing: 6) {
-                        Circle().fill(settings.shellStyle.crabColor).frame(width: 10, height: 10)
-                        Text("Match theme")
-                    }.tag(true)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSection("Pet Name") {
+                    TextField("Name", text: $settings.botName)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 12))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
                 }
-                .pickerStyle(.radioGroup)
-            }
 
-            Section("Shell Style") {
-                Picker("Style", selection: $settings.shellStyle) {
-                    ForEach(ShellStyle.allCases, id: \.rawValue) { style in
+                settingsSection("Character Color") {
+                    Button {
+                        settings.useCustomCrabColor = false
+                    } label: {
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(style.tintColor)
-                                .frame(width: 12, height: 12)
-                            Text(style.displayName)
+                                .fill(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                .frame(width: 8, height: 8)
+                            Text("Always salmon")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.white)
+                            Spacer()
+                            if !settings.useCustomCrabColor {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            }
                         }
-                        .tag(style)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+
+                    Color(white: 0.12).frame(height: 1)
+
+                    Button {
+                        settings.useCustomCrabColor = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(settings.shellStyle.crabColor)
+                                .frame(width: 8, height: 8)
+                            Text("Match theme")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.white)
+                            Spacer()
+                            if settings.useCustomCrabColor {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                settingsSection("Shell Style") {
+                    ForEach(Array(ShellStyle.allCases.enumerated()), id: \.element.rawValue) { index, style in
+                        if index > 0 { Color(white: 0.12).frame(height: 1) }
+                        Button {
+                            settings.shellStyle = style
+                        } label: {
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(style.tintColor)
+                                    .frame(width: 8, height: 8)
+                                Text(style.displayName)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Color.white)
+                                Spacer()
+                                if settings.shellStyle == style {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .pickerStyle(.radioGroup)
-            }
 
-            Section("Size") {
-                HStack {
-                    Image(systemName: "minus.magnifyingglass")
-                        .foregroundStyle(.secondary)
-                    Slider(value: $settings.widgetScale, in: 0.5...1.5, step: 0.1)
-                    Image(systemName: "plus.magnifyingglass")
-                        .foregroundStyle(.secondary)
+                settingsSection("Size") {
+                    VStack(spacing: 4) {
+                        HStack {
+                            Image(systemName: "minus.magnifyingglass")
+                                .foregroundStyle(Color(white: 0.5))
+                            Slider(value: $settings.widgetScale, in: 0.5...1.5, step: 0.1)
+                                .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            Image(systemName: "plus.magnifyingglass")
+                                .foregroundStyle(Color(white: 0.5))
+                        }
+                        Text("\(Int(settings.widgetScale * 100))%")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                 }
-                Text("\(Int(settings.widgetScale * 100))%")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
 
-            Section("Screen Background") {
-                Picker("Theme", selection: $settings.backgroundTheme) {
-                    ForEach(BackgroundTheme.allCases, id: \.rawValue) { theme in
-                        Text(theme.displayName).tag(theme)
+                settingsSection("Screen Background") {
+                    ForEach(Array(BackgroundTheme.allCases.enumerated()), id: \.element.rawValue) { index, theme in
+                        if index > 0 { Color(white: 0.12).frame(height: 1) }
+                        Button {
+                            settings.backgroundTheme = theme
+                        } label: {
+                            HStack {
+                                Text(theme.displayName)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Color.white)
+                                Spacer()
+                                if settings.backgroundTheme == theme {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .pickerStyle(.radioGroup)
-            }
 
-            Section("Seasonal") {
-                Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
-                if let seasonal = CrabAccessory.seasonalAccessory() {
-                    Text("Active now: \(String(describing: seasonal))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text("No seasonal event right now")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
+                settingsSection("Seasonal") {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.white)
+                            .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
 
-                Picker("Preview", selection: $previewSeasonal) {
-                    Text("None").tag(Optional<CrabAccessory>.none)
-                    Text("Santa Hat (Dec)").tag(Optional<CrabAccessory>.some(.santaHat))
-                    Text("Pumpkin (Oct)").tag(Optional<CrabAccessory>.some(.pumpkin))
-                    Text("Bunny Ears (Apr)").tag(Optional<CrabAccessory>.some(.bunnyEars))
-                    Text("Heart (Feb)").tag(Optional<CrabAccessory>.some(.heartBow))
-                    Text("Confetti (Jan 1)").tag(Optional<CrabAccessory>.some(.partyPopper))
-                }
-                .pickerStyle(.menu)
+                        Color(white: 0.12).frame(height: 1)
 
-                if previewSeasonal != nil {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.screenDark)
-                            .frame(height: 80)
-                        CrabView(
-                            size: 40,
-                            color: AppSettings.shared.activeCrabColor,
-                            eyeColor: Color.screenDark,
-                            eyeStyle: .normal,
-                            accessories: seasonalPreviewAccessories,
-                            accessoryColor: .white
-                        )
+                        if let seasonal = CrabAccessory.seasonalAccessory() {
+                            Text("Active now: \(String(describing: seasonal))")
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(Color(white: 0.5))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                        } else {
+                            Text("No seasonal event right now")
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(Color(white: 0.33))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                        }
+
+                        Color(white: 0.12).frame(height: 1)
+
+                        Picker("Preview", selection: $previewSeasonal) {
+                            Text("None").tag(Optional<CrabAccessory>.none)
+                            Text("Santa Hat (Dec)").tag(Optional<CrabAccessory>.some(.santaHat))
+                            Text("Pumpkin (Oct)").tag(Optional<CrabAccessory>.some(.pumpkin))
+                            Text("Bunny Ears (Apr)").tag(Optional<CrabAccessory>.some(.bunnyEars))
+                            Text("Heart (Feb)").tag(Optional<CrabAccessory>.some(.heartBow))
+                            Text("Confetti (Jan 1)").tag(Optional<CrabAccessory>.some(.partyPopper))
+                        }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 11))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+
+                        if previewSeasonal != nil {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.screenDark)
+                                    .frame(height: 80)
+                                CrabView(
+                                    size: 40,
+                                    color: AppSettings.shared.activeCrabColor,
+                                    eyeColor: Color.screenDark,
+                                    eyeStyle: .normal,
+                                    accessories: seasonalPreviewAccessories,
+                                    accessoryColor: .white
+                                )
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.bottom, 8)
+                        }
                     }
                 }
-            }
 
-            Section("Float on Top") {
-                Picker("Keep on top", selection: $settings.floatPolicy) {
-                    ForEach(FloatPolicy.allCases, id: \.rawValue) { policy in
-                        Text(policy.displayName).tag(policy)
+                settingsSection("Float on Top") {
+                    ForEach(Array(FloatPolicy.allCases.enumerated()), id: \.element.rawValue) { index, policy in
+                        if index > 0 { Color(white: 0.12).frame(height: 1) }
+                        Button {
+                            settings.floatPolicy = policy
+                        } label: {
+                            HStack {
+                                Text(policy.displayName)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Color.white)
+                                Spacer()
+                                if settings.floatPolicy == policy {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .pickerStyle(.radioGroup)
-            }
 
-            Section("Visibility") {
-                Toggle("Show in Dock", isOn: $settings.showDockIcon)
-                Toggle("Show floating widget", isOn: $settings.showWidget)
+                settingsSection("Visibility") {
+                    Toggle("Show in Dock", isOn: $settings.showDockIcon)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white)
+                        .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+
+                    Color(white: 0.12).frame(height: 1)
+
+                    Toggle("Show floating widget", isOn: $settings.showWidget)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white)
+                        .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                }
             }
+            .padding(12)
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Level Up
