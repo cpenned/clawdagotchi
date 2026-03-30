@@ -609,13 +609,6 @@ struct SettingsView: View {
                     "Take care of it — feed it, pet it, and clean up after it!"
                 )
 
-                darkAboutSection("Your Crab", """
-Level \(AppSettings.shared.level) — \(CrabAccessory.forLevel(AppSettings.shared.level)) unlocked
-XP: \(AppSettings.shared.xp) / \(nextThresholdText)
-Born: \(AppSettings.shared.birthDateFormatted)
-Age: \(AppSettings.shared.ageInDays) days
-""")
-
                 darkAboutSection("Session Tracking", """
 Idle — gentle bob, periodic blink
 Thinking — eyes look side to side (PreToolUse)
