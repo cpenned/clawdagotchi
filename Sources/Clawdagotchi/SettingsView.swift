@@ -399,109 +399,116 @@ struct SettingsView: View {
     // MARK: - Stats
 
     private var statsTab: some View {
-        Form {
-            Section("Streak") {
-                HStack {
-                    Text("Current streak")
-                    Spacer()
-                    Text("\(AppSettings.shared.streak) days")
-                        .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSection("Streak") {
+                    settingsRow("Current streak", value: "\(AppSettings.shared.streak) days")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Last login", value: AppSettings.shared.lastLoginDate.isEmpty ? "Never" : AppSettings.shared.lastLoginDate)
                 }
-                HStack {
-                    Text("Last login")
-                    Spacer()
-                    Text(AppSettings.shared.lastLoginDate.isEmpty ? "Never" : AppSettings.shared.lastLoginDate)
-                        .foregroundStyle(.secondary)
+
+                settingsSection("Claude Code") {
+                    settingsRow("Sessions completed", value: "\(AppSettings.shared.totalSessions)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Tools used", value: "\(AppSettings.shared.totalToolUses)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Permissions approved", value: "\(AppSettings.shared.totalPermissionsApproved)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Permissions denied", value: "\(AppSettings.shared.totalPermissionsDenied)")
+                }
+
+                settingsSection("Pet Care") {
+                    settingsRow("Pokes", value: "\(AppSettings.shared.totalPokes)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Feeds", value: "\(AppSettings.shared.totalFeeds)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Pets", value: "\(AppSettings.shared.totalPets)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Poops cleaned", value: "\(AppSettings.shared.totalPoopsCleaned)")
                 }
             }
-
-            Section("Claude Code") {
-                statRow("Sessions completed", AppSettings.shared.totalSessions)
-                statRow("Tools used", AppSettings.shared.totalToolUses)
-                statRow("Permissions approved", AppSettings.shared.totalPermissionsApproved)
-                statRow("Permissions denied", AppSettings.shared.totalPermissionsDenied)
-            }
-
-            Section("Pet Care") {
-                statRow("Pokes", AppSettings.shared.totalPokes)
-                statRow("Feeds", AppSettings.shared.totalFeeds)
-                statRow("Pets", AppSettings.shared.totalPets)
-                statRow("Poops cleaned", AppSettings.shared.totalPoopsCleaned)
-            }
+            .padding(12)
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Achievements
 
     private var achievementsTab: some View {
-        Form {
-            Section("\(AppSettings.shared.unlockedAchievements.count) / \(AchievementManager.all.count) Unlocked") {
-                ForEach(AchievementManager.all) { achievement in
-                    let unlocked = AppSettings.shared.unlockedAchievements.contains(achievement.id)
-                    HStack {
-                        Image(systemName: unlocked ? "trophy.fill" : "trophy")
-                            .foregroundStyle(unlocked ? .yellow : .gray)
-                            .frame(width: 20)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(achievement.name)
-                                .font(.body)
-                                .foregroundStyle(unlocked ? .primary : .secondary)
-                            Text(achievement.description)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSection("\(AppSettings.shared.unlockedAchievements.count) / \(AchievementManager.all.count) Unlocked") {
+                    ForEach(Array(AchievementManager.all.enumerated()), id: \.element.id) { index, achievement in
+                        if index > 0 { Color(white: 0.12).frame(height: 1) }
+                        let unlocked = AppSettings.shared.unlockedAchievements.contains(achievement.id)
+                        HStack {
+                            Image(systemName: unlocked ? "trophy.fill" : "trophy")
+                                .foregroundStyle(unlocked ? Color.yellow : Color(white: 0.33))
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(achievement.name)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(unlocked ? Color.white : Color(white: 0.5))
+                                Text(achievement.description)
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(Color(white: 0.4))
+                            }
+                            Spacer()
+                            if unlocked {
+                                Text("+\(achievement.xpBonus) XP")
+                                    .font(.system(size: 9, design: .monospaced))
+                                    .foregroundStyle(Color.green)
+                            }
                         }
-                        Spacer()
-                        if unlocked {
-                            Text("+\(achievement.xpBonus) XP")
-                                .font(.caption2)
-                                .foregroundStyle(.green)
-                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
                     }
                 }
             }
-        }
-        .formStyle(.grouped)
-        .padding()
-    }
-
-    private func statRow(_ label: String, _ value: Int) -> some View {
-        HStack {
-            Text(label)
-            Spacer()
-            Text("\(value)")
-                .foregroundStyle(.secondary)
+            .padding(12)
         }
     }
 
     // MARK: - Sound
 
     private var soundTab: some View {
-        Form {
-            Section("Sound Effects") {
-                Toggle("Enable sounds", isOn: $settings.soundEnabled)
-                if settings.soundEnabled {
-                    HStack {
-                        Image(systemName: "speaker.fill")
-                            .foregroundStyle(.secondary)
-                        Slider(value: $settings.soundVolume, in: 0...1)
-                        Image(systemName: "speaker.wave.3.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSection("Sound Effects") {
+                    Toggle("Enable sounds", isOn: $settings.soundEnabled)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white)
+                        .tint(Color.salmon)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
 
-            if settings.soundEnabled {
-                Section("Sounds per action") {
-                    ForEach(SoundAction.allCases, id: \.rawValue) { action in
-                        SoundPickerRow(action: action)
+                    if settings.soundEnabled {
+                        Color(white: 0.12).frame(height: 1)
+                        HStack {
+                            Image(systemName: "speaker.fill")
+                                .foregroundStyle(Color(white: 0.5))
+                            Slider(value: $settings.soundVolume, in: 0...1)
+                                .tint(Color.salmon)
+                            Image(systemName: "speaker.wave.3.fill")
+                                .foregroundStyle(Color(white: 0.5))
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                    }
+                }
+
+                if settings.soundEnabled {
+                    settingsSection("Sounds Per Action") {
+                        ForEach(Array(SoundAction.allCases.enumerated()), id: \.element.rawValue) { index, action in
+                            if index > 0 { Color(white: 0.12).frame(height: 1) }
+                            SoundPickerRow(action: action)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                        }
                     }
                 }
             }
+            .padding(12)
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Help
