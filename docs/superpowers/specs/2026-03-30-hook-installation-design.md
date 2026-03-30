@@ -62,6 +62,8 @@ if !AppSettings.shared.hooksPromptShown && !HookInstaller.areHooksInstalled() {
 }
 ```
 
+Note: `hooksPromptShown` is a new `UserDefaults` key (defaults to `false`), so existing users who upgrade without having run `install_hooks.sh` will also see this prompt on their first launch after upgrading.
+
 **Alert spec:**
 - Title: "Install Claude Code Hooks?"
 - Message: "Hooks let Clawdagotchi react to your Claude Code activity. This writes 5 hook entries to ~/.claude/settings.json and copies hook_relay.py to ~/.local/share/clawdagotchi/."
