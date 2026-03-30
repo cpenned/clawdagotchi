@@ -299,108 +299,101 @@ struct SettingsView: View {
     }
 
     private var levelTab: some View {
-        Form {
-            Section("Preview Levels") {
-                VStack(spacing: 12) {
-                    // Crab preview
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.screenDark)
-                            .frame(height: 100)
-
-                        CrabView(
-                            size: 50,
-                            color: AppSettings.shared.activeCrabColor,
-                            eyeColor: Color.screenDark,
-                            eyeStyle: .normal,
-                            accessories: CrabAccessory.allUnlocked(for: Int(previewLevel)),
-                            accessoryColor: .white
-                        )
-                    }
-
-                    // Level slider
-                    HStack {
-                        Text("LV 1")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Slider(value: $previewLevel, in: 1...8, step: 1)
-                        Text("LV 8")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    // Level info
-                    let lvl = Int(previewLevel)
-                    let acc = CrabAccessory.forLevel(lvl)
-                    let threshold = lvl <= TamagotchiViewModel.levelThresholds.count
-                        ? (lvl > 1 ? TamagotchiViewModel.levelThresholds[lvl - 1] : 0)
-                        : TamagotchiViewModel.levelThresholds.last!
-                    let unlocked = lvl <= AppSettings.shared.level
-
-                    VStack(spacing: 4) {
-                        Text("Level \(lvl)")
-                            .font(.headline)
-
-                        if acc != .none {
-                            Text("Unlocks: \(String(describing: acc))")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSection("Preview Levels") {
+                    VStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.screenDark)
+                                .frame(height: 100)
+                            CrabView(
+                                size: 50,
+                                color: AppSettings.shared.activeCrabColor,
+                                eyeColor: Color.screenDark,
+                                eyeStyle: .normal,
+                                accessories: CrabAccessory.allUnlocked(for: Int(previewLevel)),
+                                accessoryColor: .white
+                            )
                         }
 
-                        Text("Requires: \(threshold) XP")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        HStack {
+                            Text("LV 1")
+                                .font(.system(size: 9, design: .monospaced))
+                                .foregroundStyle(Color(white: 0.4))
+                            Slider(value: $previewLevel, in: 1...8, step: 1)
+                                .tint(Color.salmon)
+                            Text("LV 8")
+                                .font(.system(size: 9, design: .monospaced))
+                                .foregroundStyle(Color(white: 0.4))
+                        }
 
-                        if unlocked {
-                            Text("Unlocked!")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        } else {
-                            let remaining = threshold - AppSettings.shared.xp
-                            Text("\(remaining) XP to go")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
+                        let lvl = Int(previewLevel)
+                        let acc = CrabAccessory.forLevel(lvl)
+                        let threshold = lvl <= TamagotchiViewModel.levelThresholds.count
+                            ? (lvl > 1 ? TamagotchiViewModel.levelThresholds[lvl - 1] : 0)
+                            : TamagotchiViewModel.levelThresholds.last!
+                        let unlocked = lvl <= AppSettings.shared.level
+
+                        VStack(spacing: 4) {
+                            Text("Level \(lvl)")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.white)
+
+                            if acc != .none {
+                                Text("Unlocks: \(String(describing: acc))")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Color(white: 0.6))
+                            }
+
+                            Text("Requires: \(threshold) XP")
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(Color(white: 0.4))
+
+                            if unlocked {
+                                Text("Unlocked!")
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundStyle(Color.green)
+                            } else {
+                                let remaining = threshold - AppSettings.shared.xp
+                                Text("\(remaining) XP to go")
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundStyle(Color.salmon)
+                            }
                         }
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                 }
-                .padding(.vertical, 4)
-            }
 
-            Section("Current Progress") {
-                HStack {
-                    Text("Level")
-                    Spacer()
-                    Text("\(AppSettings.shared.level)")
-                        .foregroundStyle(.secondary)
-                }
-                HStack {
-                    Text("Total XP")
-                    Spacer()
-                    Text("\(AppSettings.shared.xp)")
-                        .foregroundStyle(.secondary)
-                }
-                HStack {
-                    Text("Next level")
-                    Spacer()
-                    Text(nextThresholdText + " XP")
-                        .foregroundStyle(.secondary)
-                }
-                Button("Reset Progress", role: .destructive) {
-                    showingResetConfirm = true
-                }
-                .alert("Reset Progress?", isPresented: $showingResetConfirm) {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Reset", role: .destructive) {
-                        TamagotchiViewModel.shared?.resetProgress()
-                        previewLevel = 1
+                settingsSection("Current Progress") {
+                    settingsRow("Level", value: "\(AppSettings.shared.level)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Total XP", value: "\(AppSettings.shared.xp)")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Next level", value: nextThresholdText + " XP")
+                    Color(white: 0.12).frame(height: 1)
+                    Button("Reset Progress") {
+                        showingResetConfirm = true
                     }
-                } message: {
-                    Text("This will reset your level to 1 and XP to 0. This cannot be undone.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.red)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .buttonStyle(.plain)
+                    .alert("Reset Progress?", isPresented: $showingResetConfirm) {
+                        Button("Cancel", role: .cancel) {}
+                        Button("Reset", role: .destructive) {
+                            TamagotchiViewModel.shared?.resetProgress()
+                            previewLevel = 1
+                        }
+                    } message: {
+                        Text("This will reset your level to 1 and XP to 0. This cannot be undone.")
+                    }
                 }
             }
+            .padding(12)
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Stats
