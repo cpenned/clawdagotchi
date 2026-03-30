@@ -102,8 +102,15 @@ final class UpdateChecker {
 
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
+            let progressAlert = NSAlert()
+            progressAlert.messageText = "Downloading Clawdagotchi v\(version)…"
+            progressAlert.informativeText = "This will only take a moment."
+            progressAlert.alertStyle = .informational
+            progressAlert.layout()
+            progressAlert.window.makeKeyAndOrderFront(nil)
+
             Task {
-                await downloadAndInstall(version: version, dmgURL: dmgURL, releaseURL: releaseURL)
+                await downloadAndInstall(version: version, dmgURL: dmgURL, releaseURL: releaseURL, progressWindow: progressAlert.window)
             }
         }
     }
@@ -134,8 +141,9 @@ final class UpdateChecker {
 
     // MARK: - Download & Install
 
-    private func downloadAndInstall(version: String, dmgURL: String, releaseURL: String) async {
+    private func downloadAndInstall(version: String, dmgURL: String, releaseURL: String, progressWindow: NSWindow) async {
         guard let url = URL(string: dmgURL) else {
+            progressWindow.close()
             openReleasesPage(releaseURL)
             return
         }
@@ -149,10 +157,12 @@ final class UpdateChecker {
             let (downloadedURL, _) = try await URLSession.shared.download(from: url)
             try FileManager.default.moveItem(at: downloadedURL, to: tempDMG)
         } catch {
+            progressWindow.close()
             openReleasesPage(releaseURL)
             return
         }
 
+        progressWindow.close()
         showInstallPrompt(dmgPath: tempDMG, releaseURL: releaseURL)
     }
 
@@ -167,6 +177,8 @@ final class UpdateChecker {
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
             installUpdate(dmgPath: dmgPath, releaseURL: releaseURL)
+        } else {
+            try? FileManager.default.removeItem(at: dmgPath)
         }
     }
 
