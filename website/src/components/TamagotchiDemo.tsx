@@ -90,42 +90,33 @@ function eggPath(w: number, h: number): string {
   ].join(' ')
 }
 
-// Draw crab on canvas — exact Swift coordinates
-function drawCrab(
-  ctx: CanvasRenderingContext2D,
-  canvasW: number,
-  canvasH: number,
-  eyeStyle: EyeStyle,
-  legPhase: number,
-  bobY: number,
+// Build crab as SVG rects — avoids foreignObject/canvas scaling bugs on mobile
+function CrabSVG({ eyeStyle, legPhase, bobY, showSunglasses, x, y, w, h }: {
+  eyeStyle: EyeStyle
+  legPhase: number
+  bobY: number
   showSunglasses: boolean
-) {
-  ctx.clearRect(0, 0, canvasW, canvasH)
-
+  x: number
+  y: number
+  w: number
+  h: number
+}) {
   // Swift: viewW=86, viewH=80, crabOffsetX=10, crabOffsetY=22
-  // scale = size/viewH where size=43 → but we have a canvas
-  // We'll use the canvas dimensions to derive the same scale
   const viewW = 86, viewH = 80
-  const scale = canvasH / viewH
-  const xOff = (canvasW - viewW * scale) / 2 + 10 * scale
-  const yOff = (canvasH - viewH * scale) / 2 + 22 * scale + bobY
+  const scale = h / viewH
+  const xOff = x + (w - viewW * scale) / 2 + 10 * scale
+  const yOff = y + (h - viewH * scale) / 2 + 22 * scale + bobY
 
-  function r(x: number, y: number, w: number, h: number) {
-    ctx.fillRect(
-      xOff + x * scale,
-      yOff + y * scale,
-      w * scale,
-      h * scale
-    )
+  const rects: { x: number; y: number; w: number; h: number; fill: string }[] = []
+  function r(rx: number, ry: number, rw: number, rh: number, fill: string) {
+    rects.push({ x: xOff + rx * scale, y: yOff + ry * scale, w: rw * scale, h: rh * scale, fill })
   }
 
-  ctx.fillStyle = CRAB_COLOR
+  // Antennae
+  r(0, 13, 6, 13, CRAB_COLOR)
+  r(60, 13, 6, 13, CRAB_COLOR)
 
-  // Antennae (Swift: x=0,y=13 and x=60,y=13, w=6,h=13)
-  r(0, 13, 6, 13)
-  r(60, 13, 6, 13)
-
-  // Legs — Swift: legXs=[6,18,42,54], y=39, w=6, baseH=13
+  // Legs
   const legOffsets: number[][] = [
     [3, -3, 3, -3],
     [0, 0, 0, 0],
@@ -135,70 +126,61 @@ function drawCrab(
   const phase = legOffsets[legPhase % 4]
   const legXs = [6, 18, 42, 54]
   legXs.forEach((lx, i) => {
-    const lh = 13 + phase[i]
-    r(lx, 39, 6, lh)
+    r(lx, 39, 6, 13 + phase[i], CRAB_COLOR)
   })
 
-  // Body (Swift: x=6, y=0, w=54, h=39) — SHARP rectangle, no rounding
-  r(6, 0, 54, 39)
+  // Body
+  r(6, 0, 54, 39, CRAB_COLOR)
 
-  // Eyes (Swift: leftEyeX=14, rightEyeX=46, eyeY=12)
-  ctx.fillStyle = EYE_COLOR
+  // Eyes
   const leftEyeX = 14, rightEyeX = 46, eyeY = 12
-
   if (eyeStyle === 'blink') {
-    r(leftEyeX, eyeY + 3, 6, 2)
-    r(rightEyeX, eyeY + 3, 6, 2)
+    r(leftEyeX, eyeY + 3, 6, 2, EYE_COLOR)
+    r(rightEyeX, eyeY + 3, 6, 2, EYE_COLOR)
   } else if (eyeStyle === 'wide') {
-    r(leftEyeX - 1, eyeY - 1, 8, 9)
-    r(rightEyeX - 1, eyeY - 1, 8, 9)
-  } else if (eyeStyle === 'squish') {
-    // > < chevrons
-    const armH = 8 * scale
-    const reachW = 5 * scale
+    r(leftEyeX - 1, eyeY - 1, 8, 9, EYE_COLOR)
+    r(rightEyeX - 1, eyeY - 1, 8, 9, EYE_COLOR)
+  } else if (eyeStyle === 'tiny') {
+    r(leftEyeX + 1, eyeY + 2, 4, 4, EYE_COLOR)
+    r(rightEyeX + 1, eyeY + 2, 4, 4, EYE_COLOR)
+  } else if (eyeStyle !== 'squish') {
+    r(leftEyeX, eyeY, 6, 7, EYE_COLOR)
+    r(rightEyeX, eyeY, 6, 7, EYE_COLOR)
+  }
+
+  // Squish chevrons
+  const squishLines = eyeStyle === 'squish' ? (() => {
     const lcx = xOff + (leftEyeX + 3) * scale
     const rcx = xOff + (rightEyeX + 3) * scale
     const cy = yOff + (eyeY + 3.5) * scale
+    const armH = 8 * scale
+    const reachW = 5 * scale
+    return (
+      <>
+        <polyline points={`${lcx - reachW / 2},${cy - armH / 2} ${lcx + reachW / 2},${cy} ${lcx - reachW / 2},${cy + armH / 2}`} fill="none" stroke={EYE_COLOR} strokeWidth={2 * scale} strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={`${rcx + reachW / 2},${cy - armH / 2} ${rcx - reachW / 2},${cy} ${rcx + reachW / 2},${cy + armH / 2}`} fill="none" stroke={EYE_COLOR} strokeWidth={2 * scale} strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    )
+  })() : null
 
-    ctx.strokeStyle = EYE_COLOR
-    ctx.lineWidth = 2 * scale
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
+  // Sunglasses
+  const sunglasses = showSunglasses ? (
+    <>
+      <rect x={xOff + 11 * scale} y={yOff + 9 * scale} width={14 * scale} height={10 * scale} fill="none" stroke="#ffffff" strokeWidth={1.5 * scale} />
+      <rect x={xOff + 43 * scale} y={yOff + 9 * scale} width={14 * scale} height={10 * scale} fill="none" stroke="#ffffff" strokeWidth={1.5 * scale} />
+      <rect x={xOff + 25 * scale} y={yOff + 13 * scale} width={18 * scale} height={2 * scale} fill="#ffffff" />
+    </>
+  ) : null
 
-    ctx.beginPath()
-    ctx.moveTo(lcx - reachW / 2, cy - armH / 2)
-    ctx.lineTo(lcx + reachW / 2, cy)
-    ctx.lineTo(lcx - reachW / 2, cy + armH / 2)
-    ctx.stroke()
-
-    ctx.beginPath()
-    ctx.moveTo(rcx + reachW / 2, cy - armH / 2)
-    ctx.lineTo(rcx - reachW / 2, cy)
-    ctx.lineTo(rcx + reachW / 2, cy + armH / 2)
-    ctx.stroke()
-  } else if (eyeStyle === 'tiny') {
-    r(leftEyeX + 1, eyeY + 2, 4, 4)
-    r(rightEyeX + 1, eyeY + 2, 4, 4)
-  } else {
-    // normal
-    r(leftEyeX, eyeY, 6, 7)
-    r(rightEyeX, eyeY, 6, 7)
-  }
-
-  // Sunglasses (level 4 accessory) — Swift coords
-  if (showSunglasses) {
-    ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = 1.5 * scale
-    ctx.lineCap = 'square'
-    ctx.lineJoin = 'miter'
-    // Left lens: x=11,y=9,w=14,h=10
-    ctx.strokeRect(xOff + 11 * scale, yOff + 9 * scale, 14 * scale, 10 * scale)
-    // Right lens: x=43,y=9,w=14,h=10
-    ctx.strokeRect(xOff + 43 * scale, yOff + 9 * scale, 14 * scale, 10 * scale)
-    // Bridge: x=25,y=13,w=18,h=2
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(xOff + 25 * scale, yOff + 13 * scale, 18 * scale, 2 * scale)
-  }
+  return (
+    <g style={{ shapeRendering: 'crispEdges' }}>
+      {rects.map((rect, i) => (
+        <rect key={i} x={rect.x} y={rect.y} width={rect.w} height={rect.h} fill={rect.fill} />
+      ))}
+      {squishLines}
+      {sunglasses}
+    </g>
+  )
 }
 
 // Simple SVG icons matching SF Symbols appearance
@@ -223,7 +205,6 @@ function HeartIcon() {
 }
 
 export default function TamagotchiDemo() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [eyeStyle, setEyeStyle] = useState<EyeStyle>('normal')
   const [bobOffset, setBobOffset] = useState(0)
   const [message, setMessage] = useState('')
@@ -284,14 +265,7 @@ export default function TamagotchiDemo() {
     return () => clearInterval(blinkInterval)
   }, [])
 
-  // Draw crab on canvas
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    drawCrab(ctx, canvas.width, canvas.height, eyeStyle, legPhase, bobOffset + jumpOffset, true)
-  }, [eyeStyle, bobOffset, legPhase, jumpOffset])
+  // (crab is now pure SVG — no canvas needed)
 
   const handlePoke = () => {
     playSound('poke')
@@ -424,7 +398,8 @@ export default function TamagotchiDemo() {
         borderRadius: 12,
         boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)',
         overflow: 'hidden',
-        width: 360,
+        width: '100%',
+        maxWidth: 360,
         userSelect: 'none',
       }}>
         {/* Titlebar */}
@@ -739,25 +714,17 @@ export default function TamagotchiDemo() {
               {messageVisible ? message : '~'}
             </text>
 
-            {/* Crab canvas — foreign object */}
-            <foreignObject
+            {/* Crab — pure SVG rects (no foreignObject/canvas for mobile compat) */}
+            <CrabSVG
+              eyeStyle={eyeStyle}
+              legPhase={legPhase}
+              bobY={bobOffset + jumpOffset}
+              showSunglasses={true}
               x={screenX}
               y={screenY + 20}
-              width={SCREEN_W}
-              height={SCREEN_H - 35}
-            >
-              <canvas
-                ref={canvasRef}
-                width={SCREEN_W * 2}
-                height={(SCREEN_H - 35) * 2}
-                style={{
-                  width: SCREEN_W,
-                  height: SCREEN_H - 35,
-                  imageRendering: 'pixelated',
-                  display: 'block',
-                }}
-              />
-            </foreignObject>
+              w={SCREEN_W}
+              h={SCREEN_H - 35}
+            />
 
             {/* Buttons */}
             {btnPositions.map((bx, i) => {
