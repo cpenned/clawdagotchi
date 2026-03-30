@@ -7,7 +7,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Clawdagotchi",
-            path: "Sources/Clawdagotchi"
+            path: "Sources/Clawdagotchi",
+            resources: [.copy("Resources/hook_relay.py")]
         )
     ]
 )
