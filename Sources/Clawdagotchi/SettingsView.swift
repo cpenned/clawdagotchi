@@ -390,6 +390,8 @@ struct SettingsView: View {
                 aboutSection("Your Crab", """
 Level \(AppSettings.shared.level) — \(CrabAccessory.forLevel(AppSettings.shared.level)) unlocked
 XP: \(AppSettings.shared.xp) / \(nextThresholdText)
+Born: \(AppSettings.shared.birthDateFormatted)
+Age: \(AppSettings.shared.ageInDays) days
 """)
 
                 aboutSection("Session Tracking", """
@@ -420,7 +422,6 @@ XP: \(AppSettings.shared.xp) / \(nextThresholdText)
                 When Claude Code needs approval, the screen shows the project name and tool details.
                 Left button (red) = Deny
                 Right button (green) = Allow
-                Permissions auto-clear after 30s if handled in terminal.
                 """)
 
                 aboutSection("Setup", """
@@ -442,11 +443,6 @@ XP: \(AppSettings.shared.xp) / \(nextThresholdText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
-                aboutSection("Your Crab", """
-Born: \(AppSettings.shared.birthDateFormatted)
-Age: \(AppSettings.shared.ageInDays) days
-""")
 
                 Button("Export Screenshot...") {
                     ScreenshotExporter.export()
