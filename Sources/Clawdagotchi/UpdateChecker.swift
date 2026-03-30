@@ -205,8 +205,17 @@ final class UpdateChecker {
 
         try? FileManager.default.removeItem(at: dmgPath)
 
-        let config = NSWorkspace.OpenConfiguration()
-        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config) { _, _ in }
+        // Relaunch via a detached shell that waits for this process to exit,
+        // then opens the updated app. Avoids the "not open anymore" dialog that
+        // occurs when NSWorkspace tries to open the new instance while the old
+        // one is still alive with an invalidated code signature.
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let quotedPath = appDestination.replacingOccurrences(of: "'", with: "'\\''")
+        let relaunchScript = "while /bin/kill -0 \(pid) 2>/dev/null; do sleep 0.1; done; open '\(quotedPath)'"
+        let relaunch = Process()
+        relaunch.executableURL = URL(fileURLWithPath: "/bin/sh")
+        relaunch.arguments = ["-c", relaunchScript]
+        try? relaunch.run()
 
         NSApp.terminate(nil)
     }

@@ -90,22 +90,52 @@ struct SettingsView: View {
             // Tab buttons
             VStack(spacing: 2) {
                 ForEach(SettingsTab.allCases, id: \.self) { tab in
-                    Button(tab.rawValue) {
+                    Button {
                         selectedTab = tab
+                    } label: {
+                        Text(tab.rawValue)
+                            .font(.system(size: 9, weight: selectedTab == tab ? .semibold : .regular, design: .monospaced))
+                            .foregroundStyle(selectedTab == tab ? Color.white : Color(white: 0.4))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 10)
                     }
-                    .font(.system(size: 9, weight: selectedTab == tab ? .semibold : .regular, design: .monospaced))
-                    .foregroundStyle(selectedTab == tab ? Color.white : Color(white: 0.4))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 10)
                     .background(selectedTab == tab ? Color.salmon : Color.clear)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                     .buttonStyle(.plain)
+                    .contentShape(Rectangle())
                 }
             }
             .padding(.horizontal, 8)
 
             Spacer()
+
+            // Bottom links
+            VStack(spacing: 6) {
+                Button("Export Screenshot...") {
+                    ScreenshotExporter.export()
+                }
+                .font(.system(size: 8, design: .monospaced))
+                .foregroundStyle(Color(white: 0.35))
+                .buttonStyle(.plain)
+
+                Button("Check for Updates...") {
+                    UpdateChecker.shared.checkNow()
+                }
+                .font(.system(size: 8, design: .monospaced))
+                .foregroundStyle(Color(white: 0.35))
+                .buttonStyle(.plain)
+
+                Button("⭐ Star on GitHub") {
+                    if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+                .font(.system(size: 8, design: .monospaced))
+                .foregroundStyle(Color(white: 0.35))
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 14)
         }
         .padding(.top, 20)
         .frame(width: 160)
@@ -690,32 +720,7 @@ Right button (green) = Allow
                         .foregroundStyle(Color(white: 0.33))
                 }
 
-                Button("Export Screenshot...") {
-                    ScreenshotExporter.export()
-                }
-                .font(.system(size: 11))
-                .foregroundStyle(Color(white: 0.6))
-                .buttonStyle(.plain)
-
                 VStack(spacing: 8) {
-                    HStack(spacing: 12) {
-                        Button("Check for Updates...") {
-                            UpdateChecker.shared.checkNow()
-                        }
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(white: 0.6))
-                        .buttonStyle(.plain)
-
-                        Button("⭐ Star on GitHub") {
-                            if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
-                                NSWorkspace.shared.open(url)
-                            }
-                        }
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(white: 0.6))
-                        .buttonStyle(.plain)
-                    }
-
                     Text("Clawdagotchi v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(Color(white: 0.25))
