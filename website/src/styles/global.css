@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0A0A0A;
+  --bg: #0a0a0a;
   --card: #141414;
-  --accent: #D97757;
-  --accent-hover: #E08868;
+  --accent: #d97757;
+  --accent-hover: #e08868;
   --text: #ffffff;
   --text-secondary: #999999;
-  --border: rgba(255,255,255,0.06);
+  --border: rgba(255, 255, 255, 0.06);
 }
 
 body {
@@ -17,6 +17,5 @@ body {
 }
 
 .font-mono-heading {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
-

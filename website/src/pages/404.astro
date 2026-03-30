@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro'
+import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="404 — Page Not Found · Clawdagotchi" description="This page doesn't exist.">
@@ -37,15 +37,15 @@ import Layout from '../layouts/Layout.astro'
     </div>
 
     <h1 class="font-mono-heading font-bold text-6xl md:text-8xl text-white mb-4">404</h1>
-    <p class="text-[var(--text-secondary)] text-xl mb-2">Page not found</p>
-    <p class="text-[var(--text-secondary)] text-base mb-10 max-w-sm">
+    <p class="text-(--text-secondary) text-xl mb-2">Page not found</p>
+    <p class="text-(--text-secondary) text-base mb-10 max-w-sm">
       Your crab searched everywhere but couldn't find this page.
     </p>
 
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
       <a
         href="/"
-        class="flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-xl font-medium text-base transition-colors"
+        class="flex items-center gap-2 bg-(--accent) hover:bg-(--accent-hover) text-white px-6 py-3 rounded-xl font-medium text-base transition-colors"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m12 19-7-7 7-7"/>
@@ -66,9 +66,9 @@ import Layout from '../layouts/Layout.astro'
       </a>
     </div>
 
-    <div class="flex items-center justify-center gap-2 text-[var(--text-secondary)] text-sm">
+    <div class="flex items-center justify-center gap-2 text-(--text-secondary) text-sm">
       <span>or</span>
-      <code class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-md px-2 py-0.5 text-[var(--accent)] font-mono text-xs select-all">brew install --cask cpenned/tap/clawdagotchi</code>
+      <code class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-md px-2 py-0.5 text-(--accent) font-mono text-xs select-all">brew install --cask cpenned/tap/clawdagotchi</code>
     </div>
   </div>
 </Layout>

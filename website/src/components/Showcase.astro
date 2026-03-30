@@ -5,12 +5,28 @@ const levels = [
   { level: 1, name: 'None', accessories: [] },
   { level: 2, name: 'Bow Tie', accessories: ['bowTie'] },
   { level: 3, name: 'Party Hat', accessories: ['bowTie', 'partyHat'] },
-  { level: 4, name: 'Sunglasses', accessories: ['bowTie', 'sunglasses', 'partyHat'] },
-  { level: 5, name: 'Top Hat', accessories: ['bowTie', 'sunglasses', 'topHat'] },
+  {
+    level: 4,
+    name: 'Sunglasses',
+    accessories: ['bowTie', 'sunglasses', 'partyHat'],
+  },
+  {
+    level: 5,
+    name: 'Top Hat',
+    accessories: ['bowTie', 'sunglasses', 'topHat'],
+  },
   { level: 6, name: 'Crown', accessories: ['bowTie', 'sunglasses', 'crown'] },
-  { level: 7, name: 'Headphones', accessories: ['bowTie', 'sunglasses', 'crown', 'headphones'] },
-  { level: 8, name: 'Star Aura', accessories: ['bowTie', 'sunglasses', 'crown', 'headphones', 'starAura'] },
-]
+  {
+    level: 7,
+    name: 'Headphones',
+    accessories: ['bowTie', 'sunglasses', 'crown', 'headphones'],
+  },
+  {
+    level: 8,
+    name: 'Star Aura',
+    accessories: ['bowTie', 'sunglasses', 'crown', 'headphones', 'starAura'],
+  },
+];
 ---
 
 <section class="py-24 px-6 overflow-hidden">
@@ -19,7 +35,7 @@ const levels = [
       <h2 class="font-mono-heading font-bold text-4xl md:text-5xl text-white mb-4">
         Dress up your crab
       </h2>
-      <p class="text-[var(--text-secondary)] text-lg max-w-xl mx-auto">
+      <p class="text-(--text-secondary) text-lg max-w-xl mx-auto">
         Level up to unlock new accessories. They stack as you progress.
       </p>
     </div>
@@ -27,7 +43,7 @@ const levels = [
     <div class="flex gap-4 overflow-x-auto pb-4 justify-start md:justify-center scrollbar-hide">
       {levels.map(({ level, name, accessories }) => (
         <div class="flex-shrink-0 flex flex-col items-center gap-3">
-          <div class="w-24 h-24 bg-[var(--card)] border border-[var(--border)] rounded-2xl flex items-center justify-center hover:border-[rgba(217,119,87,0.3)] transition-colors">
+          <div class="w-24 h-24 bg-(--card) border border-(--border) rounded-2xl flex items-center justify-center hover:border-[rgba(217,119,87,0.3)] transition-colors">
             <!-- SVG crab matching Swift CrabView geometry -->
             <!-- ViewBox: 86x80, crabOffsetX=10, crabOffsetY=22 -->
             <svg width="48" height="48" viewBox="0 0 86 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +114,7 @@ const levels = [
           </div>
           <div class="text-center">
             <p class="text-white text-xs font-medium">{name}</p>
-            <p class="text-[var(--text-secondary)] text-xs">LV {level}</p>
+            <p class="text-(--text-secondary) text-xs">LV {level}</p>
           </div>
         </div>
       ))}

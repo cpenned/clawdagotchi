@@ -4,34 +4,40 @@ const features = [
   {
     id: 'tracking',
     title: 'Live Session Tracking',
-    description: 'Your crab watches Claude Code work and reacts with animated expressions in real-time.',
+    description:
+      'Your crab watches Claude Code work and reacts with animated expressions in real-time.',
   },
   {
     id: 'permissions',
     title: 'Permission Handling',
-    description: 'Approve or deny tool permissions directly from the floating widget without switching windows.',
+    description:
+      'Approve or deny tool permissions directly from the floating widget without switching windows.',
   },
   {
     id: 'petcare',
     title: 'Pet Care',
-    description: 'Feed, pet, and poke your crab. Watch hunger and happiness drain over time if you neglect it.',
+    description:
+      'Feed, pet, and poke your crab. Watch hunger and happiness drain over time if you neglect it.',
   },
   {
     id: 'levelup',
     title: 'Level Up',
-    description: 'Earn XP from coding sessions and interactions. Level up to unlock 8 unique accessories.',
+    description:
+      'Earn XP from coding sessions and interactions. Level up to unlock 8 unique accessories.',
   },
   {
     id: 'achievements',
     title: 'Achievements',
-    description: '12 badges to unlock — from your first poke to 30-day coding streaks and beyond.',
+    description:
+      '12 badges to unlock — from your first poke to 30-day coding streaks and beyond.',
   },
   {
     id: 'minigames',
     title: 'Mini-Games',
-    description: 'Simon Says pops up randomly. Catch bugs and find treasure for bonus XP rewards.',
+    description:
+      'Simon Says pops up randomly. Catch bugs and find treasure for bonus XP rewards.',
   },
-]
+];
 ---
 
 <section class="py-24 px-6">
@@ -40,14 +46,14 @@ const features = [
       <h2 class="font-mono-heading font-bold text-4xl md:text-5xl text-white mb-4">
         Everything a pet needs
       </h2>
-      <p class="text-[var(--text-secondary)] text-lg max-w-xl mx-auto">
+      <p class="text-(--text-secondary) text-lg max-w-xl mx-auto">
         More than a widget — a full-featured companion that grows with your coding journey.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {features.map(f => (
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 hover:border-[rgba(217,119,87,0.2)] transition-colors">
+        <div class="bg-(--card) border border-(--border) rounded-2xl p-6 hover:border-[rgba(217,119,87,0.2)] transition-colors">
           <div class="mb-4">
             {f.id === 'tracking' && (
               <!-- Eye icon — pixel art -->
@@ -133,7 +139,7 @@ const features = [
             )}
           </div>
           <h3 class="font-mono-heading font-bold text-white text-lg mb-2">{f.title}</h3>
-          <p class="text-[var(--text-secondary)] text-sm leading-relaxed">{f.description}</p>
+          <p class="text-(--text-secondary) text-sm leading-relaxed">{f.description}</p>
         </div>
       ))}
     </div>
