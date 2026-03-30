@@ -523,96 +523,109 @@ struct SettingsView: View {
     private var aboutTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                aboutSection("What is Clawdagotchi?",
+                darkAboutSection("What is Clawdagotchi?",
                     "A floating desktop pet that lives on your screen and reacts to your Claude Code sessions. " +
                     "It tracks tool usage, permissions, and session activity through Claude Code hooks. " +
                     "Take care of it — feed it, pet it, and clean up after it!"
                 )
 
-                aboutSection("Your Crab", """
+                darkAboutSection("Your Crab", """
 Level \(AppSettings.shared.level) — \(CrabAccessory.forLevel(AppSettings.shared.level)) unlocked
 XP: \(AppSettings.shared.xp) / \(nextThresholdText)
 Born: \(AppSettings.shared.birthDateFormatted)
 Age: \(AppSettings.shared.ageInDays) days
 """)
 
-                aboutSection("Session Tracking", """
-                Idle — gentle bob, periodic blink
-                Thinking — eyes look side to side (PreToolUse)
-                Working — wide eyes, walking legs (PostToolUse)
-                Done — happy squish eyes, bounce (Stop)
-                Permission — alert eyes, approve/deny buttons
-                Buttons glow to show active session count (up to 3).
-                """)
+                darkAboutSection("Session Tracking", """
+Idle — gentle bob, periodic blink
+Thinking — eyes look side to side (PreToolUse)
+Working — wide eyes, walking legs (PostToolUse)
+Done — happy squish eyes, bounce (Stop)
+Permission — alert eyes, approve/deny buttons
+Buttons glow to show active session count (up to 3).
+""")
 
-                aboutSection("Pet Care", """
-                Feed (middle button) — restores hunger bar
-                Pet (right button) — restores happiness, cleans poop
-                Poke (left button) — restores happiness, wakes up
-                Hunger and happiness drain over time.
-                Poops accumulate every ~15 min — pet to clean!
-                """)
+                darkAboutSection("Pet Care", """
+Feed (middle button) — restores hunger bar
+Pet (right button) — restores happiness, cleans poop
+Poke (left button) — restores happiness, wakes up
+Hunger and happiness drain over time.
+Poops accumulate every ~15 min — pet to clean!
+""")
 
-                aboutSection("Moods", """
-                Sleeping — eyes close, zzz (after 2 min idle)
-                Hungry — small eyes, trembles (hunger bar low)
-                Angry — wide glare (happiness empty)
-                Pooping — squish face, leaves a mess
-                """)
+                darkAboutSection("Moods", """
+Sleeping — eyes close, zzz (after 2 min idle)
+Hungry — small eyes, trembles (hunger bar low)
+Angry — wide glare (happiness empty)
+Pooping — squish face, leaves a mess
+""")
 
-                aboutSection("Permissions", """
-                When Claude Code needs approval, the screen shows the project name and tool details.
-                Left button (red) = Deny
-                Right button (green) = Allow
-                """)
+                darkAboutSection("Permissions", """
+When Claude Code needs approval, the screen shows the project name and tool details.
+Left button (red) = Deny
+Right button (green) = Allow
+""")
 
-                aboutSection("Setup", """
-                1. Run: bash install_hooks.sh
-                2. Launch the app
-                3. Use Claude Code — the crab reacts!
-                """)
+                darkAboutSection("Setup", """
+1. Run: bash install_hooks.sh
+2. Launch the app
+3. Use Claude Code — the crab reacts!
+""")
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Preview Moods")
-                        .font(.headline)
-                    HStack(spacing: 8) {
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.33))
+                        .tracking(1.5)
+                    HStack(spacing: 6) {
                         moodPreviewButton("Sleep", .sleeping)
                         moodPreviewButton("Hungry", .hungry)
                         moodPreviewButton("Angry", .angry)
                         moodPreviewButton("Poop", .pooping)
                     }
                     Text("Triggers the mood on the live widget for 4 seconds.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.33))
                 }
 
                 Button("Export Screenshot...") {
                     ScreenshotExporter.export()
                 }
+                .font(.system(size: 11))
+                .foregroundStyle(Color(white: 0.6))
+                .buttonStyle(.plain)
 
                 VStack(spacing: 8) {
                     HStack(spacing: 12) {
                         Button("Check for Updates...") {
                             UpdateChecker.shared.checkNow()
                         }
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(white: 0.6))
+                        .buttonStyle(.plain)
+
                         Button("⭐ Star on GitHub") {
                             if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
                                 NSWorkspace.shared.open(url)
                             }
                         }
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(white: 0.6))
+                        .buttonStyle(.plain)
                     }
 
                     Text("Clawdagotchi v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.25))
+
                     Text("An independent fan project. Not affiliated with, sponsored by, or endorsed by Anthropic.")
-                        .font(.caption2)
-                        .foregroundStyle(.quaternary)
+                        .font(.system(size: 9))
+                        .foregroundStyle(Color(white: 0.2))
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
             }
-            .padding()
+            .padding(12)
         }
     }
 
@@ -620,17 +633,24 @@ Age: \(AppSettings.shared.ageInDays) days
         Button(label) {
             TamagotchiViewModel.shared?.previewMood(mood)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
+        .font(.system(size: 10, design: .monospaced))
+        .foregroundStyle(Color.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(Color(white: 0.2))
+        .cornerRadius(4)
+        .buttonStyle(.plain)
     }
 
-    private func aboutSection(_ title: String, _ body: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.headline)
+    private func darkAboutSection(_ title: String, _ body: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title.uppercased())
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color(white: 0.33))
+                .tracking(1.5)
             Text(body)
-                .font(.body)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11))
+                .foregroundStyle(Color(white: 0.6))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
