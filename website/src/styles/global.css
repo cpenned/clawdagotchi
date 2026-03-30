@@ -20,30 +20,3 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Pixel grid background — fades in at top and bottom */
-@layer base {
-  [data-pixel-top],
-  [data-pixel-bottom] {
-    position: fixed;
-    left: 0;
-    right: 0;
-    height: 300px;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-      radial-gradient(circle, rgba(217,119,87,0.08) 1px, transparent 1px);
-    background-size: 8px 8px;
-  }
-
-  [data-pixel-top] {
-    top: 0;
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-  }
-
-  [data-pixel-bottom] {
-    bottom: 0;
-    mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-  }
-}
