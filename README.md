@@ -29,6 +29,13 @@
 
 Download the latest `.dmg` from [Releases](https://github.com/cpenned/clawdagotchi/releases), open it, and drag Clawdagotchi to Applications.
 
+Or install with Homebrew:
+
+```bash
+brew tap cpenned/tap
+brew install --cask clawdagotchi
+```
+
 Or build from source:
 
 ```bash
