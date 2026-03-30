@@ -5,22 +5,45 @@ struct SettingsView: View {
     @State private var selectedTab: SettingsTab = .appearance
 
     var body: some View {
-        TabView {
-            appearanceTab
-                .tabItem { Label("Appearance", systemImage: "paintbrush") }
-            levelTab
-                .tabItem { Label("Level Up", systemImage: "star.fill") }
-            statsTab
-                .tabItem { Label("Stats", systemImage: "chart.bar") }
-            achievementsTab
-                .tabItem { Label("Badges", systemImage: "trophy") }
-            soundTab
-                .tabItem { Label("Sound", systemImage: "speaker.wave.2") }
-            aboutTab
-                .tabItem { Label("About", systemImage: "info.circle") }
+        VStack(spacing: 0) {
+            tabBar
+            Color(white: 0.15).frame(height: 1)
+            tabContent
         }
         .frame(width: 440, height: 500)
-        .padding(.top, 8)
+        .background(Color.screenDark)
+        .preferredColorScheme(.dark)
+    }
+
+    private var tabBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 2) {
+                ForEach(SettingsTab.allCases, id: \.self) { tab in
+                    Button(tab.rawValue) {
+                        selectedTab = tab
+                    }
+                    .buttonStyle(PillTabButtonStyle(isSelected: selectedTab == tab))
+                }
+            }
+            .padding(4)
+        }
+        .background(Color(white: 0.067))
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var tabContent: some View {
+        Group {
+            switch selectedTab {
+            case .appearance: appearanceTab
+            case .levelUp: levelTab
+            case .stats: statsTab
+            case .badges: achievementsTab
+            case .sound: soundTab
+            case .about: aboutTab
+            }
+        }
     }
 
     // MARK: - Appearance
