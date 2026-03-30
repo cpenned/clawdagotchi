@@ -48,7 +48,7 @@ This always redirects to the latest release. Never hardcode a specific version i
 ## Common Issues
 
 - **Hook timeout during git**: The PermissionRequest hook can block git operations if the app is running and a permission is pending. Kill the app first.
-- **Gatekeeper warning**: Users need `xattr -cr /Applications/Clawdagotchi.app` until we have a Developer ID certificate (pending Apple Developer enrollment).
+- **Code signing**: App is signed with Developer ID (team 5FS8D53Q69) and notarized with Apple. No Gatekeeper warnings.
 - **Multiple instances**: Second instance fails to bind port 7777. Only run one at a time.
 
 ## Testing

@@ -38,8 +38,14 @@ const {
     <meta name="twitter:image" content="https://clawdagotchi.com/og-image.png" />
   </head>
   <body>
-    <div aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:300px;pointer-events:none;z-index:0;background-image:radial-gradient(circle,rgba(217,119,87,0.08) 1px,transparent 1px);background-size:8px 8px;-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);mask-image:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent)"></div>
-    <div aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:300px;pointer-events:none;z-index:0;background-image:radial-gradient(circle,rgba(217,119,87,0.08) 1px,transparent 1px);background-size:8px 8px;-webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0.7),transparent);mask-image:linear-gradient(to top,rgba(0,0,0,0.7),transparent)"></div>
+    <!-- Top glow -->
+    <div aria-hidden="true" style="position:fixed;top:0;left:50%;transform:translateX(-50%);width:800px;height:400px;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center top,rgba(217,119,87,0.07) 0%,transparent 70%);"></div>
+    <!-- Top grid -->
+    <div aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:350px;pointer-events:none;z-index:1;background-image:radial-gradient(circle,rgba(217,119,87,0.15) 1px,transparent 1px);background-size:8px 8px;-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0.8),transparent);mask-image:linear-gradient(to bottom,rgba(0,0,0,0.8),transparent)"></div>
+    <!-- Bottom glow -->
+    <div aria-hidden="true" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:800px;height:400px;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center bottom,rgba(217,119,87,0.07) 0%,transparent 70%);"></div>
+    <!-- Bottom grid -->
+    <div aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:350px;pointer-events:none;z-index:1;background-image:radial-gradient(circle,rgba(217,119,87,0.15) 1px,transparent 1px);background-size:8px 8px;-webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0.8),transparent);mask-image:linear-gradient(to top,rgba(0,0,0,0.8),transparent)"></div>
     <div style="position:relative;z-index:10">
       <slot />
     </div>
