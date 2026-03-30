@@ -1,5 +1,4 @@
 import AppKit
-import SwiftUI
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -31,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.addButton(withTitle: "Skip")
         alert.alertStyle = .informational
 
+        NSApp.activate(ignoringOtherApps: true)
         let response = alert.runModal()
         guard response == .alertFirstButtonReturn else { return }
 
