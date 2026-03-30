@@ -116,7 +116,7 @@ final class AppSettings {
             "soundEnabled": true,
             "soundVolume": Float(0.5),
             "shellStyle": ShellStyle.salmonPink.rawValue,
-            "widgetScale": 1.0,
+            "widgetScale": 1.2,
             "floatPolicy": FloatPolicy.always.rawValue,
             "botName": "Clawd",
             "useCustomCrabColor": true,
