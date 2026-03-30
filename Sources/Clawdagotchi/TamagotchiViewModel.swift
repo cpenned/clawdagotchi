@@ -227,10 +227,10 @@ final class TamagotchiViewModel {
 
     private func updateMood() {
         // Stats decay over time (every 30s tick)
-        // Hunger drains ~1% per 30s = empty in ~50 min
-        // Happiness drains ~0.8% per 30s = empty in ~62 min
-        hunger = max(0, hunger - 0.02)
-        happiness = max(0, happiness - 0.016)
+        // Hunger drains ~0.5% per 30s = empty in ~100 min
+        // Happiness drains ~0.4% per 30s = empty in ~125 min
+        hunger = max(0, hunger - Double.random(in: 0.008...0.012))
+        happiness = max(0, happiness - Double.random(in: 0.006...0.010))
 
         guard displayState == .idle else {
             if moodState != .normal {
