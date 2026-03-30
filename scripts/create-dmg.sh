@@ -86,15 +86,18 @@ fi
 
 rm -rf "$STAGE_DIR"
 
+# Also create stable-named copy for direct download links
+STABLE_DMG="$RELEASE_DIR/$APP_NAME.dmg"
+cp "$DMG_PATH" "$STABLE_DMG"
+
 echo ""
 echo "=== Done ==="
 echo ""
 echo "DMG: $DMG_PATH"
+echo "Stable: $STABLE_DMG"
 echo "Size: $(du -h "$DMG_PATH" | cut -f1)"
 echo ""
-echo "To test: open $DMG_PATH"
+echo "To release:"
+echo "  gh release create v$VERSION $DMG_PATH $STABLE_DMG --title \"Clawdagotchi v$VERSION\""
 echo ""
-echo "Note: This DMG is ad-hoc signed. For distribution without"
-echo "Gatekeeper warnings, sign with a Developer ID certificate:"
-echo "  codesign --force --deep --sign \"Developer ID Application: ...\" $APP_PATH"
-echo "  xcrun notarytool submit $DMG_PATH --keychain-profile \"...\" --wait"
+echo "To test: open $DMG_PATH"

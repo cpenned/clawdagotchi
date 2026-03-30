@@ -6,9 +6,12 @@
 
 When bumping the version:
 1. Update `Info.plist` (CFBundleShortVersionString + CFBundleVersion)
-2. Run `bash scripts/create-dmg.sh` — DMG filename auto-reads from Info.plist
-3. Create GitHub release: `gh release create vX.Y.Z releases/Clawdagotchi-X.Y.Z.dmg`
+2. Run `bash scripts/create-dmg.sh` — creates versioned + stable DMG
+3. Create GitHub release with BOTH DMGs:
+   `gh release create vX.Y.Z releases/Clawdagotchi-X.Y.Z.dmg releases/Clawdagotchi.dmg`
 4. The About tab and UpdateChecker read version from `Bundle.main.infoDictionary` at runtime
+
+The `Clawdagotchi.dmg` (no version) is a stable-named copy used by the website's direct download links.
 
 The Settings About tab, UpdateChecker, and DMG script all read from Info.plist automatically. Never hardcode version strings elsewhere.
 

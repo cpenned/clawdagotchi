@@ -4,6 +4,33 @@ import TamagotchiDemo from './TamagotchiDemo.tsx'
 
 <section class="min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
   <div class="max-w-4xl mx-auto text-center">
+    <!-- App icon (matches macOS icon exactly) -->
+    <div class="mb-6">
+      <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto rounded-2xl" style="box-shadow: 0 8px 32px rgba(217,119,87,0.3)">
+        <!-- Salmon bg -->
+        <rect width="100" height="100" rx="22" fill="#D97757"/>
+        <!-- Light egg -->
+        <ellipse cx="50" cy="48" rx="34" ry="40" fill="#F8D0C4"/>
+        <!-- Crab body (scaled from 66x52 viewBox) -->
+        <rect x="32" y="28" width="36" height="26" fill="#D97757"/>
+        <!-- Antennae -->
+        <rect x="26" y="34" width="4" height="8" fill="#D97757"/>
+        <rect x="70" y="34" width="4" height="8" fill="#D97757"/>
+        <!-- Legs -->
+        <rect x="32" y="54" width="4" height="8" fill="#D97757"/>
+        <rect x="40" y="54" width="4" height="8" fill="#D97757"/>
+        <rect x="56" y="54" width="4" height="8" fill="#D97757"/>
+        <rect x="64" y="54" width="4" height="8" fill="#D97757"/>
+        <!-- Eyes (cutout) -->
+        <rect x="38" y="34" width="5" height="5" fill="#F8D0C4"/>
+        <rect x="57" y="34" width="5" height="5" fill="#F8D0C4"/>
+        <!-- Buttons -->
+        <circle cx="41" cy="80" r="3.5" fill="#D97757"/>
+        <circle cx="50" cy="80" r="3.5" fill="#D97757"/>
+        <circle cx="59" cy="80" r="3.5" fill="#D97757"/>
+      </svg>
+    </div>
+
     <!-- Badge -->
     <div class="inline-flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-full px-4 py-1.5 text-sm text-[var(--text-secondary)] mb-8">
       <span class="w-2 h-2 rounded-full bg-[var(--accent)] inline-block"></span>
@@ -25,7 +52,7 @@ import TamagotchiDemo from './TamagotchiDemo.tsx'
     <!-- CTAs -->
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
       <a
-        href="https://github.com/cpenned/clawdagotchi/releases/latest"
+        href="https://github.com/cpenned/clawdagotchi/releases/latest/download/Clawdagotchi.dmg"
         id="download"
         class="flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-xl font-medium text-base transition-colors"
       >
