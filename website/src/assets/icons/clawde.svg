@@ -1,0 +1,16 @@
+<svg width="28" height="28" viewBox="0 0 66 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Matches macOS app icon crab exactly: viewBox 66x52 -->
+  <!-- Antennae -->
+  <rect x="0" y="13" width="6" height="13" fill="#D97757" />
+  <rect x="60" y="13" width="6" height="13" fill="#D97757" />
+  <!-- Body -->
+  <rect x="6" y="0" width="54" height="39" fill="#D97757" />
+  <!-- Legs (4) -->
+  <rect x="6" y="39" width="6" height="13" fill="#D97757" />
+  <rect x="18" y="39" width="6" height="13" fill="#D97757" />
+  <rect x="42" y="39" width="6" height="13" fill="#D97757" />
+  <rect x="54" y="39" width="6" height="13" fill="#D97757" />
+  <!-- Eyes (dark) -->
+  <rect x="14" y="12" width="6" height="7" fill="#0A0A0A" />
+  <rect x="46" y="12" width="6" height="7" fill="#0A0A0A" />
+</svg>
