@@ -7,11 +7,15 @@ final class UpdateChecker {
     private let repo = "cpenned/clawdagotchi"
     private let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
 
+    private var isHomebrewInstall: Bool {
+        let path = Bundle.main.bundlePath.lowercased()
+        return path.contains("homebrew") || path.contains("cellar")
+    }
+
     private init() {}
 
     func checkOnLaunch() {
         Task {
-            // Wait a few seconds so the app settles
             try? await Task.sleep(for: .seconds(5))
             await check(silent: true)
         }
@@ -46,8 +50,16 @@ final class UpdateChecker {
 
             let latestVersion = tagName.replacingOccurrences(of: "v", with: "")
 
+            // Extract DMG asset download URL
+            var dmgURL: String? = nil
+            if let assets = json["assets"] as? [[String: Any]] {
+                dmgURL = assets
+                    .first { ($0["name"] as? String)?.hasSuffix(".dmg") == true }
+                    .flatMap { $0["browser_download_url"] as? String }
+            }
+
             if isNewer(latestVersion, than: currentVersion) {
-                showUpdateAvailable(version: latestVersion, url: htmlURL)
+                showUpdateAvailable(version: latestVersion, releaseURL: htmlURL, dmgURL: dmgURL)
             } else if !silent {
                 showUpToDate()
             }
@@ -68,18 +80,34 @@ final class UpdateChecker {
         return false
     }
 
-    private func showUpdateAvailable(version: String, url: String) {
+    private func showUpdateAvailable(version: String, releaseURL: String, dmgURL: String?) {
+        if isHomebrewInstall {
+            let alert = NSAlert()
+            alert.messageText = "Update Available"
+            alert.informativeText = "Clawdagotchi v\(version) is available.\n\nYou installed via Homebrew — run this to update:\n\nbrew upgrade clawdagotchi"
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            return
+        }
+
+        guard let dmgURL else {
+            // No DMG asset found — fall back to releases page
+            openReleasesPage(releaseURL)
+            return
+        }
+
         let alert = NSAlert()
         alert.messageText = "Update Available"
-        alert.informativeText = "Clawdagotchi v\(version) is available. You're running v\(currentVersion)."
+        alert.informativeText = "Clawdagotchi v\(version) is available. You're running v\(currentVersion).\n\nDownload and install now?"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "Download")
         alert.addButton(withTitle: "Later")
 
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            if let downloadURL = URL(string: url) {
-                NSWorkspace.shared.open(downloadURL)
+            Task {
+                await downloadAndInstall(version: version, dmgURL: dmgURL, releaseURL: releaseURL)
             }
         }
     }
@@ -91,5 +119,23 @@ final class UpdateChecker {
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+
+    private func openReleasesPage(_ url: String) {
+        if let releaseURL = URL(string: url) {
+            NSWorkspace.shared.open(releaseURL)
+        }
+    }
+
+    // MARK: - Download & Install (stubs — implemented in later tasks)
+
+    private func downloadAndInstall(version: String, dmgURL: String, releaseURL: String) async {
+        // Task 2
+    }
+
+    @discardableResult
+    private func shell(_ command: String) -> Int32 {
+        // Task 3
+        return -1
     }
 }
