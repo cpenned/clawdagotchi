@@ -18,10 +18,10 @@ struct SettingsView: View {
 
     private var xpFraction: CGFloat {
         let thresholds = TamagotchiViewModel.levelThresholds
-        let level = AppSettings.shared.level
+        let level = settings.level
         guard level < thresholds.count else { return 1.0 }
         let target = CGFloat(thresholds[level])
-        return target > 0 ? min(CGFloat(AppSettings.shared.xp) / target, 1.0) : 1.0
+        return target > 0 ? min(CGFloat(settings.xp) / target, 1.0) : 1.0
     }
 
     private var sidebar: some View {
@@ -37,12 +37,12 @@ struct SettingsView: View {
                     .frame(width: 80, height: 76)
                 CrabView(
                     size: 60,
-                    color: AppSettings.shared.activeCrabColor,
+                    color: settings.activeCrabColor,
                     eyeColor: Color.screenDark,
                     eyeStyle: .normal,
                     accessories: CrabAccessory.allUnlocked(
-                        for: AppSettings.shared.level,
-                        seasonalEnabled: AppSettings.shared.seasonalAccessories
+                        for: settings.level,
+                        seasonalEnabled: settings.seasonalAccessories
                     ),
                     accessoryColor: .white
                 )
@@ -50,38 +50,35 @@ struct SettingsView: View {
             .padding(.bottom, 12)
 
             // Bot name
-            Text(AppSettings.shared.botName)
+            Text(settings.botName)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.salmon)
                 .padding(.bottom, 2)
 
             // Level
-            Text("Level \(AppSettings.shared.level)")
+            Text("Level \(settings.level)")
                 .font(.system(size: 9, design: .monospaced))
                 .foregroundStyle(Color(white: 0.4))
                 .padding(.bottom, 6)
 
             // XP bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color(white: 0.145)).frame(height: 3)
-                    Capsule().fill(Color.salmon).frame(width: geo.size.width * xpFraction, height: 3)
-                }
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color(white: 0.145)).frame(width: 100, height: 3)
+                Capsule().fill(Color.salmon).frame(width: 100 * xpFraction, height: 3)
             }
-            .frame(width: 100, height: 3)
             .padding(.bottom, 3)
 
-            Text("\(AppSettings.shared.xp) / \(nextThresholdText) XP")
+            Text("\(settings.xp) / \(nextThresholdText) XP")
                 .font(.system(size: 8, design: .monospaced))
                 .foregroundStyle(Color(white: 0.27))
                 .padding(.bottom, 14)
 
             // Streak
-            if AppSettings.shared.streak > 0 {
+            if settings.streak > 0 {
                 HStack(spacing: 4) {
                     Text("🔥")
                         .font(.system(size: 10))
-                    Text("\(AppSettings.shared.streak) day streak")
+                    Text("\(settings.streak) day streak")
                         .font(.system(size: 9, design: .monospaced))
                         .foregroundStyle(Color(white: 0.53))
                 }
