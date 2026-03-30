@@ -6,3 +6,6 @@ releases/
 website/node_modules
 website/dist
 website/.astro
+clawdagotchi_dev.csr
+clawdagotchi_dev.key
+docs/
