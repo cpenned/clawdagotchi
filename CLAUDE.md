@@ -7,9 +7,14 @@
 When bumping the version:
 1. Update `Info.plist` (CFBundleShortVersionString + CFBundleVersion)
 2. Run `bash scripts/create-dmg.sh` — creates versioned + stable DMG
-3. Create GitHub release with BOTH DMGs:
+3. Notarize: `xcrun notarytool submit releases/Clawdagotchi-X.Y.Z.dmg --keychain-profile "notary" --wait`
+4. Staple: `xcrun stapler staple releases/Clawdagotchi-X.Y.Z.dmg` then `cp releases/Clawdagotchi-X.Y.Z.dmg releases/Clawdagotchi.dmg`
+5. Create GitHub release with BOTH DMGs:
    `gh release create vX.Y.Z releases/Clawdagotchi-X.Y.Z.dmg releases/Clawdagotchi.dmg`
-4. The About tab and UpdateChecker read version from `Bundle.main.infoDictionary` at runtime
+6. Update Homebrew cask (`github.com/cpenned/homebrew-tap`):
+   - Get new SHA: `shasum -a 256 releases/Clawdagotchi-X.Y.Z.dmg`
+   - Update `version` and `sha256` in `Casks/clawdagotchi.rb`
+7. The About tab and UpdateChecker read version from `Bundle.main.infoDictionary` at runtime
 
 The `Clawdagotchi.dmg` (no version) is a stable-named copy used by the website's direct download links.
 
