@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0A0A0A;
+  --card: #141414;
+  --accent: #D97757;
+  --accent-hover: #E08868;
+  --text: #ffffff;
+  --text-secondary: #999999;
+  --border: rgba(255,255,255,0.06);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.font-mono-heading {
+  font-family: 'JetBrains Mono', monospace;
+}

@@ -1,0 +1,43 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="404 — Page Not Found · Clawdagotchi" description="This page doesn't exist.">
+  <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+    <!-- Sad crab -->
+    <div class="mb-8">
+      <svg width="80" height="80" viewBox="0 0 86 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Antennae -->
+        <rect x="10" y="35" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <rect x="70" y="35" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <!-- Body -->
+        <rect x="16" y="22" width="54" height="39" rx="6" fill="#D97757" opacity="0.5"/>
+        <!-- Legs -->
+        <rect x="16" y="61" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <rect x="28" y="61" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <rect x="52" y="61" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <rect x="64" y="61" width="6" height="13" rx="3" fill="#D97757" opacity="0.5"/>
+        <!-- Sad eyes (X marks) -->
+        <text x="27" y="44" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="bold">×</text>
+        <text x="59" y="44" text-anchor="middle" fill="#1A1A1A" font-size="10" font-weight="bold">×</text>
+      </svg>
+    </div>
+
+    <h1 class="font-mono-heading font-bold text-6xl md:text-8xl text-white mb-4">404</h1>
+    <p class="text-[var(--text-secondary)] text-xl mb-2">Page not found</p>
+    <p class="text-[var(--text-secondary)] text-base mb-10 max-w-sm">
+      Your crab searched everywhere but couldn't find this page.
+    </p>
+
+    <a
+      href="/"
+      class="flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-xl font-medium text-base transition-colors"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7"/>
+        <path d="M19 12H5"/>
+      </svg>
+      Back home
+    </a>
+  </div>
+</Layout>
