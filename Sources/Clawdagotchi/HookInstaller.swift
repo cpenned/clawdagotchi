@@ -7,7 +7,6 @@ enum HookInstaller {
         return share.appendingPathComponent("hook_relay.py")
     }()
 
-    /// Returns true if any hook command in ~/.claude/settings.json references hook_relay.py
     static func areHooksInstalled() -> Bool {
         let settingsURL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".claude/settings.json")
@@ -30,14 +29,11 @@ enum HookInstaller {
         return false
     }
 
-    /// Copies hook_relay.py to ~/.local/share/clawdagotchi/ and writes hook entries to ~/.claude/settings.json
     static func install() throws {
-        // 1. Locate bundled relay
         guard let bundledRelay = Bundle.main.path(forResource: "hook_relay", ofType: "py") else {
             throw HookInstallerError.relayNotInBundle
         }
 
-        // 2. Copy to stable destination
         let destDir = relayDestination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
         if FileManager.default.fileExists(atPath: relayDestination.path) {
@@ -45,7 +41,6 @@ enum HookInstaller {
         }
         try FileManager.default.copyItem(atPath: bundledRelay, toPath: relayDestination.path)
 
-        // 3. Read or create ~/.claude/settings.json
         let claudeDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude")
         try FileManager.default.createDirectory(at: claudeDir, withIntermediateDirectories: true)
         let settingsURL = claudeDir.appendingPathComponent("settings.json")
@@ -58,7 +53,6 @@ enum HookInstaller {
             settings = [:]
         }
 
-        // 4. Write hook entries
         var hooks = settings["hooks"] as? [String: Any] ?? [:]
         let events = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop", "PermissionRequest"]
         let relayPath = relayDestination.path
@@ -84,10 +78,9 @@ enum HookInstaller {
         }
         settings["hooks"] = hooks
 
-        // 5. Atomic write
         let jsonData = try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys])
         let tmp = settingsURL.deletingLastPathComponent().appendingPathComponent(".settings.tmp.json")
-        try jsonData.write(to: tmp, options: .atomic)
+        try jsonData.write(to: tmp)
         _ = try FileManager.default.replaceItemAt(settingsURL, withItemAt: tmp)
     }
 }
