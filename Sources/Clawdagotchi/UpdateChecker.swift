@@ -132,10 +132,46 @@ final class UpdateChecker {
         }
     }
 
-    // MARK: - Download & Install (stubs — implemented in later tasks)
+    // MARK: - Download & Install
 
     private func downloadAndInstall(version: String, dmgURL: String, releaseURL: String) async {
-        // Task 2
+        guard let url = URL(string: dmgURL) else {
+            openReleasesPage(releaseURL)
+            return
+        }
+
+        let tempDMG = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Clawdagotchi-\(version).dmg")
+
+        try? FileManager.default.removeItem(at: tempDMG)
+
+        do {
+            let (downloadedURL, _) = try await URLSession.shared.download(from: url)
+            try FileManager.default.moveItem(at: downloadedURL, to: tempDMG)
+        } catch {
+            openReleasesPage(releaseURL)
+            return
+        }
+
+        showInstallPrompt(dmgPath: tempDMG, releaseURL: releaseURL)
+    }
+
+    private func showInstallPrompt(dmgPath: URL, releaseURL: String) {
+        let alert = NSAlert()
+        alert.messageText = "Ready to Install"
+        alert.informativeText = "The update has been downloaded. Clawdagotchi will restart to complete the installation."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Install & Restart")
+        alert.addButton(withTitle: "Later")
+
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            installUpdate(dmgPath: dmgPath, releaseURL: releaseURL)
+        }
+    }
+
+    private func installUpdate(dmgPath: URL, releaseURL: String) {
+        // Task 3
     }
 
     @discardableResult
