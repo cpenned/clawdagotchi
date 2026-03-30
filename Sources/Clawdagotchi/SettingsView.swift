@@ -6,32 +6,114 @@ struct SettingsView: View {
     @State private var hooksInstalled: Bool = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            tabBar
-            Color(white: 0.15).frame(height: 1)
+        HStack(spacing: 0) {
+            sidebar
+            Color(white: 0.11).frame(width: 1)
             tabContent
         }
-        .frame(width: 440, height: 500)
+        .frame(width: 580, height: 520)
         .background(Color.screenDark)
         .preferredColorScheme(.dark)
     }
 
-    private var tabBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
+    private var xpFraction: CGFloat {
+        let thresholds = TamagotchiViewModel.levelThresholds
+        let level = AppSettings.shared.level
+        guard level < thresholds.count else { return 1.0 }
+        let target = CGFloat(thresholds[level])
+        return target > 0 ? min(CGFloat(AppSettings.shared.xp) / target, 1.0) : 1.0
+    }
+
+    private var sidebar: some View {
+        VStack(alignment: .center, spacing: 0) {
+            // Crab
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(white: 0.118))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color(white: 0.165), lineWidth: 1)
+                    )
+                    .frame(width: 80, height: 76)
+                CrabView(
+                    size: 60,
+                    color: AppSettings.shared.activeCrabColor,
+                    eyeColor: Color.screenDark,
+                    eyeStyle: .normal,
+                    accessories: CrabAccessory.allUnlocked(
+                        for: AppSettings.shared.level,
+                        seasonalEnabled: AppSettings.shared.seasonalAccessories
+                    ),
+                    accessoryColor: .white
+                )
+            }
+            .padding(.bottom, 12)
+
+            // Bot name
+            Text(AppSettings.shared.botName)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.salmon)
+                .padding(.bottom, 2)
+
+            // Level
+            Text("Level \(AppSettings.shared.level)")
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundStyle(Color(white: 0.4))
+                .padding(.bottom, 6)
+
+            // XP bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color(white: 0.145)).frame(height: 3)
+                    Capsule().fill(Color.salmon).frame(width: geo.size.width * xpFraction, height: 3)
+                }
+            }
+            .frame(width: 100, height: 3)
+            .padding(.bottom, 3)
+
+            Text("\(AppSettings.shared.xp) / \(nextThresholdText) XP")
+                .font(.system(size: 8, design: .monospaced))
+                .foregroundStyle(Color(white: 0.27))
+                .padding(.bottom, 14)
+
+            // Streak
+            if AppSettings.shared.streak > 0 {
+                HStack(spacing: 4) {
+                    Text("🔥")
+                        .font(.system(size: 10))
+                    Text("\(AppSettings.shared.streak) day streak")
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.53))
+                }
+                .padding(.bottom, 20)
+            } else {
+                Spacer().frame(height: 20)
+            }
+
+            // Tab buttons
+            VStack(spacing: 2) {
                 ForEach(SettingsTab.allCases, id: \.self) { tab in
                     Button(tab.rawValue) {
                         selectedTab = tab
                     }
-                    .buttonStyle(PillTabButtonStyle(isSelected: selectedTab == tab))
+                    .font(.system(size: 9, weight: selectedTab == tab ? .semibold : .regular, design: .monospaced))
+                    .foregroundStyle(selectedTab == tab ? Color.white : Color(white: 0.4))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .background(selectedTab == tab ? Color.salmon : Color.clear)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .buttonStyle(.plain)
                 }
             }
-            .padding(4)
+            .padding(.horizontal, 8)
+
+            Spacer()
         }
-        .background(Color(white: 0.067))
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
+        .padding(.top, 20)
+        .frame(width: 160)
+        .frame(maxHeight: .infinity)
+        .background(Color(white: 0.086))
     }
 
     private var tabContent: some View {
@@ -722,21 +804,6 @@ enum SettingsTab: String, CaseIterable {
     case badges = "Badges"
     case sound = "Sound"
     case about = "About"
-}
-
-struct PillTabButtonStyle: ButtonStyle {
-    let isSelected: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 10, weight: .medium, design: .monospaced))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 5)
-            .background(isSelected ? Color.salmon : Color.clear)
-            .foregroundStyle(isSelected ? Color.white : Color(white: 0.4))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .contentShape(Rectangle())
-    }
 }
 
 struct SoundPickerRow: View {
