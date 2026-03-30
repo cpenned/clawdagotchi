@@ -42,9 +42,17 @@ fi
 echo "App bundle: $APP_PATH"
 echo ""
 
-# Ad-hoc code sign (allows Gatekeeper to identify the app)
-echo "Code signing (ad-hoc)..."
-codesign --force --deep --sign - "$APP_PATH"
+# Code sign with Developer ID (or fall back to ad-hoc)
+SIGN_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | grep "Developer ID Application" | head -1 | sed 's/.*"\(.*\)"/\1/')
+if [ -n "$SIGN_IDENTITY" ]; then
+    echo "Code signing with: $SIGN_IDENTITY"
+    codesign --force --deep --options runtime \
+        --entitlements "$PROJECT_DIR/Clawdagotchi.entitlements" \
+        --sign "$SIGN_IDENTITY" "$APP_PATH"
+else
+    echo "Code signing (ad-hoc — no Developer ID found)..."
+    codesign --force --deep --sign - "$APP_PATH"
+fi
 echo ""
 
 # Create DMG
