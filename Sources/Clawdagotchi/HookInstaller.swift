@@ -36,10 +36,10 @@ enum HookInstaller {
 
         let destDir = relayDestination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
-        if FileManager.default.fileExists(atPath: relayDestination.path) {
+        if FileManager.default.fileExists(atPath: relayDestination.path(percentEncoded: false)) {
             try FileManager.default.removeItem(at: relayDestination)
         }
-        try FileManager.default.copyItem(atPath: bundledRelay, toPath: relayDestination.path)
+        try FileManager.default.copyItem(at: URL(fileURLWithPath: bundledRelay), to: relayDestination)
 
         let claudeDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude")
         try FileManager.default.createDirectory(at: claudeDir, withIntermediateDirectories: true)
@@ -55,7 +55,7 @@ enum HookInstaller {
 
         var hooks = settings["hooks"] as? [String: Any] ?? [:]
         let events = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop", "PermissionRequest"]
-        let relayPath = relayDestination.path
+        let relayPath = relayDestination.path(percentEncoded: false)
 
         for event in events {
             var entries = hooks[event] as? [[String: Any]] ?? []
