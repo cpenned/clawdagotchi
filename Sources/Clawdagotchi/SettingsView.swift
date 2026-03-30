@@ -99,11 +99,11 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 6)
                             .padding(.horizontal, 10)
+                            .background(selectedTab == tab ? Color.salmon : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .contentShape(Rectangle())
                     }
-                    .background(selectedTab == tab ? Color.salmon : Color.clear)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
                     .buttonStyle(.plain)
-                    .contentShape(Rectangle())
                 }
             }
             .padding(.horizontal, 8)
@@ -112,29 +112,51 @@ struct SettingsView: View {
 
             // Bottom links
             VStack(spacing: 6) {
-                Button("Export Screenshot...") {
+                Button {
                     ScreenshotExporter.export()
+                } label: {
+                    Text("Screenshot")
+                        .font(.system(size: 8, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.55))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .background(Color(white: 0.145))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .contentShape(Rectangle())
                 }
-                .font(.system(size: 8, design: .monospaced))
-                .foregroundStyle(Color(white: 0.35))
                 .buttonStyle(.plain)
 
-                Button("Check for Updates...") {
+                Button {
                     UpdateChecker.shared.checkNow()
+                } label: {
+                    Text("Check for Updates")
+                        .font(.system(size: 8, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color(white: 0.55))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .background(Color(white: 0.145))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .contentShape(Rectangle())
                 }
-                .font(.system(size: 8, design: .monospaced))
-                .foregroundStyle(Color(white: 0.35))
                 .buttonStyle(.plain)
 
-                Button("⭐ Star on GitHub") {
+                Button {
                     if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
                         NSWorkspace.shared.open(url)
                     }
+                } label: {
+                    Text("⭐ Star on GitHub")
+                        .font(.system(size: 8, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.salmon)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .background(Color.salmon.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .contentShape(Rectangle())
                 }
-                .font(.system(size: 8, design: .monospaced))
-                .foregroundStyle(Color(white: 0.35))
                 .buttonStyle(.plain)
             }
+            .padding(.horizontal, 8)
             .padding(.bottom, 14)
         }
         .padding(.top, 20)
@@ -189,6 +211,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
 
@@ -213,6 +236,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -239,6 +263,7 @@ struct SettingsView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }
@@ -281,6 +306,7 @@ struct SettingsView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }
@@ -365,6 +391,7 @@ struct SettingsView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }
@@ -483,7 +510,7 @@ struct SettingsView: View {
                     Color(white: 0.12).frame(height: 1)
                     settingsRow("Next level", value: nextThresholdText + " XP")
                     Color(white: 0.12).frame(height: 1)
-                    Button("Reset Progress") {
+                    Button("Reset Level") {
                         showingResetConfirm = true
                     }
                     .font(.system(size: 11))
@@ -491,14 +518,14 @@ struct SettingsView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .buttonStyle(.plain)
-                    .alert("Reset Progress?", isPresented: $showingResetConfirm) {
+                    .alert("Reset Level?", isPresented: $showingResetConfirm) {
                         Button("Cancel", role: .cancel) {}
                         Button("Reset", role: .destructive) {
                             TamagotchiViewModel.shared?.resetProgress()
                             previewLevel = 1
                         }
                     } message: {
-                        Text("This will reset your level to 1 and XP to 0. This cannot be undone.")
+                        Text("Your level and XP will reset to 1 and 0. You can earn your way back up through Claude Code activity.")
                     }
                 }
             }

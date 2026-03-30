@@ -5,6 +5,7 @@ import AppKit
 struct ClawdagotchiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var viewModel = TamagotchiViewModel()
+    @Environment(\.openSettings) private var openSettings
 
     var body: some Scene {
         Window("Clawdagotchi", id: "main") {
@@ -12,6 +13,25 @@ struct ClawdagotchiApp: App {
                 .background(WindowConfigurator(hasPermissionPending: viewModel.pendingPermission != nil))
                 .onAppear { viewModel.start() }
                 .onDisappear { viewModel.stop() }
+                .contextMenu {
+                    Button("Settings…") {
+                        NSApp.activate(ignoringOtherApps: true)
+                        openSettings()
+                    }
+                    Divider()
+                    Button("Check for Updates…") {
+                        UpdateChecker.shared.checkNow()
+                    }
+                    Button("Star on GitHub") {
+                        if let url = URL(string: "https://github.com/cpenned/clawdagotchi") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                    Divider()
+                    Button("Quit Clawdagotchi") {
+                        NSApp.terminate(nil)
+                    }
+                }
         }
         .windowStyle(.plain)
         .windowResizability(.contentMinSize)

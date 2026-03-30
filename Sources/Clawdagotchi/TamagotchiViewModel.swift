@@ -43,7 +43,7 @@ final class TamagotchiViewModel {
 
     private(set) var justLeveledUp: Bool = false
 
-    static let levelThresholds = [0, 100, 350, 800, 1500, 2500, 4000, 6000]
+    static let levelThresholds = [0, 200, 700, 1600, 3000, 5000, 8000, 12000]
 
     var currentLevel: Int { AppSettings.shared.level }
     var currentXP: Int { AppSettings.shared.xp }
