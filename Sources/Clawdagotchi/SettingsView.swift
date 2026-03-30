@@ -65,7 +65,7 @@ struct SettingsView: View {
                     } label: {
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                .fill(Color.salmon)
                                 .frame(width: 8, height: 8)
                             Text("Always salmon")
                                 .font(.system(size: 11))
@@ -74,7 +74,7 @@ struct SettingsView: View {
                             if !settings.useCustomCrabColor {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                    .foregroundStyle(Color.salmon)
                             }
                         }
                         .padding(.horizontal, 12)
@@ -98,7 +98,7 @@ struct SettingsView: View {
                             if settings.useCustomCrabColor {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                    .foregroundStyle(Color.salmon)
                             }
                         }
                         .padding(.horizontal, 12)
@@ -124,7 +124,7 @@ struct SettingsView: View {
                                 if settings.shellStyle == style {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                        .foregroundStyle(Color.salmon)
                                 }
                             }
                             .padding(.horizontal, 12)
@@ -140,13 +140,13 @@ struct SettingsView: View {
                             Image(systemName: "minus.magnifyingglass")
                                 .foregroundStyle(Color(white: 0.5))
                             Slider(value: $settings.widgetScale, in: 0.5...1.5, step: 0.1)
-                                .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                .tint(Color.salmon)
                             Image(systemName: "plus.magnifyingglass")
                                 .foregroundStyle(Color(white: 0.5))
                         }
                         Text("\(Int(settings.widgetScale * 100))%")
                             .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            .foregroundStyle(Color.salmon)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
@@ -166,7 +166,7 @@ struct SettingsView: View {
                                 if settings.backgroundTheme == theme {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                        .foregroundStyle(Color.salmon)
                                 }
                             }
                             .padding(.horizontal, 12)
@@ -181,7 +181,7 @@ struct SettingsView: View {
                         Toggle("Seasonal accessories", isOn: $settings.seasonalAccessories)
                             .font(.system(size: 11))
                             .foregroundStyle(Color.white)
-                            .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                            .tint(Color.salmon)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
 
@@ -250,7 +250,7 @@ struct SettingsView: View {
                                 if settings.floatPolicy == policy {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                                        .foregroundStyle(Color.salmon)
                                 }
                             }
                             .padding(.horizontal, 12)
@@ -264,7 +264,7 @@ struct SettingsView: View {
                     Toggle("Show in Dock", isOn: $settings.showDockIcon)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.white)
-                        .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                        .tint(Color.salmon)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
 
@@ -273,7 +273,7 @@ struct SettingsView: View {
                     Toggle("Show floating widget", isOn: $settings.showWidget)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.white)
-                        .tint(Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0))
+                        .tint(Color.salmon)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                 }
@@ -638,7 +638,7 @@ Right button (green) = Allow
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .background(Color(white: 0.2))
-        .cornerRadius(4)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
         .buttonStyle(.plain)
     }
 
@@ -666,7 +666,7 @@ Right button (green) = Allow
                 content()
             }
             .background(Color(white: 0.145))
-            .cornerRadius(6)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
 
@@ -702,9 +702,9 @@ struct PillTabButtonStyle: ButtonStyle {
             .font(.system(size: 10, weight: .medium, design: .monospaced))
             .padding(.horizontal, 12)
             .padding(.vertical, 5)
-            .background(isSelected ? Color(red: 0xD9 / 255.0, green: 0x77 / 255.0, blue: 0x57 / 255.0) : Color.clear)
+            .background(isSelected ? Color.salmon : Color.clear)
             .foregroundStyle(isSelected ? Color.white : Color(white: 0.4))
-            .cornerRadius(6)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
             .contentShape(Rectangle())
     }
 }
