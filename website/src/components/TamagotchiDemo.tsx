@@ -2,21 +2,71 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 type EyeStyle = 'normal' | 'wide' | 'squish' | 'blink' | 'tiny'
 
-// salmonPink ShellStyle values
+// clearRetro ShellStyle values
 const SHELL = {
-  tintColor: 'rgba(249,107,89,1)',       // rgb(0.98*255, 0.42*255, 0.35*255)
-  tintOpacity: 0.50,
-  highlightColor: '#FF8C7A',             // rgb(1.0, 0.55, 0.48)
-  shadowColor: '#D14838',               // rgb(0.82, 0.28, 0.22)
-  edgeHighlight: '#FFD9CC',             // rgb(1.0, 0.85, 0.80)
-  specularIntensity: 0.35,
-  labelColor: 'rgba(255,255,255,0.40)',
-  crabColor: '#F08E80',                  // rgb(0.94, 0.56, 0.50)
+  tintColor: 'rgba(217,217,217,1)',      // Color(white: 0.85)
+  tintOpacity: 0.18,
+  highlightColor: 'rgba(242,242,242,1)', // Color(white: 0.95)
+  shadowColor: 'rgba(153,153,153,1)',    // Color(white: 0.60)
+  edgeHighlight: '#FFFFFF',
+  specularIntensity: 0.50,
+  labelColor: 'rgba(255,255,255,0.50)',
+  crabColor: 'rgba(140,140,140,1)',      // Color(white: 0.55) — clearRetro crabColor
 }
 
 const CRAB_COLOR = '#D97757'
 const EYE_COLOR = '#1A1A1A'
 const SCREEN_BG = '#1A1A1A'
+
+// Simple Web Audio sounds matching macOS system sounds
+let audioCtx: AudioContext | null = null
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioContext()
+  return audioCtx
+}
+
+function playSound(type: 'poke' | 'feed' | 'pet' | 'blink') {
+  try {
+    const ctx = getAudioCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    gain.gain.value = 0.15
+
+    switch (type) {
+      case 'poke': // Frog-like chirp
+        osc.type = 'square'
+        osc.frequency.setValueAtTime(800, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15)
+        osc.start(); osc.stop(ctx.currentTime + 0.15)
+        break
+      case 'feed': // Bottle pop
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(300, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.08)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
+        osc.start(); osc.stop(ctx.currentTime + 0.12)
+        break
+      case 'pet': // Purr-like soft tone
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(200, ctx.currentTime)
+        osc.frequency.setValueAtTime(220, ctx.currentTime + 0.1)
+        osc.frequency.setValueAtTime(200, ctx.currentTime + 0.2)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+        osc.start(); osc.stop(ctx.currentTime + 0.3)
+        break
+      case 'blink': // Tiny tick
+        osc.type = 'sine'
+        osc.frequency.value = 1200
+        gain.gain.value = 0.05
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03)
+        osc.start(); osc.stop(ctx.currentTime + 0.03)
+        break
+    }
+  } catch {}
+}
 
 // Egg SVG path — matches Swift EggShape bezier exactly
 // w=190, h=250, control points from Swift percentages
@@ -244,6 +294,7 @@ export default function TamagotchiDemo() {
   }, [eyeStyle, bobOffset, legPhase, jumpOffset])
 
   const handlePoke = () => {
+    playSound('poke')
     showMessage('hey! >_<')
     setEyeStyle('wide')
     setIsWalking(true)
@@ -265,6 +316,7 @@ export default function TamagotchiDemo() {
   }
 
   const handleFeed = () => {
+    playSound('feed')
     showMessage('nom nom nom')
     setIsWalking(true)
 
@@ -281,6 +333,7 @@ export default function TamagotchiDemo() {
   }
 
   const handlePet = () => {
+    playSound('pet')
     showMessage('~ happy ~')
     setEyeStyle('squish')
     setIsWalking(true)
