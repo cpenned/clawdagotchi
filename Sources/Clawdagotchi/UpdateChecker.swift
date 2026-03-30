@@ -174,17 +174,17 @@ final class UpdateChecker {
         let mountPoint = "/tmp/clawdagotchi-update-mount"
         let appDestination = Bundle.main.bundlePath
 
-        shell("hdiutil detach '\(mountPoint)' -quiet 2>/dev/null || true")
+        run("/usr/bin/hdiutil", "detach", mountPoint, "-quiet")
 
-        let mountResult = shell("hdiutil attach -nobrowse -quiet '\(dmgPath.path)' -mountpoint '\(mountPoint)'")
+        let mountResult = run("/usr/bin/hdiutil", "attach", "-nobrowse", "-quiet", dmgPath.path, "-mountpoint", mountPoint)
         guard mountResult == 0 else {
             openReleasesPage(releaseURL)
             return
         }
 
-        let copyResult = shell("ditto '\(mountPoint)/Clawdagotchi.app' '\(appDestination)'")
+        let copyResult = run("/usr/bin/ditto", "\(mountPoint)/Clawdagotchi.app", appDestination)
 
-        shell("hdiutil detach '\(mountPoint)' -quiet")
+        run("/usr/bin/hdiutil", "detach", mountPoint, "-quiet")
 
         guard copyResult == 0 else {
             openReleasesPage(releaseURL)
@@ -200,10 +200,10 @@ final class UpdateChecker {
     }
 
     @discardableResult
-    private func shell(_ command: String) -> Int32 {
+    private func run(_ binary: String, _ args: String...) -> Int32 {
         let process = Process()
-        process.launchPath = "/bin/sh"
-        process.arguments = ["-c", command]
+        process.executableURL = URL(fileURLWithPath: binary)
+        process.arguments = args
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
         try? process.run()
