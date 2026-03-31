@@ -1,21 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { eggPath } from '../utils/eggPath';
+import { SHELL_STYLES } from '../utils/shellStyles';
 
 type EyeStyle = 'normal' | 'wide' | 'squish' | 'blink' | 'tiny';
 
-// clearRetro ShellStyle values
-const SHELL = {
-  tintColor: 'rgba(217,217,217,1)', // Color(white: 0.85)
-  tintOpacity: 0.18,
-  highlightColor: 'rgba(242,242,242,1)', // Color(white: 0.95)
-  shadowColor: 'rgba(153,153,153,1)', // Color(white: 0.60)
-  edgeHighlight: '#FFFFFF',
-  specularIntensity: 0.5,
-  labelColor: 'rgba(255,255,255,0.50)',
-  crabColor: 'rgba(140,140,140,1)', // Color(white: 0.55) — clearRetro crabColor
-};
-
-const CRAB_COLOR = '#D97757';
+// Hero demo uses salmonPink — the app's default shell (AppSettings default)
+const SHELL = SHELL_STYLES.find((s) => s.key === 'salmonPink')!;
+const CRAB_COLOR = SHELL.crabColor;
 const EYE_COLOR = '#1A1A1A';
 const SCREEN_BG = '#1A1A1A';
 
@@ -576,11 +567,11 @@ export default function TamagotchiDemo() {
                   />
                 </clipPath>
 
-                {/* Translucent shell gradient: top-left highlight → center tint → bottom-right shadow */}
+                {/* Translucent shell gradient — derived from SHELL style values */}
                 <linearGradient id="shellGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#FF8C7A" stopOpacity={0.6} />
-                  <stop offset="50%" stopColor="#F86B59" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#D14838" stopOpacity={0.55} />
+                  <stop offset="0%" stopColor={SHELL.highlightColor} stopOpacity={SHELL.tintOpacity + 0.1} />
+                  <stop offset="50%" stopColor={SHELL.tintColor} stopOpacity={SHELL.tintOpacity} />
+                  <stop offset="100%" stopColor={SHELL.shadowColor} stopOpacity={SHELL.tintOpacity + 0.05} />
                 </linearGradient>
 
                 {/* Bezel outer gradient */}
@@ -613,7 +604,7 @@ export default function TamagotchiDemo() {
                   <stop offset="18%" stopColor="rgba(255,255,255,0.30)" />
                   <stop offset="45%" stopColor="rgba(255,255,255,0)" />
                   <stop offset="72%" stopColor="rgba(255,255,255,0)" />
-                  <stop offset="100%" stopColor="rgba(255,217,204,0.22)" />
+                  <stop offset="100%" stopColor={SHELL.edgeHighlight} stopOpacity={0.22} />
                 </linearGradient>
 
                 {/* Button gradient */}
@@ -669,7 +660,7 @@ export default function TamagotchiDemo() {
               <path
                 d={`M ${glowX1} ${glowY1} A ${specR} ${specR} 0 0 1 ${glowX2} ${glowY2}`}
                 fill="none"
-                stroke={`rgba(255,255,255,${0.35 * 0.2})`}
+                stroke={`rgba(255,255,255,${SHELL.specularIntensity * 0.2})`}
                 strokeWidth="20"
                 strokeLinecap="round"
               />
@@ -677,7 +668,7 @@ export default function TamagotchiDemo() {
               <path
                 d={`M ${specX1} ${specY1} A ${specR} ${specR} 0 0 1 ${specX2} ${specY2}`}
                 fill="none"
-                stroke={`rgba(255,255,255,${0.35 * 0.6})`}
+                stroke={`rgba(255,255,255,${SHELL.specularIntensity * 0.6})`}
                 strokeWidth="8"
                 strokeLinecap="round"
               />
