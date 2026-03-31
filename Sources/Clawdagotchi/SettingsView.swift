@@ -548,20 +548,26 @@ struct SettingsView: View {
                     settingsRow("Sessions completed", value: "\(AppSettings.shared.totalSessions)")
                     Color(white: 0.12).frame(height: 1)
                     settingsRow("Tools used", value: "\(AppSettings.shared.totalToolUses)")
-                    Color(white: 0.12).frame(height: 1)
-                    settingsRow("Permissions approved", value: "\(AppSettings.shared.totalPermissionsApproved)")
-                    Color(white: 0.12).frame(height: 1)
-                    settingsRow("Permissions denied", value: "\(AppSettings.shared.totalPermissionsDenied)")
+                }
+
+                settingsSection("Points") {
+                    settingsRow("All-time XP earned", value: "\(AppSettings.shared.totalXPEarned) XP")
                 }
 
                 settingsSection("Pet Care") {
-                    settingsRow("Pokes", value: "\(AppSettings.shared.totalPokes)")
+                    settingsRow("Pokes", value: "\(AppSettings.shared.totalPokes)", badge: "+1 XP")
                     Color(white: 0.12).frame(height: 1)
-                    settingsRow("Feeds", value: "\(AppSettings.shared.totalFeeds)")
+                    settingsRow("Feeds", value: "\(AppSettings.shared.totalFeeds)", badge: "+1 XP")
                     Color(white: 0.12).frame(height: 1)
-                    settingsRow("Pets", value: "\(AppSettings.shared.totalPets)")
+                    settingsRow("Pets", value: "\(AppSettings.shared.totalPets)", badge: "+1 XP")
                     Color(white: 0.12).frame(height: 1)
                     settingsRow("Poops cleaned", value: "\(AppSettings.shared.totalPoopsCleaned)")
+                }
+
+                settingsSection("Claude Code") {
+                    settingsRow("Permissions approved", value: "\(AppSettings.shared.totalPermissionsApproved)", badge: "+5 XP")
+                    Color(white: 0.12).frame(height: 1)
+                    settingsRow("Permissions denied", value: "\(AppSettings.shared.totalPermissionsDenied)", badge: "+3 XP")
                 }
             }
             .padding(12)
@@ -804,11 +810,16 @@ Right button (green) = Allow
         }
     }
 
-    private func settingsRow(_ label: String, value: String) -> some View {
+    private func settingsRow(_ label: String, value: String, badge: String? = nil) -> some View {
         HStack {
             Text(label)
                 .font(.system(size: 11))
                 .foregroundStyle(Color.white)
+            if let badge {
+                Text(badge)
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundStyle(Color.green)
+            }
             Spacer()
             Text(value)
                 .font(.system(size: 11))

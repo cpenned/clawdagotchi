@@ -98,6 +98,9 @@ final class AppSettings {
     var totalPoopsCleaned: Int {
         didSet { UserDefaults.standard.set(totalPoopsCleaned, forKey: "totalPoopsCleaned") }
     }
+    var totalXPEarned: Int {
+        didSet { UserDefaults.standard.set(totalXPEarned, forKey: "totalXPEarned") }
+    }
     var unlockedAchievements: Set<String> {
         didSet {
             let array = Array(unlockedAchievements)
@@ -139,6 +142,7 @@ final class AppSettings {
             "totalFeeds": 0,
             "totalPets": 0,
             "totalPoopsCleaned": 0,
+            "totalXPEarned": 0,
             "unlockedAchievements": "[]",
         ])
         self.showDockIcon = defaults.bool(forKey: "showDockIcon")
@@ -166,6 +170,7 @@ final class AppSettings {
         self.totalFeeds = defaults.integer(forKey: "totalFeeds")
         self.totalPets = defaults.integer(forKey: "totalPets")
         self.totalPoopsCleaned = defaults.integer(forKey: "totalPoopsCleaned")
+        self.totalXPEarned = defaults.integer(forKey: "totalXPEarned")
         if let str = defaults.string(forKey: "unlockedAchievements"),
            let data = str.data(using: .utf8),
            let array = try? JSONDecoder().decode([String].self, from: data) {

@@ -319,6 +319,7 @@ final class TamagotchiViewModel {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
         lastFedTime = Date()
+        let wasAlreadyFull = hunger >= 1.0
         hunger = min(1, hunger + 0.35)
 
         // Feed clears: hungry, sleeping
@@ -331,7 +332,7 @@ final class TamagotchiViewModel {
         funReaction = .feed
         SoundManager.shared.play(.feed)
         AppSettings.shared.totalFeeds += 1
-        grantXP(1)
+        if !wasAlreadyFull { grantXP(1) }
         checkAndNotifyAchievements()
         Task {
             try? await Task.sleep(for: .seconds(1.5))
@@ -342,6 +343,7 @@ final class TamagotchiViewModel {
     func petCrab() {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
+        let wasAlreadyFull = happiness >= 1.0
         happiness = min(1, happiness + 0.25)
 
         // Pet clears: one poop, sleeping
@@ -360,7 +362,7 @@ final class TamagotchiViewModel {
         funReaction = .pet
         SoundManager.shared.play(.pet)
         AppSettings.shared.totalPets += 1
-        grantXP(1)
+        if !wasAlreadyFull { grantXP(1) }
         checkAndNotifyAchievements()
         Task {
             try? await Task.sleep(for: .seconds(1.2))
@@ -466,6 +468,7 @@ final class TamagotchiViewModel {
 
     func grantXP(_ amount: Int) {
         AppSettings.shared.xp += amount
+        AppSettings.shared.totalXPEarned += amount
         checkLevelUp()
     }
 
