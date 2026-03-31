@@ -39,6 +39,14 @@ if [ -f "$PROJECT_DIR/AppIcon.icns" ]; then
     cp "$PROJECT_DIR/AppIcon.icns" "$APP_PATH/Contents/Resources/"
 fi
 
+RELAY_SRC="$PROJECT_DIR/.build/arm64-apple-macosx/release/Clawdagotchi_Clawdagotchi.bundle/hook_relay.py"
+if [ -f "$RELAY_SRC" ]; then
+    cp "$RELAY_SRC" "$APP_PATH/Contents/Resources/hook_relay.py"
+    echo "  Included hook_relay.py"
+else
+    echo "  WARNING: hook_relay.py not found in SPM bundle"
+fi
+
 echo "App bundle: $APP_PATH"
 echo ""
 
