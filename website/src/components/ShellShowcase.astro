@@ -1,0 +1,400 @@
+---
+import { SHELL_STYLES } from '../utils/shellStyles';
+import { eggPath } from '../utils/eggPath';
+
+const EGG_W = 190;
+const EGG_H = 250;
+const SCREEN_W = 110;
+const SCREEN_H = 90;
+const CX = EGG_W / 2;       // 95
+const CY = EGG_H / 2;       // 125
+
+const screenX = (EGG_W - SCREEN_W) / 2;         // 40
+const screenY = CY - SCREEN_H / 2 - 24;          // 56
+const labelY = EGG_H / 2 - EGG_H * 0.24;        // 65
+const specCx = CX + 15;
+const specCy = CY + 40;
+const specR = 55;
+
+const deg200 = (200 * Math.PI) / 180;
+const deg260 = (260 * Math.PI) / 180;
+const deg205 = (205 * Math.PI) / 180;
+const deg255 = (255 * Math.PI) / 180;
+
+const specX1 = specCx + specR * Math.cos(deg200);
+const specY1 = specCy + specR * Math.sin(deg200);
+const specX2 = specCx + specR * Math.cos(deg260);
+const specY2 = specCy + specR * Math.sin(deg260);
+const glowX1 = specCx + specR * Math.cos(deg205);
+const glowY1 = specCy + specR * Math.sin(deg205);
+const glowX2 = specCx + specR * Math.cos(deg255);
+const glowY2 = specCy + specR * Math.sin(deg255);
+
+const mainEggPath = eggPath(EGG_W, EGG_H);
+const innerEggPath = eggPath(EGG_W - 6, EGG_H - 6);
+
+// Screw positions matching TamagotchiDemo.tsx
+const sdx = SCREEN_W / 2 + 14;
+const sdy = SCREEN_H / 2 + 12;
+const soy = -24;
+const screws = [
+  [CX - sdx, CY + soy - sdy],
+  [CX + sdx, CY + soy - sdy],
+  [CX - sdx, CY + soy + sdy],
+  [CX + sdx, CY + soy + sdy],
+];
+
+// Bezel dimensions matching TamagotchiDemo.tsx
+const bezelOuterW = SCREEN_W + 16;
+const bezelOuterH = SCREEN_H + 14;
+const bezelOuterX = (EGG_W - bezelOuterW) / 2;
+const bezelOuterY = CY - bezelOuterH / 2 - 24;
+const bezelInnerW = SCREEN_W + 8;
+const bezelInnerH = SCREEN_H + 6;
+const bezelInnerX = (EGG_W - bezelInnerW) / 2;
+const bezelInnerY = CY - bezelInnerH / 2 - 24;
+
+// Button positions
+const btnY = CY - 46;
+const btnCenterX = CX;
+const btnSize = 18;
+const btnSpacing = 14 + btnSize;
+const btnPositions = [
+  btnCenterX - btnSpacing,
+  btnCenterX,
+  btnCenterX + btnSpacing,
+];
+
+// PCB grid lines and dots (clipped to inner egg)
+const gridLines: { x1: number; y1: number; x2: number; y2: number; dir: 'h' | 'v' }[] = [];
+const gridDots: { cx: number; cy: number }[] = [];
+for (let y = 10; y <= EGG_H - 10; y += 8) {
+  gridLines.push({ x1: 10, y1: y, x2: EGG_W - 10, y2: y, dir: 'h' });
+}
+for (let x = 10; x <= EGG_W - 10; x += 8) {
+  gridLines.push({ x1: x, y1: 10, x2: x, y2: EGG_H - 10, dir: 'v' });
+}
+for (let y = 10; y <= EGG_H - 10; y += 8) {
+  for (let x = 10; x <= EGG_W - 10; x += 8) {
+    gridDots.push({ cx: x, cy: y });
+  }
+}
+
+// Crab render helper — builds rect list for idle pose
+// Swift: viewW=86, viewH=80; CrabSVG positions crab body centered in screen area
+// For our static crab, center it at (CX, CY + 10) matching x=screenX, y=screenY+20, w=SCREEN_W, h=SCREEN_H-35
+const crabX = screenX;
+const crabY = screenY + 20;
+const crabW = SCREEN_W;
+const crabH = SCREEN_H - 35;
+const viewW = 86;
+const viewH = 80;
+const crabScale = crabH / viewH;
+const crabXOff = crabX + (crabW - viewW * crabScale) / 2 + 10 * crabScale;
+const crabYOff = crabY + (crabH - viewH * crabScale) / 2 + 22 * crabScale;
+
+interface CrabRect { x: number; y: number; w: number; h: number }
+function buildCrabRects(): CrabRect[] {
+  const rects: CrabRect[] = [];
+  function r(rx: number, ry: number, rw: number, rh: number) {
+    rects.push({
+      x: crabXOff + rx * crabScale,
+      y: crabYOff + ry * crabScale,
+      w: rw * crabScale,
+      h: rh * crabScale,
+    });
+  }
+  // Antennae
+  r(0, 13, 6, 13);
+  r(60, 13, 6, 13);
+  // Legs (idle: legPhase=0, offsets=[3,-3,3,-3])
+  const legOffsets = [3, -3, 3, -3];
+  const legXs = [6, 18, 42, 54];
+  legXs.forEach((lx, i) => {
+    r(lx, 39, 6, 13 + legOffsets[i]);
+  });
+  // Body
+  r(6, 0, 54, 39);
+  return rects;
+}
+
+// Eyes (idle, normal style)
+const eyeLeftX = crabXOff + 14 * crabScale;
+const eyeRightX = crabXOff + 46 * crabScale;
+const eyeY = crabYOff + 12 * crabScale;
+const eyeW = 6 * crabScale;
+const eyeH = 7 * crabScale;
+
+const crabRects = buildCrabRects();
+---
+
+<section id="shell-showcase" class="py-24 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="text-sm font-mono-heading font-bold uppercase tracking-widest mb-4" style="color: #D97757;">
+        Customization
+      </p>
+      <h2 class="font-mono-heading font-bold text-4xl md:text-5xl text-white mb-4">
+        Six shell styles.<br />Pick your look.
+      </h2>
+      <p class="text-(--text-secondary) text-lg max-w-xl mx-auto">
+        Each shell has its own color, crab, and personality. Switch anytime in Settings.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      {SHELL_STYLES.map((style, idx) => (
+        <div class="shell-card">
+          <svg
+            viewBox={`0 0 ${EGG_W} ${EGG_H}`}
+            width="100%"
+            style="display: block; max-width: 170px; margin: 0 auto;"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              {/* Clip path for internals */}
+              <clipPath id={`ss${idx}-innerEggClip`}>
+                <path d={innerEggPath} transform="translate(3, 3)" />
+              </clipPath>
+
+              {/* Shell translucent gradient */}
+              <linearGradient id={`ss${idx}-shellGrad`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color={style.highlightColor} stop-opacity={style.tintOpacity + 0.1} />
+                <stop offset="50%" stop-color={style.tintColor} stop-opacity={style.tintOpacity} />
+                <stop offset="100%" stop-color={style.shadowColor} stop-opacity={style.tintOpacity + 0.05} />
+              </linearGradient>
+
+              {/* Edge refraction gradient */}
+              <linearGradient id={`ss${idx}-edgeGrad`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.75)" />
+                <stop offset="30%" stop-color="rgba(255,255,255,0.30)" />
+                <stop offset="60%" stop-color="rgba(255,255,255,0)" />
+                <stop offset="80%" stop-color="rgba(255,255,255,0)" />
+                <stop offset="100%" stop-color={style.edgeHighlight} stop-opacity={0.22} />
+              </linearGradient>
+
+              {/* Inner glow radial gradient */}
+              <radialGradient id={`ss${idx}-innerGlow`} cx="50%" cy="50%" r="60%" fx="50%" fy="50%">
+                <stop offset="0%" stop-color={style.tintColor} stop-opacity={0.08} />
+                <stop offset="100%" stop-color={style.tintColor} stop-opacity={0} />
+              </radialGradient>
+
+              {/* Bezel outer gradient */}
+              <linearGradient id={`ss${idx}-bezelGrad`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2E2E2E" />
+                <stop offset="100%" stop-color="#1A1A1A" />
+              </linearGradient>
+
+              {/* Inner bezel gradient */}
+              <linearGradient id={`ss${idx}-innerBezelGrad`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(0,0,0,0.3)" />
+                <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+              </linearGradient>
+            </defs>
+
+            {/* Layer 1: Drop shadow */}
+            <path
+              d={mainEggPath}
+              fill="black"
+              opacity="0.45"
+              transform="translate(0, 8)"
+              style="filter: blur(10px);"
+            />
+
+            {/* Layer 2: Internal cavity */}
+            <path
+              d={innerEggPath}
+              transform="translate(3, 3)"
+              fill="#0F0F0F"
+            />
+
+            {/* Layer 3: PCB internals */}
+            <g clip-path={`url(#ss${idx}-innerEggClip)`} opacity={style.internalsOpacity}>
+              {gridLines.map((line, li) => (
+                <line
+                  key={li}
+                  x1={line.x1}
+                  y1={line.y1}
+                  x2={line.x2}
+                  y2={line.y2}
+                  stroke="rgba(34,197,94,0.12)"
+                  stroke-width="1"
+                />
+              ))}
+              {gridDots.map((dot, di) => (
+                <circle
+                  key={di}
+                  cx={dot.cx}
+                  cy={dot.cy}
+                  r="0.8"
+                  fill="rgba(34,197,94,0.18)"
+                />
+              ))}
+            </g>
+
+            {/* Layer 4: Shell wall thickness strokes */}
+            <path d={mainEggPath} fill="none" stroke={style.tintColor} stroke-opacity="0.25" stroke-width="6" />
+            <path d={mainEggPath} fill="none" stroke={style.tintColor} stroke-opacity="0.18" stroke-width="3" />
+
+            {/* Layer 5: Translucent shell */}
+            <path d={mainEggPath} fill={`url(#ss${idx}-shellGrad)`} />
+
+            {/* Layer 6: Inner glow */}
+            <path d={mainEggPath} fill={`url(#ss${idx}-innerGlow)`} />
+
+            {/* Layer 7: Edge refraction */}
+            <path d={mainEggPath} fill="none" stroke={`url(#ss${idx}-edgeGrad)`} stroke-width="2" />
+
+            {/* Layer 8: Specular highlight */}
+            {/* Glow arc */}
+            <path
+              d={`M ${glowX1} ${glowY1} A ${specR} ${specR} 0 0 1 ${glowX2} ${glowY2}`}
+              fill="none"
+              stroke={`rgba(255,255,255,${style.specularIntensity * 0.2})`}
+              stroke-width="20"
+              stroke-linecap="round"
+            />
+            {/* Primary arc */}
+            <path
+              d={`M ${specX1} ${specY1} A ${specR} ${specR} 0 0 1 ${specX2} ${specY2}`}
+              fill="none"
+              stroke={`rgba(255,255,255,${style.specularIntensity * 0.6})`}
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+
+            {/* Layer 9: Brand label */}
+            <text
+              x={CX}
+              y={labelY}
+              text-anchor="middle"
+              dominant-baseline="middle"
+              font-size="7"
+              font-weight="800"
+              font-family="'JetBrains Mono', monospace"
+              letter-spacing="2"
+              fill={style.labelColor}
+            >CLAWDAGOTCHI</text>
+
+            {/* Layer 10: Screws */}
+            {screws.map(([sx, sy], si) => (
+              <g key={si}>
+                <circle cx={sx} cy={sy} r="2.5" fill="rgb(89,89,89)" />
+                <line x1={sx - 1.5} y1={sy} x2={sx + 1.5} y2={sy} stroke="rgba(0,0,0,0.5)" stroke-width="0.5" />
+                <line x1={sx} y1={sy - 1.5} x2={sx} y2={sy + 1.5} stroke="rgba(0,0,0,0.5)" stroke-width="0.5" />
+              </g>
+            ))}
+
+            {/* Layer 11: Screen inset */}
+            {/* Outer bezel */}
+            <rect
+              x={bezelOuterX}
+              y={bezelOuterY}
+              width={bezelOuterW}
+              height={bezelOuterH}
+              rx="10"
+              ry="10"
+              fill={`url(#ss${idx}-bezelGrad)`}
+            />
+            {/* Inner bezel */}
+            <rect
+              x={bezelInnerX}
+              y={bezelInnerY}
+              width={bezelInnerW}
+              height={bezelInnerH}
+              rx="8"
+              ry="8"
+              fill={`url(#ss${idx}-innerBezelGrad)`}
+            />
+            {/* Gasket */}
+            <rect
+              x={screenX - 1}
+              y={screenY - 1}
+              width={SCREEN_W + 2}
+              height={SCREEN_H + 2}
+              rx="6"
+              ry="6"
+              fill="none"
+              stroke="rgba(0,0,0,0.8)"
+              stroke-width="0.5"
+            />
+            {/* Screen */}
+            <rect
+              x={screenX}
+              y={screenY}
+              width={SCREEN_W}
+              height={SCREEN_H}
+              rx="5"
+              ry="5"
+              fill="#111111"
+            />
+
+            {/* Layer 12: Crab (idle, static) */}
+            <g style="shape-rendering: crispEdges;">
+              {crabRects.map((rect, ri) => (
+                <rect
+                  key={ri}
+                  x={rect.x}
+                  y={rect.y}
+                  width={rect.w}
+                  height={rect.h}
+                  fill={style.crabColor}
+                />
+              ))}
+              {/* Eyes — normal style */}
+              <rect x={eyeLeftX} y={eyeY} width={eyeW} height={eyeH} fill="#1A1A1A" />
+              <rect x={eyeRightX} y={eyeY} width={eyeW} height={eyeH} fill="#1A1A1A" />
+            </g>
+
+            {/* Layer 13: Buttons */}
+            {btnPositions.map((bx, bi) => {
+              const isCenter = bi === 1;
+              const by = EGG_H / 2 + btnY + (isCenter ? 3 : 0);
+              return (
+                <g key={bi}>
+                  <circle cx={bx} cy={by} r="11" fill="rgba(180,180,180,0.15)" />
+                  <circle cx={bx} cy={by} r="9" fill="rgb(40,40,40)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                  <path
+                    d={`M ${bx - 6} ${by - 5} Q ${bx} ${by - 7} ${bx + 6} ${by - 5}`}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.12)"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                  />
+                </g>
+              );
+            })}
+          </svg>
+          <p class="shell-name">{style.name}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .shell-card {
+    background: #141414;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 24px 16px;
+    transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .shell-card:hover {
+    border-color: rgba(217, 119, 87, 0.3);
+  }
+
+  .shell-name {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    margin: 0;
+    letter-spacing: 0.05em;
+  }
+</style>
