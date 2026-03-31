@@ -44,6 +44,8 @@ bash scripts/create-dmg.sh
 
 Produces `releases/Clawdagotchi-X.Y.Z.dmg` and `releases/Clawdagotchi.dmg`.
 
+Verify the output includes `Included hook_relay.py`. If it says `WARNING: hook_relay.py not found`, stop and investigate before continuing.
+
 ### 5. Notarize
 
 ```bash
