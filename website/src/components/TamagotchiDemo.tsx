@@ -280,6 +280,56 @@ function _HeartIcon() {
   );
 }
 
+// 7×8 pixel poop — matches PixelPoop in TamagotchiView.swift exactly
+// Rendered bottom-aligned at (cx, bottomY) in SVG coords.
+function PixelPoop({ cx, bottomY, color }: { cx: number; bottomY: number; color: string }) {
+  const grid = [
+    [0,0,0,1,0,0,0],
+    [0,0,1,1,1,0,0],
+    [0,0,0,1,1,0,0],
+    [0,0,1,1,0,0,0],
+    [0,1,1,1,1,1,0],
+    [0,1,1,1,1,1,0],
+    [1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1],
+  ];
+  const px = 1.5;
+  const cols = 7;
+  const rows = 8;
+  // Bottom-align: grid bottom edge lands at bottomY
+  const ox = cx - (cols * px) / 2;
+  const oy = bottomY - rows * px;
+  const rects: { x: number; y: number }[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c]) rects.push({ x: ox + c * px, y: oy + r * px });
+    }
+  }
+  // Steam: 2 wavy quadratic curves above the poop
+  const steamBase = oy - 1;
+  const steamCX = cx;
+  return (
+    <g>
+      {rects.map((rect, i) => (
+        <rect key={i} x={rect.x} y={rect.y} width={px} height={px} fill={color} shapeRendering="crispEdges" />
+      ))}
+      {/* Steam lines */}
+      <path
+        d={`M ${steamCX - 1.5} ${steamBase} Q ${steamCX - 1.5 + 2} ${steamBase - 2.5} ${steamCX - 1.5} ${steamBase - 5}`}
+        fill="none"
+        stroke="rgba(89,89,89,1)"
+        strokeWidth="0.5"
+      />
+      <path
+        d={`M ${steamCX + 1.5} ${steamBase} Q ${steamCX + 1.5 + 2} ${steamBase - 2.5} ${steamCX + 1.5} ${steamBase - 5}`}
+        fill="none"
+        stroke="rgba(89,89,89,1)"
+        strokeWidth="0.5"
+      />
+    </g>
+  );
+}
+
 export default function TamagotchiDemo() {
   const [eyeStyle, setEyeStyle] = useState<EyeStyle>('normal');
   const [bobOffset, setBobOffset] = useState(0);
@@ -385,6 +435,8 @@ export default function TamagotchiDemo() {
         setIsWalking(false);
       }
     }, 200);
+
+    setPoopCount((prev) => Math.min(prev + 1, 5));
   };
 
   const handlePet = () => {
@@ -396,6 +448,8 @@ export default function TamagotchiDemo() {
       setEyeStyle('normal');
       setIsWalking(false);
     }, 1500);
+
+    setPoopCount((prev) => Math.max(prev - 1, 0));
   };
 
   const EGG_W = 190;
@@ -403,6 +457,20 @@ export default function TamagotchiDemo() {
   const SCREEN_W = 110;
   const SCREEN_H = 90;
   const PADDING = 50;
+
+  // Screen center in absolute SVG coords (matches Swift offset origin)
+  const screenCX = EGG_W / 2;       // 95
+  const screenCY = EGG_H / 2 - 24;  // 101
+
+  // Poop positions — Swift's offsets are relative to screen center
+  // Each entry is [x, bottomY] — poop is bottom-aligned at bottomY
+  const POOP_POSITIONS: [number, number][] = [
+    [screenCX + (SCREEN_W / 2 - 16), screenCY + (SCREEN_H / 2 - 20)],
+    [screenCX + (-SCREEN_W / 2 + 16), screenCY + (SCREEN_H / 2 - 22)],
+    [screenCX + SCREEN_W / 4,          screenCY + (SCREEN_H / 2 - 18)],
+    [screenCX + (-SCREEN_W / 4 + 5),   screenCY + (SCREEN_H / 2 - 21)],
+    [screenCX,                          screenCY + (SCREEN_H / 2 - 19)],
+  ];
 
   const eggD = eggPath(EGG_W, EGG_H);
 
@@ -470,6 +538,7 @@ export default function TamagotchiDemo() {
 
   const [hoveredBtn, setHoveredBtn] = useState<number | null>(null);
   const [pressedBtn, setPressedBtn] = useState<number | null>(null);
+  const [poopCount, setPoopCount] = useState(1);
 
   return (
     <div className="grid gap-6">
@@ -767,6 +836,16 @@ export default function TamagotchiDemo() {
                 fill="url(#screenTopShadow)"
               />
 
+              {/* Poops — up to 5, rendered before crab and text */}
+              {POOP_POSITIONS.slice(0, poopCount).map(([px, py], i) => (
+                <PixelPoop
+                  key={i}
+                  cx={px}
+                  bottomY={py + bobOffset}
+                  color={CRAB_COLOR}
+                />
+              ))}
+
               {/* Status bar — fork/knife + dots | name | heart + dots */}
               {/* Positioned at y: screenY + 10 (offset -(screenH/2-10) from screen center) */}
               <g transform={`translate(${screenX + 5}, ${screenY + 10})`}>
@@ -990,7 +1069,7 @@ export default function TamagotchiDemo() {
                 textAlign: 'center',
               }}
             >
-              Click to poke, feed, or pet your crab
+              Feed to make a mess. Pet to clean it up.
             </p>
           </div>
         </div>
