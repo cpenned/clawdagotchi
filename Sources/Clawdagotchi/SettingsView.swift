@@ -624,31 +624,31 @@ struct SettingsView: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
 
-                    if settings.soundEnabled {
-                        Color(white: 0.12).frame(height: 1)
-                        HStack {
-                            Image(systemName: "speaker.fill")
-                                .foregroundStyle(Color(white: 0.5))
-                            Slider(value: $settings.soundVolume, in: 0...1)
-                                .tint(Color.salmon)
-                            Image(systemName: "speaker.wave.3.fill")
-                                .foregroundStyle(Color(white: 0.5))
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                    Color(white: 0.12).frame(height: 1)
+                    HStack {
+                        Image(systemName: "speaker.fill")
+                            .foregroundStyle(Color(white: 0.5))
+                        Slider(value: $settings.soundVolume, in: 0...1)
+                            .tint(Color.salmon)
+                        Image(systemName: "speaker.wave.3.fill")
+                            .foregroundStyle(Color(white: 0.5))
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .disabled(!settings.soundEnabled)
+                    .opacity(settings.soundEnabled ? 1 : 0.4)
                 }
 
-                if settings.soundEnabled {
-                    settingsSection("Sounds Per Action") {
-                        ForEach(Array(SoundAction.allCases.enumerated()), id: \.element.rawValue) { index, action in
-                            if index > 0 { Color(white: 0.12).frame(height: 1) }
-                            SoundPickerRow(action: action)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 4)
-                        }
+                settingsSection("Sounds Per Action") {
+                    ForEach(Array(SoundAction.allCases.enumerated()), id: \.element.rawValue) { index, action in
+                        if index > 0 { Color(white: 0.12).frame(height: 1) }
+                        SoundPickerRow(action: action)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
                     }
                 }
+                .disabled(!settings.soundEnabled)
+                .opacity(settings.soundEnabled ? 1 : 0.4)
             }
             .padding(12)
         }
@@ -682,9 +682,9 @@ Buttons glow to show active session count (up to 3).
 """)
 
                 darkAboutSection("Pet Care", """
-Feed (middle button) — restores hunger bar
+Feed (left button) — restores hunger bar
 Pet (right button) — restores happiness, cleans poop
-Poke (left button) — restores happiness, wakes up
+Poke (middle button) — wakes up, clears angry mood
 Hunger and happiness drain over time.
 Poops accumulate every ~15 min — pet to clean!
 """)

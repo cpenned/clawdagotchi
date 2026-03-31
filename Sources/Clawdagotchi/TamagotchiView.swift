@@ -706,9 +706,9 @@ struct TamagotchiView: View {
                                   action: simonAction(2))
             } else {
                 interactiveButton(baseColor: Color(white: 0.25),
-                                  glowColor: .shellPinkLight, lit: sessionCount >= 1, isCenter: false, action: onPoke)
+                                  glowColor: .shellPinkLight, lit: sessionCount >= 1, isCenter: false, action: onFeed)
                 interactiveButton(baseColor: Color(white: 0.25),
-                                  glowColor: .shellPinkLight, lit: sessionCount >= 2, isCenter: true, action: onFeed)
+                                  glowColor: .shellPinkLight, lit: sessionCount >= 2, isCenter: true, action: onPoke)
                 interactiveButton(baseColor: Color(white: 0.25),
                                   glowColor: .shellPinkLight, lit: sessionCount >= 3, isCenter: false, action: onPet)
             }

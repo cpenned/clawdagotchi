@@ -282,16 +282,24 @@ function _HeartIcon() {
 
 // 7×8 pixel poop — matches PixelPoop in TamagotchiView.swift exactly
 // Rendered bottom-aligned at (cx, bottomY) in SVG coords.
-function PixelPoop({ cx, bottomY, color }: { cx: number; bottomY: number; color: string }) {
+function PixelPoop({
+  cx,
+  bottomY,
+  color,
+}: {
+  cx: number;
+  bottomY: number;
+  color: string;
+}) {
   const grid = [
-    [0,0,0,1,0,0,0],
-    [0,0,1,1,1,0,0],
-    [0,0,0,1,1,0,0],
-    [0,0,1,1,0,0,0],
-    [0,1,1,1,1,1,0],
-    [0,1,1,1,1,1,0],
-    [1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1],
+    [0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0],
+    [0, 0, 1, 1, 0, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
   ];
   const px = 1.5;
   const cols = 7;
@@ -311,7 +319,15 @@ function PixelPoop({ cx, bottomY, color }: { cx: number; bottomY: number; color:
   return (
     <g>
       {rects.map((rect, i) => (
-        <rect key={i} x={rect.x} y={rect.y} width={px} height={px} fill={color} shapeRendering="crispEdges" />
+        <rect
+          key={i}
+          x={rect.x}
+          y={rect.y}
+          width={px}
+          height={px}
+          fill={color}
+          shapeRendering="crispEdges"
+        />
       ))}
       {/* Steam lines */}
       <path
@@ -459,17 +475,17 @@ export default function TamagotchiDemo() {
   const PADDING = 50;
 
   // Screen center in absolute SVG coords (matches Swift offset origin)
-  const screenCX = EGG_W / 2;       // 95
-  const screenCY = EGG_H / 2 - 24;  // 101
+  const screenCX = EGG_W / 2; // 95
+  const screenCY = EGG_H / 2 - 24; // 101
 
   // Poop positions — Swift's offsets are relative to screen center
   // Each entry is [x, bottomY] — poop is bottom-aligned at bottomY
   const POOP_POSITIONS: [number, number][] = [
     [screenCX + (SCREEN_W / 2 - 16), screenCY + (SCREEN_H / 2 - 20)],
     [screenCX + (-SCREEN_W / 2 + 16), screenCY + (SCREEN_H / 2 - 22)],
-    [screenCX + SCREEN_W / 4,          screenCY + (SCREEN_H / 2 - 18)],
-    [screenCX + (-SCREEN_W / 4 + 5),   screenCY + (SCREEN_H / 2 - 21)],
-    [screenCX,                          screenCY + (SCREEN_H / 2 - 19)],
+    [screenCX + SCREEN_W / 4, screenCY + (SCREEN_H / 2 - 18)],
+    [screenCX + (-SCREEN_W / 4 + 5), screenCY + (SCREEN_H / 2 - 21)],
+    [screenCX, screenCY + (SCREEN_H / 2 - 19)],
   ];
 
   const eggD = eggPath(EGG_W, EGG_H);
@@ -533,8 +549,8 @@ export default function TamagotchiDemo() {
     btnCenterX,
     btnCenterX + btnSpacing,
   ];
-  const btnActions = [handlePoke, handleFeed, handlePet];
-  const btnTitles = ['Poke', 'Feed', 'Pet'];
+  const btnActions = [handleFeed, handlePoke, handlePet];
+  const btnTitles = ['Feed', 'Poke', 'Pet'];
 
   const [hoveredBtn, setHoveredBtn] = useState<number | null>(null);
   const [pressedBtn, setPressedBtn] = useState<number | null>(null);
@@ -638,9 +654,21 @@ export default function TamagotchiDemo() {
 
                 {/* Translucent shell gradient — derived from SHELL style values */}
                 <linearGradient id="shellGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor={SHELL.highlightColor} stopOpacity={SHELL.tintOpacity + 0.1} />
-                  <stop offset="50%" stopColor={SHELL.tintColor} stopOpacity={SHELL.tintOpacity} />
-                  <stop offset="100%" stopColor={SHELL.shadowColor} stopOpacity={SHELL.tintOpacity + 0.05} />
+                  <stop
+                    offset="0%"
+                    stopColor={SHELL.highlightColor}
+                    stopOpacity={SHELL.tintOpacity + 0.1}
+                  />
+                  <stop
+                    offset="50%"
+                    stopColor={SHELL.tintColor}
+                    stopOpacity={SHELL.tintOpacity}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={SHELL.shadowColor}
+                    stopOpacity={SHELL.tintOpacity + 0.05}
+                  />
                 </linearGradient>
 
                 {/* Bezel outer gradient */}
@@ -673,7 +701,11 @@ export default function TamagotchiDemo() {
                   <stop offset="18%" stopColor="rgba(255,255,255,0.30)" />
                   <stop offset="45%" stopColor="rgba(255,255,255,0)" />
                   <stop offset="72%" stopColor="rgba(255,255,255,0)" />
-                  <stop offset="100%" stopColor={SHELL.edgeHighlight} stopOpacity={0.22} />
+                  <stop
+                    offset="100%"
+                    stopColor={SHELL.edgeHighlight}
+                    stopOpacity={0.22}
+                  />
                 </linearGradient>
 
                 {/* Button gradient */}
@@ -1069,7 +1101,8 @@ export default function TamagotchiDemo() {
                 textAlign: 'center',
               }}
             >
-              Feed to make a mess. Pet to clean it up.
+              Feed (left) to make a mess. Poke (middle) to startle. Pet (right)
+              to clean up.
             </p>
           </div>
         </div>

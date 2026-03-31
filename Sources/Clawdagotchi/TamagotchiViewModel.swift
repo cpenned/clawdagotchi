@@ -295,7 +295,6 @@ final class TamagotchiViewModel {
     func pokeCrab() {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
-        happiness = min(1, happiness + 0.15)
 
         // Poke clears: angry, sleeping
         if moodState == .angry || moodState == .sleeping {
