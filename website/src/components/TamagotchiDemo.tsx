@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { eggPath } from '../utils/eggPath';
 
 type EyeStyle = 'normal' | 'wide' | 'squish' | 'blink' | 'tiny';
 
@@ -70,32 +71,6 @@ function playSound(type: 'poke' | 'feed' | 'pet' | 'blink') {
         break;
     }
   } catch {}
-}
-
-// Egg SVG path — matches Swift EggShape bezier exactly
-// w=190, h=250, control points from Swift percentages
-function eggPath(w: number, h: number): string {
-  // move(0.50w, 0)
-  // curve to (w, 0.52h) ctrl1=(0.80w,0) ctrl2=(w, 0.22h)
-  // curve to (0.50w, h) ctrl1=(w, 0.82h) ctrl2=(0.82w, h)
-  // curve to (0, 0.52h) ctrl1=(0.18w, h) ctrl2=(0, 0.82h)
-  // curve to (0.50w, 0) ctrl1=(0, 0.22h) ctrl2=(0.20w, 0)
-  const x0 = w * 0.5,
-    y0 = 0;
-  const x1 = w,
-    y1 = h * 0.52;
-  const x2 = w * 0.5,
-    y2 = h;
-  const x3 = 0,
-    y3 = h * 0.52;
-  return [
-    `M ${x0} ${y0}`,
-    `C ${w * 0.8} ${y0} ${x1} ${h * 0.22} ${x1} ${y1}`,
-    `C ${x1} ${h * 0.82} ${w * 0.82} ${y2} ${x2} ${y2}`,
-    `C ${w * 0.18} ${y2} ${x3} ${h * 0.82} ${x3} ${y3}`,
-    `C ${x3} ${h * 0.22} ${w * 0.2} ${y0} ${x0} ${y0}`,
-    'Z',
-  ].join(' ');
 }
 
 // Build crab as SVG rects — avoids foreignObject/canvas scaling bugs on mobile
