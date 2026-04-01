@@ -354,6 +354,7 @@ export default function TamagotchiDemo() {
   const [isWalking, setIsWalking] = useState(false);
   const [jumpOffset, setJumpOffset] = useState(0);
   const [messageVisible, setMessageVisible] = useState(false);
+  const [isPermission, setIsPermission] = useState(false);
   const messageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -412,6 +413,15 @@ export default function TamagotchiDemo() {
     return () => clearInterval(blinkInterval);
   }, []);
 
+  // Show permission request 4s after load
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setIsPermission(true);
+      setEyeStyle('wide');
+    }, 4000);
+    return () => clearTimeout(t);
+  }, []);
+
   // (crab is now pure SVG — no canvas needed)
 
   const handlePoke = () => {
@@ -466,6 +476,21 @@ export default function TamagotchiDemo() {
     }, 1500);
 
     setPoopCount((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleAllow = () => {
+    playSound('feed');
+    setIsPermission(false);
+    showMessage('allowed!');
+    setEyeStyle('squish');
+    setTimeout(() => setEyeStyle('normal'), 1200);
+  };
+
+  const handleDeny = () => {
+    playSound('poke');
+    setIsPermission(false);
+    showMessage('denied!');
+    setTimeout(() => setEyeStyle('normal'), 1200);
   };
 
   const EGG_W = 190;
@@ -641,6 +666,12 @@ export default function TamagotchiDemo() {
               style={{ overflow: 'visible', display: 'block' }}
             >
               <defs>
+                <style>{`
+                  @keyframes permPulse {
+                    0%, 100% { stroke-opacity: 0.2; }
+                    50% { stroke-opacity: 0.6; }
+                  }
+                `}</style>
                 {/* Clip path to egg shape */}
                 <clipPath id="eggClip">
                   <path d={eggD} />
@@ -984,12 +1015,56 @@ export default function TamagotchiDemo() {
                 eyeStyle={eyeStyle}
                 legPhase={legPhase}
                 bobY={bobOffset + jumpOffset}
-                showSunglasses={true}
+                showSunglasses={!isPermission}
                 x={screenX}
                 y={screenY + 20}
                 w={SCREEN_W}
                 h={SCREEN_H - 35}
               />
+
+              {/* Permission overlay — project name + tool detail */}
+              {isPermission && (
+                <g>
+                  <text
+                    x={screenX + SCREEN_W / 2}
+                    y={screenCY - 6}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={6}
+                    fontWeight={800}
+                    fontFamily="'JetBrains Mono', monospace"
+                    fill="rgba(255,149,0,0.7)"
+                  >
+                    clawdagotchi
+                  </text>
+                  <text
+                    x={screenX + SCREEN_W / 2}
+                    y={screenCY + 4}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={5}
+                    fontFamily="'JetBrains Mono', monospace"
+                    fill="rgba(255,255,255,0.3)"
+                  >
+                    git push origin main
+                  </text>
+                </g>
+              )}
+
+              {/* Permission border pulse — orange outline around screen */}
+              {isPermission && (
+                <rect
+                  x={screenX - 1}
+                  y={screenY - 1}
+                  width={SCREEN_W + 2}
+                  height={SCREEN_H + 2}
+                  rx={6}
+                  fill="none"
+                  stroke="rgb(255,149,0)"
+                  strokeWidth={2}
+                  style={{ animation: 'permPulse 0.8s ease-in-out infinite' }}
+                />
+              )}
 
               {/* Buttons */}
               {btnPositions.map((bx, i) => {
@@ -997,16 +1072,40 @@ export default function TamagotchiDemo() {
                 const isPressed = pressedBtn === i;
                 const isCenter = i === 1;
                 const by = EGG_H / 2 + btnY + (isCenter ? 3 : 0);
-                const _gradId = isPressed
-                  ? 'btnGradPress'
-                  : isHovered
-                    ? 'btnGradHover'
-                    : 'btnGrad';
+
+                // Permission mode: left=Deny (red), center=noop (orange glow), right=Allow (green)
+                const permTopColors = ['#B33333', '#404040', '#267A33'];
+                const permBottomColors = ['#8C1E1E', '#242424', '#195926'];
+                const permGlowColors = [
+                  'rgba(255,59,48,0.45)',
+                  'rgba(255,149,0,0.45)',
+                  'rgba(52,199,89,0.45)',
+                ];
+                const permActions = [handleDeny, () => {}, handleAllow];
+                const permTitles = ['Deny', '', 'Allow'];
+
+                const topColor = isPermission
+                  ? permTopColors[i]
+                  : isPressed
+                    ? '#303030'
+                    : isHovered
+                      ? '#604848'
+                      : '#404040';
+                const bottomColor = isPermission
+                  ? permBottomColors[i]
+                  : isPressed
+                    ? '#1A1A1A'
+                    : isHovered
+                      ? '#3C2828'
+                      : '#242424';
+                const action = isPermission ? permActions[i] : btnActions[i];
+                const title = isPermission ? permTitles[i] : btnTitles[i];
+
                 return (
                   <g
                     key={i}
                     style={{ cursor: 'pointer' }}
-                    onClick={btnActions[i]}
+                    onClick={action}
                     onMouseEnter={() => setHoveredBtn(i)}
                     onMouseLeave={() => {
                       setHoveredBtn(null);
@@ -1016,7 +1115,7 @@ export default function TamagotchiDemo() {
                     onMouseUp={() => setPressedBtn(null)}
                   >
                     {/* Button title for accessibility */}
-                    <title>{btnTitles[i]}</title>
+                    <title>{title}</title>
 
                     {/* Metallic contact pad */}
                     <circle
@@ -1025,6 +1124,17 @@ export default function TamagotchiDemo() {
                       r={11}
                       fill="rgba(180,180,180,0.15)"
                     />
+
+                    {/* Permission glow — always lit in permission mode */}
+                    {isPermission && (
+                      <circle
+                        cx={bx}
+                        cy={by}
+                        r={9}
+                        fill={permGlowColors[i]}
+                        style={{ filter: 'blur(5px)' }}
+                      />
+                    )}
 
                     {/* Drop shadow */}
                     <circle
@@ -1044,32 +1154,37 @@ export default function TamagotchiDemo() {
                         x2="0"
                         y2="1"
                       >
-                        <stop
-                          offset="0%"
-                          stopColor={
-                            isPressed
-                              ? '#303030'
-                              : isHovered
-                                ? '#604848'
-                                : '#404040'
-                          }
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor={
-                            isPressed
-                              ? '#1A1A1A'
-                              : isHovered
-                                ? '#3C2828'
-                                : '#242424'
-                          }
-                        />
+                        <stop offset="0%" stopColor={topColor} />
+                        <stop offset="100%" stopColor={bottomColor} />
                       </linearGradient>
                     </defs>
                     <circle cx={bx} cy={by} r={9} fill={`url(#btnG${i})`} />
 
+                    {/* Surface highlight — brighter when permission active */}
+                    <circle
+                      cx={bx}
+                      cy={by}
+                      r={8}
+                      fill={`url(#btnHighlight${i})`}
+                    />
+                    <defs>
+                      <radialGradient
+                        id={`btnHighlight${i}`}
+                        cx="50%"
+                        cy="20%"
+                        r="60%"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="white"
+                          stopOpacity={isPermission ? 0.45 : 0.22}
+                        />
+                        <stop offset="100%" stopColor="white" stopOpacity={0} />
+                      </radialGradient>
+                    </defs>
+
                     {/* Hover glow */}
-                    {isHovered && (
+                    {!isPermission && isHovered && (
                       <circle
                         cx={bx}
                         cy={by}
@@ -1101,8 +1216,9 @@ export default function TamagotchiDemo() {
                 textAlign: 'center',
               }}
             >
-              Feed (left) to make a mess. Poke (middle) to startle. Pet (right)
-              to clean up.
+              {isPermission
+                ? 'Claude Code needs a permission. Allow or deny.'
+                : 'Feed (left) to make a mess. Poke (middle) to startle. Pet (right) to clean up.'}
             </p>
           </div>
         </div>
