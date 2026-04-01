@@ -652,10 +652,11 @@ export default function TamagotchiDemo() {
           <div
             style={{
               padding: 24,
+              paddingBottom: 44,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 20,
+              position: 'relative',
             }}
           >
             {/* Egg SVG — all layers as SVG */}
@@ -926,11 +927,7 @@ export default function TamagotchiDemo() {
                     cx={6 + i * 5}
                     cy={0}
                     r={1.5}
-                    fill={
-                      i < hunger
-                        ? 'rgba(255,255,255,0.6)'
-                        : 'rgba(255,255,255,0.12)'
-                    }
+                    fill={i < hunger ? CRAB_COLOR : 'rgba(255,255,255,0.12)'}
                   />
                 ))}
 
@@ -955,18 +952,19 @@ export default function TamagotchiDemo() {
                     cx={SCREEN_W - 10 - 5 - (4 - i) * 5}
                     cy={0}
                     r={1.5}
-                    fill={
-                      i < happiness
-                        ? 'rgba(255,255,255,0.6)'
-                        : 'rgba(255,255,255,0.12)'
-                    }
+                    fill={i < happiness ? CRAB_COLOR : 'rgba(255,255,255,0.12)'}
                   />
                 ))}
-                {/* Heart icon (simple) */}
-                <path
-                  d={`M ${SCREEN_W - 10} -2.5 C${SCREEN_W - 10} -4 ${SCREEN_W - 8} -4 ${SCREEN_W - 9} -2.5 C${SCREEN_W - 9} -4 ${SCREEN_W - 7} -4 ${SCREEN_W - 7} -2.5 C${SCREEN_W - 7} 0 ${SCREEN_W - 9} 2 ${SCREEN_W - 9} 2 C${SCREEN_W - 9} 2 ${SCREEN_W - 10} 1 ${SCREEN_W - 10} -2.5Z`}
-                  fill="rgba(255,255,255,0.4)"
-                />
+                {/* Heart icon — symmetric, centered at (SCREEN_W-7, 0) */}
+                {(() => {
+                  const hx = SCREEN_W - 7;
+                  return (
+                    <path
+                      d={`M ${hx} -1 C ${hx} -3 ${hx - 3} -3 ${hx - 3} -1 C ${hx - 3} 2 ${hx} 2.5 ${hx} 2.5 C ${hx} 2.5 ${hx + 3} 2 ${hx + 3} -1 C ${hx + 3} -3 ${hx} -3 ${hx} -1 Z`}
+                      fill="rgba(255,255,255,0.4)"
+                    />
+                  );
+                })()}
               </g>
 
               {/* Level dots — at y: screenY + 19 */}
@@ -1022,29 +1020,38 @@ export default function TamagotchiDemo() {
                 h={SCREEN_H - 35}
               />
 
-              {/* Permission overlay — project name + tool detail */}
+              {/* Permission overlay — dark scrim + project name + tool detail */}
               {isPermission && (
                 <g>
+                  {/* Dark scrim so text is readable over crab */}
+                  <rect
+                    x={screenX + 4}
+                    y={screenCY + 2}
+                    width={SCREEN_W - 8}
+                    height={24}
+                    rx={3}
+                    fill="rgba(0,0,0,0.75)"
+                  />
                   <text
                     x={screenX + SCREEN_W / 2}
-                    y={screenCY - 6}
+                    y={screenCY + 11}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fontSize={6}
                     fontWeight={800}
                     fontFamily="'JetBrains Mono', monospace"
-                    fill="rgba(255,149,0,0.7)"
+                    fill="rgba(255,149,0,0.9)"
                   >
                     clawdagotchi
                   </text>
                   <text
                     x={screenX + SCREEN_W / 2}
-                    y={screenCY + 4}
+                    y={screenCY + 21}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fontSize={5}
                     fontFamily="'JetBrains Mono', monospace"
-                    fill="rgba(255,255,255,0.3)"
+                    fill="rgba(255,255,255,0.45)"
                   >
                     git push origin main
                   </text>
@@ -1209,6 +1216,10 @@ export default function TamagotchiDemo() {
             {/* Caption */}
             <p
               style={{
+                position: 'absolute',
+                bottom: 14,
+                left: 0,
+                right: 0,
                 fontSize: 11,
                 color: 'rgba(255,255,255,0.3)',
                 margin: 0,

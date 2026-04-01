@@ -3,10 +3,14 @@
  * Bezier curves match the Swift EggShape implementation exactly.
  */
 export function eggPath(w: number, h: number): string {
-  const x0 = w * 0.5, y0 = 0;
-  const x1 = w,       y1 = h * 0.52;
-  const x2 = w * 0.5, y2 = h;
-  const x3 = 0,       y3 = h * 0.52;
+  const x0 = w * 0.5,
+    y0 = 0;
+  const x1 = w,
+    y1 = h * 0.52;
+  const x2 = w * 0.5,
+    y2 = h;
+  const x3 = 0,
+    y3 = h * 0.52;
   return [
     `M ${x0} ${y0}`,
     `C ${w * 0.8} ${y0} ${x1} ${h * 0.22} ${x1} ${y1}`,

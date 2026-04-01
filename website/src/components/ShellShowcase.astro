@@ -6,12 +6,12 @@ const EGG_W = 190;
 const EGG_H = 250;
 const SCREEN_W = 110;
 const SCREEN_H = 90;
-const CX = EGG_W / 2;       // 95
-const CY = EGG_H / 2;       // 125
+const CX = EGG_W / 2; // 95
+const CY = EGG_H / 2; // 125
 
-const screenX = (EGG_W - SCREEN_W) / 2;         // 40
-const screenY = CY - SCREEN_H / 2 - 24;          // 56
-const labelY = EGG_H / 2 - EGG_H * 0.24;        // 65
+const screenX = (EGG_W - SCREEN_W) / 2; // 40
+const screenY = CY - SCREEN_H / 2 - 24; // 56
+const labelY = EGG_H / 2 - EGG_H * 0.24; // 65
 const specCx = CX + 15;
 const specCy = CY + 40;
 const specR = 55;
@@ -66,7 +66,13 @@ const btnPositions = [
 ];
 
 // PCB grid lines and dots (clipped to inner egg)
-const gridLines: { x1: number; y1: number; x2: number; y2: number; dir: 'h' | 'v' }[] = [];
+const gridLines: {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  dir: 'h' | 'v';
+}[] = [];
 const gridDots: { cx: number; cy: number }[] = [];
 for (let y = 10; y <= EGG_H - 10; y += 8) {
   gridLines.push({ x1: 10, y1: y, x2: EGG_W - 10, y2: y, dir: 'h' });
@@ -93,7 +99,12 @@ const crabScale = crabH / viewH;
 const crabXOff = crabX + (crabW - viewW * crabScale) / 2 + 10 * crabScale;
 const crabYOff = crabY + (crabH - viewH * crabScale) / 2 + 22 * crabScale;
 
-interface CrabRect { x: number; y: number; w: number; h: number }
+interface CrabRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 function buildCrabRects(): CrabRect[] {
   const rects: CrabRect[] = [];
   function r(rx: number, ry: number, rw: number, rh: number) {
