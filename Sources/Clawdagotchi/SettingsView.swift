@@ -841,11 +841,14 @@ enum SettingsTab: String, CaseIterable {
 
 struct SoundPickerRow: View {
     let action: SoundAction
-    @State private var selected: String
+    @State private var selected: SoundEntry
+    @State private var customSounds: [SoundEntry] = SoundManager.shared.customSounds
+
+    private static let browseSentinel = SoundEntry.system("__browse__")
 
     init(action: SoundAction) {
         self.action = action
-        self._selected = State(initialValue: SoundManager.shared.soundName(for: action))
+        self._selected = State(initialValue: SoundManager.shared.soundEntry(for: action))
     }
 
     var body: some View {
@@ -854,14 +857,45 @@ struct SoundPickerRow: View {
             Spacer()
             Picker("", selection: $selected) {
                 ForEach(SoundManager.availableSounds, id: \.self) { name in
-                    Text(name).tag(name)
+                    Text(name).tag(SoundEntry.system(name))
+                }
+                if !customSounds.isEmpty {
+                    Divider()
+                    ForEach(customSounds, id: \.self) { entry in
+                        Text(entry.displayName).tag(entry)
+                    }
+                }
+                Divider()
+                Text("Browse…").tag(Self.browseSentinel)
+            }
+            .frame(width: 140)
+            .onChange(of: selected) { _, newValue in
+                if newValue == Self.browseSentinel {
+                    browseForSound()
+                } else {
+                    SoundManager.shared.setSoundEntry(newValue, for: action)
+                    SoundManager.shared.preview(newValue)
                 }
             }
-            .frame(width: 120)
-            .onChange(of: selected) { _, newValue in
-                SoundManager.shared.setSoundName(newValue, for: action)
-                SoundManager.shared.preview(newValue)
-            }
         }
+    }
+
+    private func browseForSound() {
+        let panel = NSOpenPanel()
+        panel.title = "Choose a sound file"
+        panel.allowedContentTypes = [.audio]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+
+        guard panel.runModal() == .OK, let url = panel.url else {
+            selected = SoundManager.shared.soundEntry(for: action)
+            return
+        }
+
+        let entry = SoundManager.shared.addCustomSound(url: url)
+        customSounds = SoundManager.shared.customSounds
+        selected = entry
+        SoundManager.shared.setSoundEntry(entry, for: action)
+        SoundManager.shared.preview(entry)
     }
 }

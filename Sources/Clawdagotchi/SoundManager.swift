@@ -1,5 +1,17 @@
 import AppKit
 
+enum SoundEntry: Codable, Hashable {
+    case system(String)
+    case custom(URL)
+
+    var displayName: String {
+        switch self {
+        case .system(let name): name
+        case .custom(let url): url.deletingPathExtension().lastPathComponent
+        }
+    }
+}
+
 enum SoundAction: String, CaseIterable {
     case permissionAlert = "permissionAlert"
     case permissionApproved = "permissionApproved"
@@ -27,18 +39,18 @@ enum SoundAction: String, CaseIterable {
         }
     }
 
-    var defaultSound: String {
+    var defaultEntry: SoundEntry {
         switch self {
-        case .permissionAlert: "Funk"
-        case .permissionApproved: "Pop"
-        case .permissionDenied: "Basso"
-        case .sessionDone: "Glass"
-        case .poke: "Frog"
-        case .feed: "Bottle"
-        case .pet: "Purr"
-        case .levelUp: "Hero"
-        case .simonCorrect: "Tink"
-        case .simonWrong: "Basso"
+        case .permissionAlert: .system("Funk")
+        case .permissionApproved: .system("Pop")
+        case .permissionDenied: .system("Basso")
+        case .sessionDone: .system("Glass")
+        case .poke: .system("Frog")
+        case .feed: .system("Bottle")
+        case .pet: .system("Purr")
+        case .levelUp: .system("Hero")
+        case .simonCorrect: .system("Tink")
+        case .simonWrong: .system("Basso")
         }
     }
 
@@ -54,28 +66,68 @@ final class SoundManager {
         "Glass", "Hero", "Morse", "Ping", "Pop",
         "Purr", "Sosumi", "Submarine", "Tink",
     ]
-    private init() {}
 
-    func soundName(for action: SoundAction) -> String {
-        UserDefaults.standard.string(forKey: action.settingsKey) ?? action.defaultSound
+    private(set) var customSounds: [SoundEntry] = []
+
+    private init() {
+        loadCustomSounds()
     }
 
-    func setSoundName(_ name: String, for action: SoundAction) {
-        UserDefaults.standard.set(name, forKey: action.settingsKey)
+    // MARK: - Custom sounds persistence
+
+    private func loadCustomSounds() {
+        guard let data = UserDefaults.standard.data(forKey: "customSounds"),
+              let decoded = try? JSONDecoder().decode([SoundEntry].self, from: data)
+        else { return }
+        customSounds = decoded
     }
+
+    private func saveCustomSounds() {
+        guard let data = try? JSONEncoder().encode(customSounds) else { return }
+        UserDefaults.standard.set(data, forKey: "customSounds")
+    }
+
+    @discardableResult
+    func addCustomSound(url: URL) -> SoundEntry {
+        let entry = SoundEntry.custom(url)
+        if !customSounds.contains(entry) {
+            customSounds.append(entry)
+            saveCustomSounds()
+        }
+        return entry
+    }
+
+    // MARK: - Per-action entry
+
+    func soundEntry(for action: SoundAction) -> SoundEntry {
+        guard let data = UserDefaults.standard.data(forKey: action.settingsKey),
+              let entry = try? JSONDecoder().decode(SoundEntry.self, from: data)
+        else { return action.defaultEntry }
+        return entry
+    }
+
+    func setSoundEntry(_ entry: SoundEntry, for action: SoundAction) {
+        guard let data = try? JSONEncoder().encode(entry) else { return }
+        UserDefaults.standard.set(data, forKey: action.settingsKey)
+    }
+
+    // MARK: - Playback
 
     func play(_ action: SoundAction) {
         let settings = AppSettings.shared
         guard settings.soundEnabled else { return }
-
-        let name = soundName(for: action)
-        guard let sound = NSSound(named: NSSound.Name(name)) else { return }
-        sound.volume = settings.soundVolume
-        sound.play()
+        preview(soundEntry(for: action))
     }
 
-    func preview(_ name: String) {
-        guard let sound = NSSound(named: NSSound.Name(name)) else { return }
+    func preview(_ entry: SoundEntry) {
+        let sound: NSSound?
+        switch entry {
+        case .system(let name):
+            sound = NSSound(named: NSSound.Name(name))
+        case .custom(let url):
+            sound = NSSound(contentsOf: url, byReference: false)
+        }
+        guard let sound else { return }
         sound.volume = AppSettings.shared.soundVolume
         sound.play()
     }
