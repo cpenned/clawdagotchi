@@ -15,6 +15,7 @@ struct TamagotchiView: View {
     let xpProgress: Double
     let justLeveledUp: Bool
     let simonSaysActive: Bool
+    let simonPromptActive: Bool
     let simonShowingPattern: Bool
     let simonHighlight: Int?
     var onApprove: () -> Void = {}
@@ -23,6 +24,8 @@ struct TamagotchiView: View {
     var onFeed: () -> Void = {}
     var onPet: () -> Void = {}
     var onSimonInput: (Int) -> Void = { _ in }
+    var onSimonPromptAccept: () -> Void = {}
+    var onSimonPromptDecline: () -> Void = {}
 
     @State private var bobOffset: CGFloat = 0
     @State private var eyeOffset: CGFloat = 0
@@ -549,6 +552,7 @@ struct TamagotchiView: View {
 
     private var stateLabelText: String {
         if state == .idle {
+            if simonPromptActive { return "want to play?" }
             if simonSaysActive && simonShowingPattern { return "watch..." }
             if simonSaysActive && !simonShowingPattern { return "your turn!" }
             switch moodState {
@@ -685,6 +689,13 @@ struct TamagotchiView: View {
                                   glowColor: .orange, lit: true, isCenter: true, action: {})
                 interactiveButton(baseColor: Color(red: 0.15, green: 0.5, blue: 0.2),
                                   glowColor: .green, lit: true, isCenter: false, action: onApprove)
+            } else if simonPromptActive {
+                interactiveButton(baseColor: Color(red: 0.7, green: 0.2, blue: 0.2),
+                                  glowColor: .red, lit: true, isCenter: false, action: onSimonPromptDecline)
+                interactiveButton(baseColor: Color(white: 0.25),
+                                  glowColor: .shellPinkLight, lit: false, isCenter: true, action: {})
+                interactiveButton(baseColor: Color(red: 0.15, green: 0.5, blue: 0.2),
+                                  glowColor: .green, lit: true, isCenter: false, action: onSimonPromptAccept)
             } else if simonSaysActive {
                 let simonAction: (Int) -> () -> Void = { idx in
                     simonShowingPattern ? { } : { onSimonInput(idx) }

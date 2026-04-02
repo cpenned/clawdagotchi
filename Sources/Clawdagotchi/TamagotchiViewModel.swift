@@ -71,11 +71,13 @@ final class TamagotchiViewModel {
     }
 
     private(set) var simonSaysActive: Bool = false
+    private(set) var simonPromptActive: Bool = false
     private(set) var simonPattern: [Int] = []
     private(set) var simonStep: Int = 0
     private(set) var simonShowingPattern: Bool = false
     private(set) var simonHighlight: Int? = nil
     private var simonLength: Int = 3
+    private var simonPromptTask: Task<Void, Never>?
 
     private var sessions: [String: Session] = [:]
     private var server: HookServer?
@@ -204,10 +206,10 @@ final class TamagotchiViewModel {
 
     private func updateMood() {
         // Stats decay over time (every 30s tick)
-        // Hunger drains ~0.5% per 30s = empty in ~100 min
-        // Happiness drains ~0.4% per 30s = empty in ~125 min
-        hunger = max(0, hunger - Double.random(in: 0.008...0.012))
-        happiness = max(0, happiness - Double.random(in: 0.006...0.010))
+        // Hunger drains ~0.002 per 30s = empty in ~4 hours
+        // Happiness drains ~0.0015 per 30s = empty in ~5.5 hours
+        hunger = max(0, hunger - Double.random(in: 0.0015...0.0025))
+        happiness = max(0, happiness - Double.random(in: 0.001...0.002))
 
         guard displayState == .idle else {
             if moodState != .normal {
@@ -256,8 +258,8 @@ final class TamagotchiViewModel {
             }
         }
 
-        if displayState == .idle && moodState == .normal && !simonSaysActive && Int.random(in: 0..<20) == 0 {
-            startSimonSays()
+        if displayState == .idle && moodState == .normal && !simonSaysActive && !simonPromptActive && Int.random(in: 0..<20) == 0 {
+            promptSimonSays()
         }
 
         let sinceLastEvent = Date().timeIntervalSince(lastRandomEventTime)
@@ -438,6 +440,28 @@ final class TamagotchiViewModel {
         simonLength = 3
     }
 
+    private func promptSimonSays() {
+        simonPromptActive = true
+        simonPromptTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(15))
+            guard let self, !Task.isCancelled else { return }
+            self.simonPromptActive = false
+        }
+    }
+
+    func acceptSimonPrompt() {
+        simonPromptTask?.cancel()
+        simonPromptTask = nil
+        simonPromptActive = false
+        startSimonSays()
+    }
+
+    func declineSimonPrompt() {
+        simonPromptTask?.cancel()
+        simonPromptTask = nil
+        simonPromptActive = false
+    }
+
     // MARK: - Random Events
 
     private func triggerRandomEvent() {
@@ -495,6 +519,7 @@ final class TamagotchiViewModel {
         let now = Date()
 
         if simonSaysActive { cancelSimonSays() }
+        if simonPromptActive { declineSimonPrompt() }
 
         lastInteractionTime = now
         // Claude activity clears all moods

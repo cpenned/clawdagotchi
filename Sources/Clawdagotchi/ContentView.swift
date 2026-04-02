@@ -24,6 +24,7 @@ struct ContentView: View {
             xpProgress: viewModel.xpProgress,
             justLeveledUp: viewModel.justLeveledUp,
             simonSaysActive: viewModel.simonSaysActive,
+            simonPromptActive: viewModel.simonPromptActive,
             simonShowingPattern: viewModel.simonShowingPattern,
             simonHighlight: viewModel.simonHighlight,
             onApprove: { viewModel.approvePermission() },
@@ -31,7 +32,9 @@ struct ContentView: View {
             onPoke: { viewModel.pokeCrab() },
             onFeed: { viewModel.feedCrab() },
             onPet: { viewModel.petCrab() },
-            onSimonInput: { viewModel.simonInput($0) }
+            onSimonInput: { viewModel.simonInput($0) },
+            onSimonPromptAccept: { viewModel.acceptSimonPrompt() },
+            onSimonPromptDecline: { viewModel.declineSimonPrompt() }
         )
         .scaleEffect(widgetScale)
         .frame(width: baseWidth * widgetScale, height: baseHeight * widgetScale)
