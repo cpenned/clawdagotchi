@@ -113,6 +113,8 @@ final class SoundManager {
 
     // MARK: - Playback
 
+    private var currentSound: NSSound?
+
     func play(_ action: SoundAction) {
         let settings = AppSettings.shared
         guard settings.soundEnabled else { return }
@@ -128,6 +130,8 @@ final class SoundManager {
             sound = NSSound(contentsOf: url, byReference: false)
         }
         guard let sound else { return }
+        currentSound?.stop()
+        currentSound = sound
         sound.volume = AppSettings.shared.soundVolume
         sound.play()
     }
