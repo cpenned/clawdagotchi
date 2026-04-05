@@ -72,6 +72,12 @@ final class AppSettings {
     var birthDate: String {
         didSet { UserDefaults.standard.set(birthDate, forKey: "birthDate") }
     }
+    var lastClaudeActivityTimestamp: Double {
+        didSet { UserDefaults.standard.set(lastClaudeActivityTimestamp, forKey: "lastClaudeActivityTimestamp") }
+    }
+    var deathThreshold: Double {
+        didSet { UserDefaults.standard.set(deathThreshold, forKey: "deathThreshold") }
+    }
 
     // Lifetime stats
     var totalSessions: Int {
@@ -134,6 +140,8 @@ final class AppSettings {
             "streak": 0,
             "lastLoginDate": "",
             "birthDate": "",
+            "lastClaudeActivityTimestamp": Double(0),
+            "deathThreshold": Double(0),
             "totalSessions": 0,
             "totalToolUses": 0,
             "totalPermissionsApproved": 0,
@@ -162,6 +170,8 @@ final class AppSettings {
         self.streak = defaults.integer(forKey: "streak")
         self.lastLoginDate = defaults.string(forKey: "lastLoginDate") ?? ""
         self.birthDate = defaults.string(forKey: "birthDate") ?? ""
+        self.lastClaudeActivityTimestamp = defaults.double(forKey: "lastClaudeActivityTimestamp")
+        self.deathThreshold = defaults.double(forKey: "deathThreshold")
         self.totalSessions = defaults.integer(forKey: "totalSessions")
         self.totalToolUses = defaults.integer(forKey: "totalToolUses")
         self.totalPermissionsApproved = defaults.integer(forKey: "totalPermissionsApproved")
