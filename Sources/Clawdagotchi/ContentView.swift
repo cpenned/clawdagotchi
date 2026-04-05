@@ -43,6 +43,7 @@ struct ContentView: View {
                 DeathRebirthOverlay(stats: stats) { newName in
                     viewModel.rebirth(newName: newName)
                 }
+                .transition(.opacity)
             }
         }
         .frame(width: baseWidth * widgetScale, height: baseHeight * widgetScale)
