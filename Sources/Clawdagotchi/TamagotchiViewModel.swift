@@ -42,6 +42,8 @@ final class TamagotchiViewModel {
     var pendingPermissionCount: Int { permissionQueue.count }
 
     private(set) var justLeveledUp: Bool = false
+    private(set) var isDead: Bool = false
+    private(set) var deathStats: DeathStats? = nil
 
     static let levelThresholds = [0, 200, 700, 1600, 3000, 5000, 8000, 12000]
 
@@ -61,6 +63,13 @@ final class TamagotchiViewModel {
         let range = nextThreshold - prevThreshold
         guard range > 0 else { return 1.0 }
         return Double(currentXP - prevThreshold) / Double(range)
+    }
+
+    struct DeathStats: Sendable {
+        let name: String
+        let days: Int
+        let level: Int
+        let xp: Int
     }
 
     enum FunReaction: Equatable {
@@ -112,6 +121,7 @@ final class TamagotchiViewModel {
 
         greetingMessage = Self.timeOfDayGreeting()
         checkDailyLogin()
+        checkForDeath()
     }
 
     func stop() {
@@ -186,6 +196,24 @@ final class TamagotchiViewModel {
         case 12..<17: return "good afternoon!"
         case 17..<21: return "good evening!"
         default: return "sleepy time..."
+        }
+    }
+
+    // MARK: - Death
+
+    private func checkForDeath() {
+        let settings = AppSettings.shared
+        let lastActivity = settings.lastClaudeActivityTimestamp
+        guard lastActivity > 0 else { return }
+        let elapsed = Date().timeIntervalSince1970 - lastActivity
+        if elapsed > settings.deathThreshold {
+            isDead = true
+            deathStats = DeathStats(
+                name: settings.botName,
+                days: settings.ageInDays,
+                level: settings.level,
+                xp: settings.xp
+            )
         }
     }
 
@@ -489,6 +517,20 @@ final class TamagotchiViewModel {
         AppSettings.shared.level = 1
     }
 
+    func rebirth(newName: String) {
+        let settings = AppSettings.shared
+        settings.xp = 0
+        settings.level = 1
+        settings.birthDate = Self.todayString()
+        settings.streak = 0
+        settings.lastLoginDate = Self.todayString()
+        settings.botName = newName.isEmpty ? "Clawd" : newName
+        settings.lastClaudeActivityTimestamp = 0
+        settings.deathThreshold = 0
+        isDead = false
+        deathStats = nil
+    }
+
     func grantXP(_ amount: Int) {
         AppSettings.shared.xp += amount
         AppSettings.shared.totalXPEarned += amount
@@ -522,6 +564,11 @@ final class TamagotchiViewModel {
         if simonPromptActive { declineSimonPrompt() }
 
         lastInteractionTime = now
+        let settings = AppSettings.shared
+        settings.lastClaudeActivityTimestamp = now.timeIntervalSince1970
+        if settings.deathThreshold == 0 {
+            settings.deathThreshold = Double.random(in: 43200...86400)
+        }
         // Claude activity clears all moods
         if moodState != .normal {
             withAnimation { moodState = .normal }
