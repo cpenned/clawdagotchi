@@ -204,7 +204,7 @@ final class TamagotchiViewModel {
     private func checkForDeath() {
         let settings = AppSettings.shared
         let lastActivity = settings.lastClaudeActivityTimestamp
-        guard lastActivity > 0 else { return }
+        guard lastActivity > 0, settings.deathThreshold > 0 else { return }
         let elapsed = Date().timeIntervalSince1970 - lastActivity
         if elapsed > settings.deathThreshold {
             isDead = true
