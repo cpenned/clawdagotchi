@@ -98,7 +98,7 @@ struct DeathRebirthOverlay: View {
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundStyle(Color(white: 0.35))
 
-            TextField("", text: $newName)
+            TextField("Crab name", text: $newName)
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(Color(white: 0.7))
                 .multilineTextAlignment(.center)
@@ -113,7 +113,7 @@ struct DeathRebirthOverlay: View {
                 .frame(width: 140)
 
             Button {
-                onRebirth(newName.isEmpty ? "Clawd" : newName)
+                onRebirth(newName)
             } label: {
                 Text("HATCH")
                     .font(.system(.caption, design: .monospaced))
