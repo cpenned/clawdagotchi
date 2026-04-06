@@ -222,7 +222,7 @@ final class TamagotchiViewModel {
     func previewMood(_ mood: MoodState) {
         withAnimation(.easeInOut(duration: 0.3)) {
             moodState = mood
-            if mood == .pooping { poopCount += 1 }
+            if mood == .pooping { poopCount = min(poopCount + 1, 5) }
         }
         Task {
             try? await Task.sleep(for: .seconds(4))
@@ -264,7 +264,7 @@ final class TamagotchiViewModel {
                 if self.moodState == .pooping {
                     withAnimation { self.moodState = .normal }
                 }
-                withAnimation { self.poopCount += 1 }
+                withAnimation { self.poopCount = min(self.poopCount + 1, 5) }
             }
             return
         }
@@ -567,7 +567,7 @@ final class TamagotchiViewModel {
         let settings = AppSettings.shared
         settings.lastClaudeActivityTimestamp = now.timeIntervalSince1970
         if settings.deathThreshold == 0 {
-            settings.deathThreshold = Double.random(in: 43200...86400)
+            settings.deathThreshold = Double.random(in: 64800...86400)
         }
         // Claude activity clears all moods
         if moodState != .normal {
