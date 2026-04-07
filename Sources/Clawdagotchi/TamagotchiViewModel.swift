@@ -254,8 +254,8 @@ final class TamagotchiViewModel {
         if moodState == .pooping { return }
         if moodState == .angry || moodState == .hungry { return }
 
-        // Periodic poop every ~15 min
-        if sincePoop > 900 {
+        // Periodic poop every ~30 min
+        if sincePoop > 1800 {
             lastPoopTime = now
             withAnimation { moodState = .pooping }
             Task { [weak self] in
@@ -349,7 +349,7 @@ final class TamagotchiViewModel {
         lastInteractionTime = Date()
         lastFedTime = Date()
         let wasAlreadyFull = hunger >= 1.0
-        hunger = min(1, hunger + 0.35)
+        hunger = min(1, hunger + 0.2)
 
         // Feed clears: hungry, sleeping
         if moodState == .hungry || moodState == .sleeping {
@@ -373,7 +373,7 @@ final class TamagotchiViewModel {
         guard permissionQueue.isEmpty else { return }
         lastInteractionTime = Date()
         let wasAlreadyFull = happiness >= 1.0
-        happiness = min(1, happiness + 0.25)
+        happiness = min(1, happiness + 0.2)
 
         // Pet clears: one poop, sleeping
         if poopCount > 0 {
