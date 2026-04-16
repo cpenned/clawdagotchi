@@ -78,6 +78,9 @@ final class AppSettings {
     var deathThreshold: Double {
         didSet { UserDefaults.standard.set(deathThreshold, forKey: "deathThreshold") }
     }
+    var weekendProtection: Bool {
+        didSet { UserDefaults.standard.set(weekendProtection, forKey: "weekendProtection") }
+    }
 
     // Lifetime stats
     var totalSessions: Int {
@@ -142,6 +145,7 @@ final class AppSettings {
             "birthDate": "",
             "lastClaudeActivityTimestamp": Double(0),
             "deathThreshold": Double(0),
+            "weekendProtection": true,
             "totalSessions": 0,
             "totalToolUses": 0,
             "totalPermissionsApproved": 0,
@@ -172,6 +176,7 @@ final class AppSettings {
         self.birthDate = defaults.string(forKey: "birthDate") ?? ""
         self.lastClaudeActivityTimestamp = defaults.double(forKey: "lastClaudeActivityTimestamp")
         self.deathThreshold = defaults.double(forKey: "deathThreshold")
+        self.weekendProtection = defaults.bool(forKey: "weekendProtection")
         self.totalSessions = defaults.integer(forKey: "totalSessions")
         self.totalToolUses = defaults.integer(forKey: "totalToolUses")
         self.totalPermissionsApproved = defaults.integer(forKey: "totalPermissionsApproved")

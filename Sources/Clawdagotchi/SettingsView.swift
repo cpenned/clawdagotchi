@@ -372,6 +372,25 @@ struct SettingsView: View {
                     }
                 }
 
+                settingsSection("Lifecycle") {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Toggle("Weekend protection", isOn: $settings.weekendProtection)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.white)
+                            .tint(Color.salmon)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+
+                        Color(white: 0.12).frame(height: 1)
+
+                        Text("When on, the death clock pauses on Saturdays and Sundays (local time).")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(Color(white: 0.5))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                    }
+                }
+
                 settingsSection("Float on Top") {
                     ForEach(Array(FloatPolicy.allCases.enumerated()), id: \.element.rawValue) { index, policy in
                         if index > 0 { Color(white: 0.12).frame(height: 1) }

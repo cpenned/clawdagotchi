@@ -214,7 +214,8 @@ final class TamagotchiViewModel {
         let settings = AppSettings.shared
         let lastActivity = settings.lastClaudeActivityTimestamp
         guard lastActivity > 0, settings.deathThreshold > 0 else { return }
-        let elapsed = Date().timeIntervalSince1970 - lastActivity
+        let from = Date(timeIntervalSince1970: lastActivity)
+        let elapsed = effectiveIdleSeconds(from: from, to: Date(), skipWeekends: settings.weekendProtection)
         if elapsed > settings.deathThreshold {
             isDead = true
             deathStats = DeathStats(
@@ -224,6 +225,24 @@ final class TamagotchiViewModel {
                 xp: settings.xp
             )
         }
+    }
+
+    private func effectiveIdleSeconds(from: Date, to: Date, skipWeekends: Bool) -> TimeInterval {
+        guard to > from else { return 0 }
+        if !skipWeekends { return to.timeIntervalSince(from) }
+        let cal = Calendar.current
+        var total: TimeInterval = 0
+        var cursor = from
+        let step: TimeInterval = 3600
+        while cursor < to {
+            let next = min(cursor.addingTimeInterval(step), to)
+            let weekday = cal.component(.weekday, from: cursor)
+            if weekday != 1 && weekday != 7 {
+                total += next.timeIntervalSince(cursor)
+            }
+            cursor = next
+        }
+        return total
     }
 
     // MARK: - Mood system
