@@ -95,6 +95,7 @@ final class TamagotchiViewModel {
     private var lastInteractionTime: Date = Date()
     private var lastFedTime: Date = Date()
     private var lastPoopTime: Date = Date()
+    private var nextPoopInterval: Double = Double.random(in: 18000...28800)
     private var lastRandomEventTime: Date = Date()
 
     func start() {
@@ -121,7 +122,15 @@ final class TamagotchiViewModel {
 
         greetingMessage = Self.timeOfDayGreeting()
         checkDailyLogin()
+        migrateDeathThreshold()
         checkForDeath()
+    }
+
+    private func migrateDeathThreshold() {
+        let settings = AppSettings.shared
+        if settings.deathThreshold > 0 && settings.deathThreshold < 86400 {
+            settings.deathThreshold = Double.random(in: 86400...172800)
+        }
     }
 
     func stop() {
@@ -254,9 +263,10 @@ final class TamagotchiViewModel {
         if moodState == .pooping { return }
         if moodState == .angry || moodState == .hungry { return }
 
-        // Periodic poop every ~30 min
-        if sincePoop > 1800 {
+        // Periodic poop every 5-8 hours (3-5 per day)
+        if sincePoop > nextPoopInterval {
             lastPoopTime = now
+            nextPoopInterval = Double.random(in: 18000...28800)
             withAnimation { moodState = .pooping }
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(3))
@@ -567,7 +577,7 @@ final class TamagotchiViewModel {
         let settings = AppSettings.shared
         settings.lastClaudeActivityTimestamp = now.timeIntervalSince1970
         if settings.deathThreshold == 0 {
-            settings.deathThreshold = Double.random(in: 64800...86400)
+            settings.deathThreshold = Double.random(in: 86400...172800)
         }
         // Claude activity clears all moods
         if moodState != .normal {
